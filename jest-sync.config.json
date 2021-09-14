@@ -1,0 +1,17 @@
+{
+  "testEnvironment": "jsdom",
+  "verbose": true,
+  "roots": [
+    "test"
+  ],
+  "setupFiles": [
+    "./test-setup.js"
+  ],
+  "testRegex": "(/tests/.*|\\.(test|spec))\\.(ts|tsx|js)$",
+  "transformIgnorePatterns": [
+    "node_modules/(?!(jest-)?react-native|lottie-react-native)"
+  ],
+  "globals": {
+    "window": {}
+  }
+}
