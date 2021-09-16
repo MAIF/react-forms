@@ -94,6 +94,41 @@ export const Example = () => {
 - **schema**: a sub schema for the object value. this schema can contains constraints
 - **constraints**: a JSON array of constraints. see [constraints section](#constraints)
 
+
+
+
+
+
+
+## Form properties
+- **schema**: the form schema
+- **flow**: the flow
+- **onChange**: a function run on the form submission (in case if the form is valid )
+- **value**: default value
+- **inputWrapper**: A custom component to wrap all input of the form
+- **footer**: a component to override the footer provided
+```javascripts
+{({ reset, valid }) => {
+            return (
+              <div className="d-flex justify-content-end">
+                <button className="btn btn-primary m-3" onClick={reset}>reset</button>
+                <button className="btn btn-success m-3" onClick={valid}>accept</button>
+              </div>
+            )
+          }}
+```
+- **httpClient**: a function to override the basic fetch used by react-forms to get async values (for optionsFrom)
+```javascript
+httpClient = {(url, method) => fetch(url, {
+  method,
+  headers: {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    'X-foo': 'bar'
+  }
+})} 
+```
+
 ## constraints
 Possible constraints are provided by import `constraints` from **@MAIF/recat-form**
 
