@@ -85,6 +85,12 @@ export const Example = () => {
 - **props**: a json object merged with default props
 - **options**: An array of options for the select field (if format `select` is setup)
 - **optionsFrom**: A url to fetch array of options for the select field (if format `select` is setup)
+- **transformer**: A function to transform options to a valid format for react select, by default the code try to do it himself.
+  ```javascript
+  {
+    transformer: (value) => ({label: value.name, value: value.age})
+  }
+  ```
 - **schema**: a sub schema for the object value. this schema can contains constraints
 - **constraints**: a JSON array of constraints. see [constraints section](#constraints)
 
