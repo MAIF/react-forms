@@ -70,6 +70,7 @@ export const Example = () => {
   - `hidden`: if the type is `string`, add an hidden input in your form
 - **isMulti**: if `select` format is choosen, `isMulti` property is to render a multiselect component
 - **defaultKeyValue**: if the format is setup to object, this default key/value is set for all added entries
+- **visible**: a boolean option to hide/display form field. It can be an object with `ref` property to get a value by reference an a key `test` as a function to test it. if there is no `test` key, it's base just on boolean value of the reference.
 - **disabled**: A boolean option to enable/disable form field
 - **label**: The label of form field
 - **placeholder**: the placeholder of form field
@@ -132,20 +133,77 @@ the following methods works for all type types of value.
   ```
 
 #### `constraints.oneOf(arrayOfValues: any[], message?:string)`
-  Whitelist a set of values and display an error under field if the provided value in not contains in this set.
+  Whitelist a set of values and display an error under field if the provided value is not contains in this set.
 
   ```javascript
   constraints.oneOf(['foo', 'bar'], 'not foo or bar :(')
   ```
 
 ### string
+the following methods works for string values. All methods for [mixed](#mixed) are available.
+
+#### `constraints.url(message?:string)`
+Validate that the provided value matches an url pattern via regexp and display an error if the result id false.
+
+#### `constraints.email(message?:string)`
+Validate that the provided value matches an email pattern via regexp and display an error if the result id false.
+
+#### `constraints.uuid(message?:string)`
+Validate that the provided value matches an uuid pattern via regexp and display an error if the result id false.
+
+#### `constraints.matches(regexp: RegExp, message?:string)`
+Test if value matche the provided regexp and display an error if the result id false.
+
+```javascript
+constraints.matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#$^+=!*()@%&]).{8,1000}$/, errorMessage)
+```
 
 ### string or number
+the following methods works for string or number values. All methods for [mixed](#mixed) are available.
+
+
+#### `constraints.min(ref: number | Reference<number>, message: string)`
+Set the minimum value allowed and display an error if the provided value (for a number) or the length of the string is bigger.
+
+#### `constraints.max(ref: number | Reference<number>, message: string)`
+Set the maximun value allowed and display an error if provided value (for a number) or the length of the string is smaller.
 
 ### number
+The following methods works for number values. All methods for [mixed](#mixed) are available.
+
+#### `constraints.positive(message?:string)`
+The value must be a positive number and display an error if it's not.
+
+#### `constraints.negative(message?:string)`
+The value must be a negative number and display an error if it's not.
+
+#### `constraints.integer(message?:string)`
+The value must be aa integer number and display an error if it's not.
+
+#### `constraints.lessThan(ref: number | Reference<number>, message: string)`
+Set the maximun value allowed and display an error if provided value (for a number) or the length of the string is smaller.
+
+#### `constraints.moreThan(ref: number | Reference<number>, message: string)`
+Set the minimum value allowed and display an error if provided value (for a number) or the length of the string is bigger.
 
 ### array
+the following methods works for basic types if the format is define to `array`. All methods for [mixed](#mixed) are available.
+
+#### `constraints.length(value: number, message?:string)`
+Set the length of the array and display an error if it's different.
 
 ### date
+the following methods works for date values. All methods for [mixed](#mixed) are available.
 
 ### file
+the following methods works for file values. All methods for [mixed](#mixed) are available.
+
+#### `constraints.supportedFormat(arrayOfValues: string[], message?:string)`
+Whitelist a set of supported format for the provided file and display an error under field if the format is not contains in this set.
+
+
+#### `constraints.unsupportedFormat(arrayOfValues: string[], message?:string)`
+Whitelist a set of unsupported format for the provided file and display an error under field if the format is contains in this set.
+
+#### `constraints.maxSize(value: number, message?:string)`
+Set the maximun value allowed for the file size and display an error if the size of provided file is bigger.

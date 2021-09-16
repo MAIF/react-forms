@@ -3,8 +3,9 @@
   "description": "Build react safe forms as fast as possible",
   "version": "1.0.0",
   "main": "lib/index.js",
-  "author": "Quentin AUBERT",
-  "license": "MIT",
+  "author": "MAIF team",
+  "maintainers": ["Quentin AUBERT"],
+  "license": "Apache 2.0",
   "scripts": {
     "build:lib": "babel src --extensions \".ts,.js\" --out-dir lib",
     "build:types": "tsc --declaration --emitDeclarationOnly ",
