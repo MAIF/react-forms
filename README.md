@@ -1,17 +1,17 @@
-# @MAIF/react-forms
+# @maif/react-forms
 
-**@MAIF/react-forms** is a React form builder with batteries included. You just have to define a form flow and a JSON schema to render stylish, highly customizable and fully managed forms.
+**@maif/react-forms** is a React form builder with batteries included. You just have to define a form flow and a JSON schema to render stylish, highly customizable and fully managed forms.
 
-**@MAIF/react-forms** use [yup](https://github.com/jquense/yup) and [react-hook-form](https://react-hook-form.com/) to build its forms
+**@maif/react-forms** use [yup](https://github.com/jquense/yup) and [react-hook-form](https://react-hook-form.com/) to build its forms
 
 # Install
 
 ```bash
-npm install @MAIF/react-forms
+npm install @maif/react-forms
 ```
 or
 ```bash
-yarn add @MAIF/react-forms
+yarn add @maif/react-forms
 ```
 
 # Usage
@@ -20,12 +20,12 @@ You must define a form flow (this is just a javascript array which that represen
 ## example
 
 ```javascript
-import { Form, Types, constraints } from 'react-form'
+import { Form, types, constraints } from 'react-form'
 
 export const Example = () => { 
   const schema = {
     age: {
-      type: Types.number,
+      type: types.number,
       label: 'age',
       placeholder: 'Your age',
       help: "Just your age",
@@ -36,7 +36,7 @@ export const Example = () => {
       ]
     }, 
     name: {
-      type: Types.string,
+      type: types.string,
       disabled: true,
       label: 'name',
       placeholder: 'your name',
@@ -130,7 +130,7 @@ httpClient = {(url, method) => fetch(url, {
 ```
 
 ## constraints
-Possible constraints are provided by import `constraints` from **@MAIF/recat-form**
+Possible constraints are provided by import `constraints` from **@maif/react-form**
 
   - [mixed](#mixed)
     - [`constraints.required(message?:string)`](#constraintsrequiredmessagestring)
