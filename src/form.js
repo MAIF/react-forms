@@ -117,8 +117,8 @@ const Footer = (props) => {
   }
   return (
     <div className="d-flex flex-row justify-content-end">
-      <button className="btn btn-danger" type="button" onClick={props.reset}>Annuler</button>
-      <button className="btn btn-success ml-1" type="submit">Sauvegarder</button>
+      <button className="btn btn-danger" type="button" onClick={props.reset}>Reset</button>
+      <button className="btn btn-success ml-1" type="submit">Save</button>
     </div>
   )
 }
