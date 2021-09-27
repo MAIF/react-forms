@@ -66,7 +66,7 @@ const getDefaultValues = (flow, schema) => {
   }, {})
 }
 
-export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, httpClient }) => {
+export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, httpClient, autosave }) => {
   const formFlow = flow || Object.keys(schema)
 
   const maybeCustomHttpClient = (url, method) => {
@@ -98,6 +98,14 @@ export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, http
       reset(value)
     }
   }, [value, formFlow, reset])
+
+  const data = watch();
+  useEffect(() => {
+    //todo: with debounce
+    if (autosave) {
+      onChange(data)
+    }
+  }, [data])
 
   // console.debug(watch())
 
@@ -225,16 +233,16 @@ const Step = ({ entry, step, errors, register, schema, control, trigger, getValu
                 component={((props, idx) => {
                   return (
                     <CustomizableInput render={step.render} field={{ rawValues: getValues(), value: getValues(`${entry}.${idx}`), onChange: v => setValue(`${entry}.${idx}`, v, { shouldValidate: true }) }} error={errors[entry] && errors[entry][idx]}>
-                        <input
-                          {...step.props}
-                          type="text"
-                          readOnly={step.disabled ? 'readOnly' : null}
-                          className={classNames("form-control", { 'is-invalid': errors[entry] && errors[entry][idx] })}
-                          placeholder={step.placeholder}
-                          // {...props} 
-                          name={props.name.replace('.', '_')}
-                          onChange={e => setValue(`${entry}.${idx}`, e.target.value, { shouldValidate: true })} />
-                        {errors[entry] && errors[entry][idx] && <div className="invalid-feedback">{errors[entry][idx].message}</div>}
+                      <input
+                        {...step.props}
+                        type="text"
+                        readOnly={step.disabled ? 'readOnly' : null}
+                        className={classNames("form-control", { 'is-invalid': errors[entry] && errors[entry][idx] })}
+                        placeholder={step.placeholder}
+                        // {...props} 
+                        name={props.name.replace('.', '_')}
+                        onChange={e => setValue(`${entry}.${idx}`, e.target.value, { shouldValidate: true })} />
+                      {errors[entry] && errors[entry][idx] && <div className="invalid-feedback">{errors[entry][idx].message}</div>}
                     </CustomizableInput>
                   )
                 })} />
