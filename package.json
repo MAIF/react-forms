@@ -4,7 +4,9 @@
   "version": "1.0.0",
   "main": "lib/index.js",
   "author": "MAIF team",
-  "maintainers": ["Quentin AUBERT"],
+  "maintainers": [
+    "Quentin AUBERT"
+  ],
   "license": "Apache-2.0",
   "licenses": [
     {

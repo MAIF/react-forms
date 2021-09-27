@@ -224,15 +224,16 @@ const Step = ({ entry, step, errors, register, schema, control, trigger, getValu
                 component={((props, idx) => {
                   return (
                     <CustomizableInput render={step.render} field={{ rawValues: getValues(), value: getValues(`${entry}.${idx}`), onChange: v => setValue(`${entry}.${idx}`, v, { shouldValidate: true }) }} error={errors[entry] && errors[entry][idx]}>
-                      <>
                         <input
                           {...step.props}
                           type="text"
                           readOnly={step.disabled ? 'readOnly' : null}
                           className={classNames("form-control", { 'is-invalid': errors[entry] && errors[entry][idx] })}
-                          placeholder={step.placeholder} {...props} />
+                          placeholder={step.placeholder}
+                          // {...props} 
+                          name={props.name.replace('.', '_')}
+                          onChange={e => setValue(`${entry}.${idx}`, e.target.value, { shouldValidate: true })} />
                         {errors[entry] && errors[entry][idx] && <div className="invalid-feedback">{errors[entry][idx].message}</div>}
-                      </>
                     </CustomizableInput>
                   )
                 })} />
@@ -432,7 +433,7 @@ const Step = ({ entry, step, errors, register, schema, control, trigger, getValu
             name={entry}
             control={control}
             render={({ field }) => {
-              const FileInput = ({onChange}) => {
+              const FileInput = ({ onChange }) => {
                 const [uploading, setUploading] = useState(false);
                 const [input, setInput] = useState(undefined);
 
@@ -463,7 +464,7 @@ const Step = ({ entry, step, errors, register, schema, control, trigger, getValu
                       onClick={trigger}>
                       {uploading && <Loader />}
                       {!uploading && <Upload />}
-                        Select file
+                      Select file
                     </button>
                   </div>
                 );
@@ -472,7 +473,7 @@ const Step = ({ entry, step, errors, register, schema, control, trigger, getValu
               return (
                 <BasicWrapper entry={entry} error={errors[entry]} label={entry} help={step.help} render={inputWrapper}>
                   <CustomizableInput render={step.render} field={{ rawValues: getValues(), ...field }} error={errors[entry]}>
-                    <FileInput onChange={field.onChange} error={errors[entry]}/>
+                    <FileInput onChange={field.onChange} error={errors[entry]} />
                   </CustomizableInput>
                 </BasicWrapper>
               )
@@ -518,7 +519,7 @@ const ArrayStep = ({ entry, step, control, trigger, register, errors, component,
               <div className="input-group-append">
                 <button className="btn btn-danger btn-sm" onClick={() => {
                   remove(idx)
-                  trigger("comments");
+                  trigger(entry);
                 }}>remove</button>
               </div>
             </div>
