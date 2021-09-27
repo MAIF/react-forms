@@ -1,6 +1,6 @@
 
 import * as constraints from '../src/constraints';
-import * as Types from '../src/types';
+import * as types from '../src/types';
 import { testBasicConstraints } from './testUtils';
 import * as yup from 'yup';
 import { getShapeAndDependencies } from '../src/resolvers';

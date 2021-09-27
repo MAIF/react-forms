@@ -1,13 +1,13 @@
 import * as yup from 'yup';
-import { Types } from '../types';
+import { types } from '../types';
 
 const resolvers = {
-  [Types.string]: () => yup.string(),
-  [Types.number]: () => yup.number(),
-  [Types.bool]: () => yup.bool(),
-  [Types.object]: () => yup.object(),
-  [Types.date]: () => yup.date(),
-  [Types.file]: () => yup.mixed()
+  [types.string]: () => yup.string(),
+  [types.number]: () => yup.number(),
+  [types.bool]: () => yup.bool(),
+  [types.object]: () => yup.object(),
+  [types.date]: () => yup.date(),
+  [types.file]: () => yup.mixed()
 }
 
 export const buildSubResolver = (props, key, dependencies) => {

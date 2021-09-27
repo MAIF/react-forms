@@ -1,5 +1,3 @@
-import * as constraints from '../src/constraints';
-import * as Types from '../src/types';
 import { testBasicConstraints } from './testUtils';
 
 

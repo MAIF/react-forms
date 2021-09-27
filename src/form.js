@@ -8,7 +8,7 @@ import ReactToolTip from 'react-tooltip';
 import { v4 as uuid } from 'uuid';
 import * as yup from "yup";
 
-import { Types } from './types';
+import { types } from './types';
 import { BooleanInput, Collapse, SelectInput, ObjectInput, CodeInput, MarkdownInput } from './inputs/index';
 import { getShapeAndDependencies } from './resolvers/index';
 import { option } from './Option'
@@ -60,7 +60,7 @@ const getDefaultValues = (flow, schema) => {
       return { ...acc, [key]: entry.defaultValue }
     }
     let defaultValue = undefined;
-    if (entry.type === Types.object) { defaultValue = {} }
+    if (entry.type === types.object) { defaultValue = {} }
     if (entry.format === 'array' || entry.isMulti) { defaultValue = [] }
     return { ...acc, [key]: defaultValue }
   }, {})
@@ -153,7 +153,7 @@ const Step = ({ entry, step, errors, register, schema, control, trigger, getValu
   }
 
   switch (step.type) {
-    case Types.string:
+    case types.string:
       switch (step.format) {
         case 'text':
           return (
@@ -280,7 +280,7 @@ const Step = ({ entry, step, errors, register, schema, control, trigger, getValu
           );
       }
 
-    case Types.number:
+    case types.number:
       switch (step.format) {
         case 'array':
           return (
@@ -322,7 +322,7 @@ const Step = ({ entry, step, errors, register, schema, control, trigger, getValu
           );
       }
 
-    case Types.bool:
+    case types.bool:
       return (
         <Controller
           name={entry}
@@ -345,7 +345,7 @@ const Step = ({ entry, step, errors, register, schema, control, trigger, getValu
         />
       )
 
-    case Types.object:
+    case types.object:
       switch (step.format) {
         case 'select':
           return (
@@ -399,7 +399,7 @@ const Step = ({ entry, step, errors, register, schema, control, trigger, getValu
             />
           )
       }
-    case Types.date:
+    case types.date:
       return (
         <Controller
           name={entry}
@@ -425,7 +425,7 @@ const Step = ({ entry, step, errors, register, schema, control, trigger, getValu
           }}
         />
       )
-    case Types.file:
+    case types.file:
       if (step.format === 'hidden') {
         return (
           <Controller
