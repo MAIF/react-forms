@@ -67,6 +67,7 @@ const getDefaultValues = (flow, schema) => {
 }
 
 export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, httpClient }) => {
+  const formFlow = flow || Object.keys(schema)
 
   const maybeCustomHttpClient = (url, method) => {
     //todo: if present props.resolve()
@@ -82,9 +83,9 @@ export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, http
     })
   }
 
-  const defaultValues = getDefaultValues(flow, schema);
+  const defaultValues = getDefaultValues(formFlow, schema);
 
-  const { shape, dependencies } = getShapeAndDependencies(flow, schema);
+  const { shape, dependencies } = getShapeAndDependencies(formFlow, schema);
   const resolver = yup.object().shape(shape, dependencies);
 
   const { register, handleSubmit, formState: { errors }, control, reset, watch, trigger, getValues, setValue } = useForm({
@@ -93,16 +94,16 @@ export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, http
   });
 
   useEffect(() => {
-    if (flow && value) {
+    if (formFlow && value) {
       reset(value)
     }
-  }, [value, flow, reset])
+  }, [value, formFlow, reset])
 
   // console.debug(watch())
 
   return (
     <form className="col-12 section pt-2 pr-2" onSubmit={handleSubmit(onChange)}>
-      {flow.map((entry, idx) => <Step key={idx} entry={entry} step={schema[entry]} errors={errors}
+      {formFlow.map((entry, idx) => <Step key={idx} entry={entry} step={schema[entry]} errors={errors}
         register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
         setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient} />)}
       <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(onChange)} />
