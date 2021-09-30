@@ -7,7 +7,7 @@ describe('Date resolver', () => {
   //todo: test with string instead of number
   it('should resolve date constraints', () => {
 
-    const errorMessage = "test must be a `date` type, but the final value was: `Invalid Date` (cast from the value `\"fifou\"`).";
+    const errorMessage = "Value must be a date";
     const testConstraints = []
     const right = { test: new Date('November 3, 1985 23:15:30') }
     const wrong = { test: 'fifou' }

@@ -4,7 +4,7 @@ import { testBasicConstraints } from './testUtils';
 describe('Number resolver', () => {
   it('should resolve number constraints', () => {
 
-    const errorMessage = "test must be a `number` type, but the final value was: `NaN` (cast from the value `\"fifou\"`).";
+    const errorMessage = "Value must be a number";
     const testConstraints = []
 
     const right = { test: 1 }
