@@ -12,7 +12,7 @@ const resolvers = {
 
 export const buildSubResolver = (props, key, dependencies) => {
   const { type, constraints = [] } = props;
-  if (props.format === 'array' || props.format === 'forms' || props.isMulti) {
+  if (props.array || props.isMulti) {
     let subResolver;
     let arrayResolver = yup.array()
 
@@ -42,9 +42,11 @@ export const buildSubResolver = (props, key, dependencies) => {
 export const getShapeAndDependencies = (flow, schema, dependencies = []) => {
   const shape = (flow || Object.keys(schema))
     .reduce((resolvers, key) => {
-      // if (typeof schema[key].type === 'object') {
-      //   return { ...resolvers, ...getShapeAndDependencies(key.flow || Object.keys(key.schema), key.schema, dependencies).shape }
-      // }
+
+      if (typeof key === 'object') {
+        return { ...resolvers, ...getShapeAndDependencies(key.flow, schema, dependencies).shape }
+      }
+
       const resolver = buildSubResolver(schema[key], key, dependencies);
       return { ...resolvers, [key]: resolver }
     }, {})
