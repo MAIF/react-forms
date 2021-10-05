@@ -21,7 +21,6 @@ const BasicWrapper = ({ entry, label, error, help, children, render }) => {
     return render({ entry, label, error, help, children })
   }
 
-
   return (
     <div className="form-group mt-3">
       <label className="form-label d-flex align-content-center" htmlFor={entry}>
@@ -49,20 +48,24 @@ const CustomizableInput = props => {
   return props.children
 }
 
+const defaultVal = (type, array, defaultValue) => {
+  if (!!array) return []
+  if (!!defaultValue) return defaultValue
+  switch (type) {
+    case types.bool: return false;
+    case types.number: return 0;
+    case types.object: return {};
+    case types.string: return "";
+    default: return undefined;
+  }
+}
 const getDefaultValues = (flow, schema) => {
-
   return flow.reduce((acc, key) => {
     const entry = schema[key]
     if (typeof key === 'object') {
       return { ...acc, ...getDefaultValues(key.flow, schema) }
     }
-    if (typeof entry.defaultValue !== 'undefined' && entry.defaultValue !== null) {
-      return { ...acc, [key]: entry.defaultValue }
-    }
-    let defaultValue = undefined;
-    if (entry.type === types.object) { defaultValue = {} }
-    if (entry.format === 'array' || entry.format === 'forms' || entry.isMulti) { defaultValue = [] }
-    return { ...acc, [key]: defaultValue }
+    return { ...acc, [key]: defaultVal(entry.type, entry.array, entry.defaultValue) }
   }, {})
 }
 
@@ -95,12 +98,13 @@ export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, http
 
   const { register, handleSubmit, formState: { errors }, control, reset, watch, trigger, getValues, setValue } = methods
 
+  
   useEffect(() => {
     if (formFlow && value) {
       reset(value)
     }
   }, [value, formFlow, reset])
-
+  
   const data = watch();
   useEffect(() => {
     //todo: with debounce
@@ -108,10 +112,8 @@ export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, http
       handleSubmit(onChange)
     }
   }, [data])
-
+  
   // console.log(watch())
-
-
 
   return (
     <FormProvider {...methods} >
@@ -125,7 +127,7 @@ export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, http
                   const step = schema[entry]
                   return (
                     <BasicWrapper key={idx} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
-                      <Step  entry={entry} step={schema[entry]} errors={errors}
+                      <Step entry={entry} step={schema[entry]} error={error}
                         register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
                         setValue={setValue} watch={watch} inputWrapper={inputWrapper} />
                     </BasicWrapper>
@@ -141,7 +143,7 @@ export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, http
           }, errors);
           return (
             <BasicWrapper key={idx} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
-              <Step key={idx} entry={entry} step={step} errors={errors}
+              <Step key={idx} entry={entry} step={step} error={error}
                 register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
                 setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient} />
             </BasicWrapper>
@@ -165,22 +167,20 @@ const Footer = (props) => {
   )
 }
 
-const Step = ({ entry, step, errors, register, schema, control, trigger, getValues, setValue, watch, inputWrapper, httpClient, defaultValue }) => {
-  const error = entry.split('.').reduce((object, key) => {
-    return object && object[key];
-  }, errors);
-
+const Step = ({ entry, step, error, register, schema, control, trigger, getValues, setValue, watch, inputWrapper, httpClient, defaultValue, index }) => {
   if (step.array) {
     return (
       <ArrayStep
         entry={entry} step={step} trigger={trigger}
         register={register} control={control} error={error}
-        setValue={setValue} values={getValues(entry)}
+        setValue={setValue} values={getValues(entry)} defaultValue={step.defaultValue || defaultVal(step.type)}
         component={((props, idx) => {
+          <div>{idx}</div>
           return (
-            <Step entry={entry} step={schema[entry]} errors={errors}
-              register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-              setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient} />
+              <Step entry={`${entry}[${idx}]`} step={{ ...schema[entry], array: false }} error={error}
+                register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
+                setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient}
+                defaultValue={props.defaultValue} value={props.defaultValue} index={idx}/>
           )
         })} />
     )
@@ -262,30 +262,6 @@ const Step = ({ entry, step, errors, register, schema, control, trigger, getValu
             }}
           />
         )
-        // case 'array':
-
-        //   return (
-        //     <BasicWrapper entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
-        //       <ArrayStep
-        //         entry={entry} step={step} trigger={trigger}
-        //         register={register} control={control} error={error}
-        //         setValue={setValue} values={getValues(entry)}
-        //         component={((props, idx) => {
-        //           return (
-        //               <input
-        //                 {...step.props}
-        //                 type="text"
-        //                 readOnly={step.disabled ? 'readOnly' : null}
-        //                 className={classNames("form-control", { 'is-invalid': error && error[idx] })}
-        //                 placeholder={step.placeholder}
-        //                 {...props}
-        //                 name={props.name.replace('.', '_')}
-        //                 onChange={e => setValue(`${entry}.${idx}`, e.target.value, { shouldValidate: true })} />
-        //               {error && error[idx] && <div className="invalid-feedback">{error[idx].message}</div>}
-        //           )
-        //         })} />
-        //     </BasicWrapper>
-        //   )
         case 'select':
           return (
             <Controller
@@ -317,7 +293,6 @@ const Step = ({ entry, step, errors, register, schema, control, trigger, getValu
                 type={step.format || 'text'} id={entry}
                 className={classNames("form-control", { 'is-invalid': error })}
                 readOnly={step.disabled ? 'readOnly' : null}
-                name={entry}
                 defaultValue={defaultValue}
                 placeholder={step.placeholder}
                 {...register(entry)} />
@@ -327,29 +302,6 @@ const Step = ({ entry, step, errors, register, schema, control, trigger, getValu
 
     case types.number:
       switch (step.format) {
-        // case 'array':
-        //   return (
-        //     <BasicWrapper entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
-        //       <ArrayStep
-        //         entry={entry} step={step} trigger={trigger}
-        //         register={register} control={control} error={error}
-        //         values={getValues(entry)}
-        //         component={((props, idx) => {
-        //           return (
-        //             <CustomizableInput render={step.render} field={{ rawValues: getValues(), value: getValues(`${entry}.${idx}`), onChange: v => setValue(`${entry}.${idx}`, v, { shouldValidate: true }) }} error={error && error[idx]}>
-        //               <input
-        //                 {...step.props}
-        //                 type="number"
-        //                 className={classNames("form-control", { 'is-invalid': error && error[idx] })}
-        //                 readOnly={step.disabled ? 'readOnly' : null}
-        //                 placeholder={step.placeholder} {...props} />
-        //               {error && error[idx] && <div className="invalid-feedback">{error[idx].message}</div>}
-        //             </CustomizableInput>
-        //           )
-        //         })} />
-        //     </BasicWrapper>
-        //   )
-
         default:
           return (
             <CustomizableInput render={step.render} field={{ rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v) }} error={error}>
@@ -418,34 +370,11 @@ const Step = ({ entry, step, errors, register, schema, control, trigger, getValu
             <CustomizableInput render={step.render} field={{ rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error}>
               <NestedForm
                 schema={step.schema} flow={step.flow || Object.keys(step.schema)} parent={entry}
-                inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} />
+                inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={defaultValue} error={error}
+                index={index}/>
             </CustomizableInput>
           )
-        // case 'forms':
-        //   const defaultValue = (step.flow || Object.keys(step.schema)).reduce((obj, key) => {
-        //     return { ...obj, [key]: ""}
-        //   }, {})
 
-        //   return (
-        //     <BasicWrapper entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
-        //       <ArrayStep
-        //         entry={entry} step={step} trigger={trigger}
-        //         register={() => {}} control={control} error={error}
-        //         values={getValues(entry)} defaultValue={defaultValue}
-        //         component={((props, idx) => {
-        //           console.log({ values: getValues(entry), props })
-        //           //todo: use idx for error
-        //           return (
-        //             <CustomizableInput render={step.render} field={{ rawValues: getValues(), value: props.value, onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error && error[idx]}>
-
-        //               <NestedFormForArray index={idx} schema={step.schema} flow={step.flow || Object.keys(step.schema)} parent={entry}
-        //                 inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={props.value} />
-
-        //             </CustomizableInput>
-        //           )
-        //         })} />
-        //     </BasicWrapper>
-        //   )
         default:
           return (
             <Controller
@@ -579,7 +508,7 @@ const ArrayStep = ({ entry, step, control, trigger, register, error, component, 
         .map((field, idx) => {
           return (
             <div key={field.id} className="d-flex flex-row">
-              {component({ key: field.id, ...register(`${entry}.${idx}`), value: values[idx], ...field }, idx)}
+              {component({ key: field.id, ...field, defaultValue: values[idx] || defaultValue }, idx)}
               <div className="input-group-append">
                 <button className="btn btn-danger btn-sm" onClick={() => {
                   remove(idx)
@@ -600,23 +529,24 @@ const ArrayStep = ({ entry, step, control, trigger, register, error, component, 
   )
 }
 
-const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient }) => {
-  const { register, control, getValues, setValue, trigger, watch, formState: { errors } } = useFormContext(); // retrieve all hook methods
+const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, index, error, value }) => {
+  const { register, control, getValues, setValue, trigger, watch } = useFormContext(); // retrieve all hook methods
   return (
-    <div style={{ borderLeft: '2px solid lightGray', paddingLeft: '.5rem' }}>
-      {flow.map((entry, idx) => <Step key={idx} entry={`${parent}.${entry}`} step={schema[entry]} errors={errors}
-        register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-        setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient} />)}
-    </div>
-  )
-}
-const NestedFormForArray = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, index, error, value }) => {
-  const { register, control, getValues, setValue, trigger, watch, formState: { errors } } = useFormContext(); // retrieve all hook methods
-  return (
-    <div style={{ borderLeft: '2px solid lightGray', paddingLeft: '.5rem', flexGrow: 1, marginBottom: '.5rem' }}>
-      {flow.map((entry, idx) => <Step key={idx} entry={`${parent}.${index}.${entry}`} step={schema[entry]} errors={errors}
-        register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-        setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient} defaultValue={value[entry]} />)}
+    <div style={{ borderLeft: '2px solid lightGray', paddingLeft: '.5rem', marginBottom: '.5rem' }}>
+      {flow.map((entry, idx) => {
+        const step = schema[entry]
+        const realError = index !== undefined ? error && error[index] && error[index][entry] : error && error[entry]
+
+        return (
+          <BasicWrapper key={idx} entry={`${parent}.${entry}`} error={realError} label={step.label || entry} help={step.help} render={inputWrapper}>
+            <Step key={idx} entry={`${parent}.${entry}`} step={schema[entry]} error={realError}
+              register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
+              setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient}
+              defaultValue={value && value[entry]}
+            />
+          </BasicWrapper>
+        )
+      })}
     </div>
   )
 }
