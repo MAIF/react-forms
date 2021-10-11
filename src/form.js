@@ -88,17 +88,25 @@ export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, http
 
   const defaultValues = getDefaultValues(formFlow, schema);
 
-  const { shape, dependencies } = getShapeAndDependencies(formFlow, schema);
-  const resolver = yup.object().shape(shape, dependencies);
+
+  //FIXME: get real schema through the switch
+  
+  const resolver = (rawData) => {
+    const { shape, dependencies } = getShapeAndDependencies(formFlow, schema, [], rawData);
+    const resolver = yup.object().shape(shape, dependencies);
+
+    console.log({rawData, shape, resolver})
+
+    return resolver;
+  }
 
   const methods = useForm({
-    resolver: yupResolver(resolver),
+    resolver: (data, context, options) => yupResolver(resolver(data))(data, context, options),
     defaultValues: value || defaultValues
   });
 
   const { register, handleSubmit, formState: { errors }, control, reset, watch, trigger, getValues, setValue } = methods
 
-  
   useEffect(() => {
     if (formFlow && value) {
       reset(value)
@@ -115,6 +123,7 @@ export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, http
   
   // console.log(watch())
 
+  console.log({errors})
   return (
     <FormProvider {...methods} >
       <form className="col-12 section pt-2 pr-2" onSubmit={handleSubmit(onChange)}>
@@ -289,11 +298,11 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
           return (
             <CustomizableInput render={step.render} field={{ rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error}>
               <input
-                {...step.props}
+                // {...step.props}
                 type={step.format || 'text'} id={entry}
                 className={classNames("form-control", { 'is-invalid': error })}
                 readOnly={step.disabled ? 'readOnly' : null}
-                defaultValue={defaultValue}
+                // defaultValue={defaultValue}
                 placeholder={step.placeholder}
                 {...register(entry)} />
             </CustomizableInput>
@@ -366,10 +375,11 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
             />
           )
         case 'form':
+          const flow = option(step.flow).getOrElse(option(step.schema).map(s => Object.keys(s)).getOrNull());
           return (
             <CustomizableInput render={step.render} field={{ rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error}>
               <NestedForm
-                schema={step.schema} flow={step.flow || Object.keys(step.schema)} parent={entry}
+                schema={step.schema} flow={flow} step={step} parent={entry}
                 inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={defaultValue} error={error}
                 index={index}/>
             </CustomizableInput>
@@ -529,18 +539,37 @@ const ArrayStep = ({ entry, step, control, trigger, register, error, component, 
   )
 }
 
-const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, index, error, value }) => {
+const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, index, error, value, step }) => {
   const { register, control, getValues, setValue, trigger, watch } = useFormContext(); // retrieve all hook methods
+
+  const schemaAndfFlow = option(step.conditionalSchema)
+    .map(condiSchema => {
+      const ref = option(condiSchema.ref).map(ref => getValues(ref)).getOrNull();
+      const rawData = getValues()
+
+      const filterSwitch = condiSchema.switch.find(s => {
+        if (typeof s.condition === 'function') {
+          return s.condition({ rawData, ref})
+        } else {
+          return s.condition === ref
+        }
+      })
+
+      return option(filterSwitch).getOrElse(condiSchema.switch.find(s => s.default))
+    })
+    .getOrElse({schema, flow})
+
+
   return (
     <div style={{ borderLeft: '2px solid lightGray', paddingLeft: '.5rem', marginBottom: '.5rem' }}>
-      {flow.map((entry, idx) => {
-        const step = schema[entry]
+      {schemaAndfFlow.flow.map((entry, idx) => {
+        const step = schemaAndfFlow.schema[entry]
         const realError = index !== undefined ? error && error[index] && error[index][entry] : error && error[entry]
 
         return (
-          <BasicWrapper key={idx} entry={`${parent}.${entry}`} error={realError} label={step.label || entry} help={step.help} render={inputWrapper}>
-            <Step key={idx} entry={`${parent}.${entry}`} step={schema[entry]} error={realError}
-              register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
+          <BasicWrapper key={`${entry}.${idx}`} entry={`${parent}.${entry}`} error={realError} label={step.label || entry} help={step.help} render={inputWrapper}>
+            <Step key={`step.${entry}.${idx}`} entry={`${parent}.${entry}`} step={schemaAndfFlow.schema[entry]} error={realError}
+              register={register} schema={schemaAndfFlow.schema} control={control} trigger={trigger} getValues={getValues}
               setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient}
               defaultValue={value && value[entry]}
             />
