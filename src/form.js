@@ -7,6 +7,7 @@ import { DatePicker } from 'react-rainbow-components';
 import ReactToolTip from 'react-tooltip';
 import { v4 as uuid } from 'uuid';
 import * as yup from "yup";
+import { createUseStyles, useTheme } from 'react-jss'
 
 import { types } from './types';
 import { BooleanInput, Collapse, SelectInput, ObjectInput, CodeInput, MarkdownInput } from './inputs/index';
@@ -70,6 +71,29 @@ const getDefaultValues = (flow, schema) => {
 }
 
 export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, httpClient, autosave }) => {
+  const useStyles = createUseStyles({
+    myButton: {
+      color: 'white',
+      backgroundColor: "forestgreen",
+      margin: {
+        // jss-expand gives more readable syntax
+        top: 5, // jss-default-unit makes this 5px
+        right: 0,
+        bottom: 0,
+        left: '1rem'
+      },
+      '& span': {
+        // jss-nested applies this to a child span
+        fontWeight: 'bold' // jss-camel-case turns this into 'font-weight'
+      }
+    },
+    myLabel: {
+      fontStyle: 'italic'
+    }
+  });
+
+  const classes = useStyles();
+
   const formFlow = flow || Object.keys(schema)
 
   const maybeCustomHttpClient = (url, method) => {
@@ -90,12 +114,12 @@ export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, http
 
 
   //FIXME: get real schema through the switch
-  
+
   const resolver = (rawData) => {
     const { shape, dependencies } = getShapeAndDependencies(formFlow, schema, [], rawData);
     const resolver = yup.object().shape(shape, dependencies);
 
-    console.log({rawData, shape, resolver})
+    console.log({ rawData, shape, resolver })
 
     return resolver;
   }
@@ -112,7 +136,7 @@ export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, http
       reset(value)
     }
   }, [value, formFlow, reset])
-  
+
   const data = watch();
   useEffect(() => {
     //todo: with debounce
@@ -120,47 +144,48 @@ export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, http
       handleSubmit(onChange)
     }
   }, [data])
-  
+
   // console.log(watch())
 
-  console.log({errors})
-  return (
-    <FormProvider {...methods} >
-      <form className="col-12 section pt-2 pr-2" onSubmit={handleSubmit(onChange)}>
-        {formFlow.map((entry, idx) => {
-          if (entry && typeof entry === 'object') {
-            const errored = entry.flow.some(step => !!errors[step])
-            return (
-              <Collapse key={idx} label={entry.label} collapsed={entry.collapsed} errored={errored}>
-                {entry.flow.map((entry, idx) => {
-                  const step = schema[entry]
-                  return (
-                    <BasicWrapper key={idx} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
-                      <Step entry={entry} step={schema[entry]} error={error}
-                        register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-                        setValue={setValue} watch={watch} inputWrapper={inputWrapper} />
-                    </BasicWrapper>
-                  )
-                })}
-              </Collapse>
-            )
-          }
+  // console.log({errors})
 
-          const step = schema[entry]
-          const error = entry.split('.').reduce((object, key) => {
-            return object && object[key];
-          }, errors);
-          return (
-            <BasicWrapper key={idx} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
-              <Step key={idx} entry={entry} step={step} error={error}
-                register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-                setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient} />
-            </BasicWrapper>
-          )
-        })}
-        <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(onChange)} />
-      </form>
-    </FormProvider>
+  return (
+      <FormProvider {...methods} >
+        <form className="col-12 section pt-2 pr-2" onSubmit={handleSubmit(onChange)}>
+          {formFlow.map((entry, idx) => {
+            if (entry && typeof entry === 'object') {
+              const errored = entry.flow.some(step => !!errors[step])
+              return (
+                <Collapse key={idx} label={entry.label} collapsed={entry.collapsed} errored={errored}>
+                  {entry.flow.map((entry, idx) => {
+                    const step = schema[entry]
+                    return (
+                      <BasicWrapper key={idx} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
+                        <Step entry={entry} step={schema[entry]} error={error}
+                          register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
+                          setValue={setValue} watch={watch} inputWrapper={inputWrapper} />
+                      </BasicWrapper>
+                    )
+                  })}
+                </Collapse>
+              )
+            }
+
+            const step = schema[entry]
+            const error = entry.split('.').reduce((object, key) => {
+              return object && object[key];
+            }, errors);
+            return (
+              <BasicWrapper key={idx} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
+                <Step key={idx} entry={entry} step={step} error={error}
+                  register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
+                  setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient} />
+              </BasicWrapper>
+            )
+          })}
+          <Footer classes={classes} render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(onChange)} />
+        </form>
+      </FormProvider>
   )
 }
 
@@ -171,7 +196,7 @@ const Footer = (props) => {
   return (
     <div className="d-flex flex-row justify-content-end">
       <button className="btn btn-danger" type="button" onClick={props.reset}>Reset</button>
-      <button className="btn btn-success ml-1" type="submit">Save</button>
+      <button className={props.classes.myButton} type="submit">Save</button>
     </div>
   )
 }
@@ -186,10 +211,10 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
         component={((props, idx) => {
           <div>{idx}</div>
           return (
-              <Step entry={`${entry}[${idx}]`} step={{ ...schema[entry], array: false }} error={error}
-                register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-                setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient}
-                defaultValue={props.defaultValue} value={props.defaultValue} index={idx}/>
+            <Step entry={`${entry}[${idx}]`} step={{ ...schema[entry], array: false }} error={error}
+              register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
+              setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient}
+              defaultValue={props.defaultValue} value={props.defaultValue} index={idx} />
           )
         })} />
     )
@@ -381,7 +406,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
               <NestedForm
                 schema={step.schema} flow={flow} step={step} parent={entry}
                 inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={defaultValue} error={error}
-                index={index}/>
+                index={index} />
             </CustomizableInput>
           )
 
@@ -549,7 +574,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
 
       const filterSwitch = condiSchema.switch.find(s => {
         if (typeof s.condition === 'function') {
-          return s.condition({ rawData, ref})
+          return s.condition({ rawData, ref })
         } else {
           return s.condition === ref
         }
@@ -557,7 +582,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
 
       return option(filterSwitch).getOrElse(condiSchema.switch.find(s => s.default))
     })
-    .getOrElse({schema, flow})
+    .getOrElse({ schema, flow })
 
 
   return (
