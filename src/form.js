@@ -7,6 +7,7 @@ import { DatePicker } from 'react-rainbow-components';
 import ReactToolTip from 'react-tooltip';
 import { v4 as uuid } from 'uuid';
 import * as yup from "yup";
+import { createUseStyles, useTheme } from 'react-jss'
 
 import { type } from './type';
 import { format } from './format';
@@ -85,6 +86,29 @@ const getDefaultValues = (flow, schema) => {
 }
 
 export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, style, className, options = {} }) => {
+  const useStyles = createUseStyles({
+    myButton: {
+      color: 'white',
+      backgroundColor: "forestgreen",
+      margin: {
+        // jss-expand gives more readable syntax
+        top: 5, // jss-default-unit makes this 5px
+        right: 0,
+        bottom: 0,
+        left: '1rem'
+      },
+      '& span': {
+        // jss-nested applies this to a child span
+        fontWeight: 'bold' // jss-camel-case turns this into 'font-weight'
+      }
+    },
+    myLabel: {
+      fontStyle: 'italic'
+    }
+  });
+
+  const classes = useStyles();
+
   const formFlow = flow || Object.keys(schema)
 
   const maybeCustomHttpClient = (url, method) => {
@@ -118,11 +142,11 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, styl
       const [key, v] = curr;
 
       if (Array.isArray(v)) {
-        return {...acc, [key]: v.map(value => ({value}))}
+        return { ...acc, [key]: v.map(value => ({ value })) }
       } else if (typeof v === 'object') {
-        return {...acc, [key]: cleanInputArray(v)}
+        return { ...acc, [key]: cleanInputArray(v) }
       } else {
-        return {...acc, [key]: v}
+        return { ...acc, [key]: v }
       }
     }, {})
   }
@@ -131,9 +155,9 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, styl
     return Object.entries(obj).reduce((acc, curr) => {
 
       const [key, v] = curr;
-      
+
       if (Array.isArray(v)) {
-        return { ...acc, [key]: v.map(({value}) => value ) }
+        return { ...acc, [key]: v.map(({ value }) => value) }
       } else if (typeof v === 'object') {
         return { ...acc, [key]: cleanOutputArray(v) }
       } else {
@@ -175,23 +199,17 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, styl
     <FormProvider {...methods} >
       <form className={className || "col-12 section pt-2 pr-2"} style={style} onSubmit={handleSubmit(data => {
         const clean = cleanOutputArray(data)
-        return onSubmit(clean)})}>
+        return onSubmit(clean)
+      })}>
         {formFlow.map((entry, idx) => {
           if (entry && typeof entry === 'object') {
             const errored = entry.flow.some(step => !!errors[step])
             return (
-              <Collapse key={idx} label={entry.label} collapsed={entry.collapsed} errored={errored}>
-                {entry.flow.map((entry, idx) => {
-                  const step = schema[entry]
-                  return (
-                    <BasicWrapper key={idx} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
-                      <Step entry={entry} step={schema[entry]} error={error}
-                        register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-                        setValue={setValue} watch={watch} inputWrapper={inputWrapper} />
-                    </BasicWrapper>
-                  )
-                })}
-              </Collapse>
+              <BasicWrapper key={idx} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
+                <Step key={idx} entry={entry} step={step} error={error}
+                  register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
+                  setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient} />
+              </BasicWrapper>
             )
           }
 
@@ -207,7 +225,7 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, styl
             </BasicWrapper>
           )
         })}
-        <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(data => onSubmit(cleanOutputArray(data)))} actions={options.actions} />
+        <Footer classes={classes}  render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(data => onSubmit(cleanOutputArray(data)))} actions={options.actions} />
       </form>
     </FormProvider>
   )
@@ -220,15 +238,16 @@ const Footer = (props) => {
 
   const isSubmitDisplayed = props.actions?.submit?.display === undefined ? true : !!props.actions?.submit?.display
 
+  //FIXME: add btn danger class
   return (
     <div className="d-flex flex-row justify-content-end mt-2">
       {props.actions?.reset?.display && <button className="btn btn-danger" type="button" onClick={props.reset}>{props.actions?.reset?.label || 'Reset'}</button>}
-      {isSubmitDisplayed && <button className="btn btn-success ml-1" type="submit">{props.actions?.submit?.label || 'Save'}</button>}
-    </div>
-  )
+      {isSubmitDisplayed && <button className={props.classes.myButton} type="submit">{props.actions?.submit?.label || 'Save'}</button>}
+      </div>
+      )
 }
 
-const Step = ({ entry, step, error, register, schema, control, trigger, getValues, setValue, watch, inputWrapper, httpClient, defaultValue, index }) => {
+      const Step = ({entry, step, error, register, schema, control, trigger, getValues, setValue, watch, inputWrapper, httpClient, defaultValue, index}) => {
   if (step.array) {
     return (
       <ArrayStep
@@ -243,389 +262,389 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
               defaultValue={props.defaultValue} value={props.defaultValue} index={idx} />
           )
         })} />
-    )
+      )
   }
 
-  const visibleStep = step && option(step.visible)
+      const visibleStep = step && option(step.visible)
     .map(visible => {
       switch (typeof visible) {
         case 'object':
-          const value = watch(step.visible.ref);
+      const value = watch(step.visible.ref);
           return option(step.visible.test).map(test => test(value)).getOrElse(value)
-        case 'boolean':
-          return visible;
-        default:
-          return true;
+      case 'boolean':
+      return visible;
+      default:
+      return true;
       }
     })
-    .getOrElse(true)
-  if (!visibleStep) {
+      .getOrElse(true)
+      if (!visibleStep) {
     return null;
   }
 
-  switch (step.type) {
+      switch (step.type) {
     case type.string:
       switch (step.format) {
         case format.text:
+      return (
+      <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v) }} error={error}>
+        <textarea
+          type="text" id={entry}
+          className={classNames("form-control", { 'is-invalid': error })}
+          readOnly={step.disabled ? 'readOnly' : null}
+          {...step.props}
+          name={entry}
+          defaultValue={defaultValue}
+          placeholder={step.placeholder}
+          {...register(entry)} />
+      </CustomizableInput>
+      );
+      case format.code: return (
+      <Controller
+        name={entry}
+        control={control}
+        render={({ field }) => {
           return (
-            <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v) }} error={error}>
-              <textarea
-                type="text" id={entry}
-                className={classNames("form-control", { 'is-invalid': error })}
-                readOnly={step.disabled ? 'readOnly' : null}
+            <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
+              <CodeInput
                 {...step.props}
-                name={entry}
-                defaultValue={defaultValue}
-                placeholder={step.placeholder}
-                {...register(entry)} />
-            </CustomizableInput>
-          );
-        case format.code: return (
-          <Controller
-            name={entry}
-            control={control}
-            render={({ field }) => {
-              return (
-                <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
-                  <CodeInput
-                    {...step.props}
-                    className={classNames({ 'is-invalid': error })}
-                    readOnly={step.disabled ? 'readOnly' : null}
-                    onChange={field.onChange}
-                    value={field.value}
-                    defaultValue={defaultValue}
-                    {...step}
-                  />
-                </CustomizableInput>
-              )
-            }}
-          />
-        )
-        case format.markdown: return (
-          <Controller
-            name={entry}
-            control={control}
-            render={({ field }) => {
-              return (
-                <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
-                  <MarkdownInput
-                    {...step.props}
-                    className={classNames({ 'is-invalid': error })}
-                    readOnly={step.disabled ? 'readOnly' : null}
-                    onChange={field.onChange}
-                    value={field.value}
-                    defaultValue={defaultValue}
-                    {...step}
-                  />
-                </CustomizableInput>
-              )
-            }}
-          />
-        )
-        case format.select:
-          return (
-            <Controller
-              name={entry}
-              control={control}
-              render={({ field }) => {
-                return (
-                  <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
-                    <SelectInput
-                      {...step.props}
-                      className={classNames({ 'is-invalid': error })}
-                      readOnly={step.disabled ? 'readOnly' : null}
-                      onChange={field.onChange}
-                      value={field.value}
-                      possibleValues={step.options}
-                      defaultValue={defaultValue}
-                      httpClient={httpClient}
-                      {...step}
-                    />
-                  </CustomizableInput>
-                )
-              }}
-            />
-          )
-        default:
-          return (
-            <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error}>
-              <input
-                // {...step.props}
-                type={step.format || 'text'} id={entry}
-                className={classNames("form-control", { 'is-invalid': error })}
+                className={classNames({ 'is-invalid': error })}
                 readOnly={step.disabled ? 'readOnly' : null}
-                // defaultValue={defaultValue}
-                placeholder={step.placeholder}
-                {...register(entry)} />
+                onChange={field.onChange}
+                value={field.value}
+                defaultValue={defaultValue}
+                {...step}
+              />
             </CustomizableInput>
-          );
+          )
+        }}
+      />
+      )
+      case format.markdown: return (
+      <Controller
+        name={entry}
+        control={control}
+        render={({ field }) => {
+          return (
+            <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
+              <MarkdownInput
+                {...step.props}
+                className={classNames({ 'is-invalid': error })}
+                readOnly={step.disabled ? 'readOnly' : null}
+                onChange={field.onChange}
+                value={field.value}
+                defaultValue={defaultValue}
+                {...step}
+              />
+            </CustomizableInput>
+          )
+        }}
+      />
+      )
+      case format.select:
+      return (
+      <Controller
+        name={entry}
+        control={control}
+        render={({ field }) => {
+          return (
+            <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
+              <SelectInput
+                {...step.props}
+                className={classNames({ 'is-invalid': error })}
+                readOnly={step.disabled ? 'readOnly' : null}
+                onChange={field.onChange}
+                value={field.value}
+                possibleValues={step.options}
+                defaultValue={defaultValue}
+                httpClient={httpClient}
+                {...step}
+              />
+            </CustomizableInput>
+          )
+        }}
+      />
+      )
+      default:
+      return (
+      <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error}>
+        <input
+          // {...step.props}
+          type={step.format || 'text'} id={entry}
+          className={classNames("form-control", { 'is-invalid': error })}
+          readOnly={step.disabled ? 'readOnly' : null}
+          // defaultValue={defaultValue}
+          placeholder={step.placeholder}
+          {...register(entry)} />
+      </CustomizableInput>
+      );
       }
 
-    case type.number:
+      case type.number:
       switch (step.format) {
         case format.select:
+      return (
+      <Controller
+        name={entry}
+        control={control}
+        render={({ field }) => {
           return (
-            <Controller
-              name={entry}
-              control={control}
-              render={({ field }) => {
-                return (
-                  <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
-                    <SelectInput
-                      {...step.props}
-                      className={classNames({ 'is-invalid': error })}
-                      readOnly={step.disabled ? 'readOnly' : null}
-                      onChange={field.onChange}
-                      value={field.value}
-                      possibleValues={step.options}
-                      defaultValue={defaultValue}
-                      httpClient={httpClient}
-                      {...step}
-                    />
-                  </CustomizableInput>
-                )
-              }}
-            />
-          )
-        default:
-          return (
-            <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v) }} error={error}>
-              <input
+            <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
+              <SelectInput
                 {...step.props}
-                type={step.format || 'number'} id={entry}
-                className={classNames("form-control", { 'is-invalid': error })}
+                className={classNames({ 'is-invalid': error })}
                 readOnly={step.disabled ? 'readOnly' : null}
-                name={entry}
-                placeholder={step.placeholder}
+                onChange={field.onChange}
+                value={field.value}
+                possibleValues={step.options}
                 defaultValue={defaultValue}
-                {...register(entry)} />
+                httpClient={httpClient}
+                {...step}
+              />
             </CustomizableInput>
-          );
+          )
+        }}
+      />
+      )
+      default:
+      return (
+      <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v) }} error={error}>
+        <input
+          {...step.props}
+          type={step.format || 'number'} id={entry}
+          className={classNames("form-control", { 'is-invalid': error })}
+          readOnly={step.disabled ? 'readOnly' : null}
+          name={entry}
+          placeholder={step.placeholder}
+          defaultValue={defaultValue}
+          {...register(entry)} />
+      </CustomizableInput>
+      );
       }
 
-    case type.bool:
+      case type.bool:
       return (
-        <Controller
-          name={entry}
-          control={control}
-          render={({ field }) => {
-            return (
-              <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
-                <BooleanInput
-                  {...step.props}
-                  className={classNames({ 'is-invalid': error })}
-                  readOnly={step.disabled ? 'readOnly' : null}
-                  onChange={field.onChange}
-                  value={field.value}
-                />
-              </CustomizableInput>
-            )
-          }}
-        />
+      <Controller
+        name={entry}
+        control={control}
+        render={({ field }) => {
+          return (
+            <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
+              <BooleanInput
+                {...step.props}
+                className={classNames({ 'is-invalid': error })}
+                readOnly={step.disabled ? 'readOnly' : null}
+                onChange={field.onChange}
+                value={field.value}
+              />
+            </CustomizableInput>
+          )
+        }}
+      />
       )
 
-    case type.object:
+      case type.object:
       switch (step.format) {
         case format.select:
+      return (
+      <Controller
+        name={entry}
+        control={control}
+        defaultValue={step.defaultValue}
+        render={({ field }) => {
           return (
-            <Controller
-              name={entry}
-              control={control}
-              defaultValue={step.defaultValue}
-              render={({ field }) => {
-                return (
-                  <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
-                    <SelectInput
-                      {...step.props}
-                      className={classNames({ 'is-invalid': error })}
-                      readOnly={step.disabled ? 'readOnly' : null}
-                      onChange={field.onChange}
-                      value={field.value}
-                      possibleValues={step.options}
-                      httpClient={httpClient}
-                      {...step}
-                    />
-                  </CustomizableInput>
-                )
-              }}
-            />
+            <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
+              <SelectInput
+                {...step.props}
+                className={classNames({ 'is-invalid': error })}
+                readOnly={step.disabled ? 'readOnly' : null}
+                onChange={field.onChange}
+                value={field.value}
+                possibleValues={step.options}
+                httpClient={httpClient}
+                {...step}
+              />
+            </CustomizableInput>
           )
-        case format.form:
+        }}
+      />
+      )
+      case format.form:
           const flow = option(step.flow).getOrElse(option(step.schema).map(s => Object.keys(s)).getOrNull());
+      return (
+      <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error}>
+        <NestedForm
+          schema={step.schema} flow={flow} step={step} parent={entry}
+          inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={defaultValue} error={error}
+          index={index} />
+      </CustomizableInput>
+      )
+
+      default:
+      return (
+      <Controller
+        name={entry}
+        control={control}
+        defaultValue={step.defaultValue}
+        render={({ field }) => {
           return (
-            <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error}>
-              <NestedForm
-                schema={step.schema} flow={flow} step={step} parent={entry}
-                inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={defaultValue} error={error}
-                index={index} />
+            <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
+              <ObjectInput
+                {...step.props}
+                className={classNames({ 'is-invalid': error })}
+                readOnly={step.disabled ? 'readOnly' : null}
+                onChange={field.onChange}
+                value={field.value}
+                possibleValues={step.options}
+                {...step}
+              />
             </CustomizableInput>
           )
-
-        default:
-          return (
-            <Controller
-              name={entry}
-              control={control}
-              defaultValue={step.defaultValue}
-              render={({ field }) => {
-                return (
-                  <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
-                    <ObjectInput
-                      {...step.props}
-                      className={classNames({ 'is-invalid': error })}
-                      readOnly={step.disabled ? 'readOnly' : null}
-                      onChange={field.onChange}
-                      value={field.value}
-                      possibleValues={step.options}
-                      {...step}
-                    />
-                  </CustomizableInput>
-                )
-              }}
-            />
-          )
-      }
-    case type.date:
-      return (
-        <Controller
-          name={entry}
-          control={control}
-          defaultValue={step.defaultValue}
-          render={({ field }) => {
-            return (
-              <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
-                <DatePicker
-                  {...step.props}
-                  id="datePicker-1"
-                  className={classNames({ 'is-invalid': error })}
-                  readOnly={step.disabled ? 'readOnly' : null}
-                  value={field.value}
-                  onChange={field.onChange}
-                  formatStyle="large"
-                // locale={state.locale.name}
-                />
-              </CustomizableInput>
-            )
-          }}
-        />
+        }}
+      />
       )
-    case type.file:
+      }
+      case type.date:
+      return (
+      <Controller
+        name={entry}
+        control={control}
+        defaultValue={step.defaultValue}
+        render={({ field }) => {
+          return (
+            <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
+              <DatePicker
+                {...step.props}
+                id="datePicker-1"
+                className={classNames({ 'is-invalid': error })}
+                readOnly={step.disabled ? 'readOnly' : null}
+                value={field.value}
+                onChange={field.onChange}
+                formatStyle="large"
+              // locale={state.locale.name}
+              />
+            </CustomizableInput>
+          )
+        }}
+      />
+      )
+      case type.file:
       if (step.format === format.hidden) {
         return (
-          <Controller
-            name={entry}
-            control={control}
-            render={({ field }) => {
-              const FileInput = ({ onChange }) => {
-                const [uploading, setUploading] = useState(false);
-                const [input, setInput] = useState(undefined);
+      <Controller
+        name={entry}
+        control={control}
+        render={({ field }) => {
+          const FileInput = ({ onChange }) => {
+            const [uploading, setUploading] = useState(false);
+            const [input, setInput] = useState(undefined);
 
-                const setFiles = (e) => {
-                  const files = e.target.files;
-                  setUploading(true);
-                  onChange(files)
-                  setUploading(false);
-                };
+            const setFiles = (e) => {
+              const files = e.target.files;
+              setUploading(true);
+              onChange(files)
+              setUploading(false);
+            };
 
-                const trigger = () => {
-                  input.click();
-                };
+            const trigger = () => {
+              input.click();
+            };
 
-                return (
-                  <div className={classNames("d-flex flex-row justify-content-start", { 'is-invalid': error })}>
-                    <input
-                      ref={(r) => setInput(r)}
-                      type="file"
-                      multiple
-                      className="form-control d-none"
-                      onChange={setFiles}
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-outline-success pl"
-                      disabled={uploading}
-                      onClick={trigger}>
-                      {uploading && <Loader />}
-                      {!uploading && <Upload />}
-                      Select file
-                    </button>
-                  </div>
-                );
-              };
+            return (
+              <div className={classNames("d-flex flex-row justify-content-start", { 'is-invalid': error })}>
+                <input
+                  ref={(r) => setInput(r)}
+                  type="file"
+                  multiple
+                  className="form-control d-none"
+                  onChange={setFiles}
+                />
+                <button
+                  type="button"
+                  className="btn btn-outline-success pl"
+                  disabled={uploading}
+                  onClick={trigger}>
+                  {uploading && <Loader />}
+                  {!uploading && <Upload />}
+                  Select file
+                </button>
+              </div>
+            );
+          };
 
-              return (
-                <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
-                  <FileInput onChange={field.onChange} error={error} />
-                </CustomizableInput>
-              )
-            }}
-          />
-        )
+          return (
+            <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
+              <FileInput onChange={field.onChange} error={error} />
+            </CustomizableInput>
+          )
+        }}
+      />
+      )
       }
       return (
-        <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error}>
-          <input
-            {...step.props}
-            type='file' id={entry}
-            className={classNames("form-control", { 'is-invalid': error })}
-            readOnly={step.disabled ? 'readOnly' : null}
-            name={entry}
-            placeholder={step.placeholder}
-            {...register(entry)} />
-        </CustomizableInput>
+      <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error}>
+        <input
+          {...step.props}
+          type='file' id={entry}
+          className={classNames("form-control", { 'is-invalid': error })}
+          readOnly={step.disabled ? 'readOnly' : null}
+          name={entry}
+          placeholder={step.placeholder}
+          {...register(entry)} />
+      </CustomizableInput>
       );
-    default:
+      default:
       return null;
   }
 
 }
 
 
-const ArrayStep = ({ entry, step, control, trigger, register, error, component, values, defaultValue, setValue }) => {
-  const { fields, append, remove } = useFieldArray({
-    control, // control props comes from useForm (optional: if you are using FormContext)
-    name: entry, // unique name for your Field Array
+      const ArrayStep = ({entry, step, control, trigger, register, error, component, values, defaultValue, setValue}) => {
+  const {fields, append, remove} = useFieldArray({
+        control, // control props comes from useForm (optional: if you are using FormContext)
+        name: entry, // unique name for your Field Array
     // keyName: "id", default to "id", you can change the key name
   });
 
-  return (
-    <>
-      {fields
-        .map((field, idx) => {
-          return (
-            <div key={field.id} className="d-flex flex-row">
-              {component({ key: field.id, ...field, defaultValue: values[idx] || defaultValue }, idx)}
-              <div className="input-group-append">
-                <button className="btn btn-danger btn-sm" onClick={() => {
-                  remove(idx)
-                  trigger(entry);
-                }}>remove</button>
+      return (
+      <>
+        {fields
+          .map((field, idx) => {
+            return (
+              <div key={field.id} className="d-flex flex-row">
+                {component({ key: field.id, ...field, defaultValue: values[idx] || defaultValue }, idx)}
+                <div className="input-group-append">
+                  <button className="btn btn-danger btn-sm" onClick={() => {
+                    remove(idx)
+                    trigger(entry);
+                  }}>remove</button>
+                </div>
               </div>
-            </div>
-          )
-        })}
-      <div>
-        <input type="button" className={classNames("btn btn-info mt-2", { 'is-invalid': error })} onClick={() => {
-          append({value: defaultValue})
-          trigger(entry);
-        }} value="Add" />
-        {error && <div className="invalid-feedback">{error.message}</div>}
-      </div>
-    </>
-  )
+            )
+          })}
+        <div>
+          <input type="button" className={classNames("btn btn-info mt-2", { 'is-invalid': error })} onClick={() => {
+            append({ value: defaultValue })
+            trigger(entry);
+          }} value="Add" />
+          {error && <div className="invalid-feedback">{error.message}</div>}
+        </div>
+      </>
+      )
 }
 
-const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, index, error, value, step }) => {
-  const { register, control, getValues, setValue, trigger, watch } = useFormContext(); // retrieve all hook methods
+      const NestedForm = ({schema, flow, parent, inputWrapper, maybeCustomHttpClient, index, error, value, step}) => {
+  const {register, control, getValues, setValue, trigger, watch} = useFormContext(); // retrieve all hook methods
 
-  const schemaAndFlow = option(step.conditionalSchema)
+      const schemaAndFlow = option(step.conditionalSchema)
     .map(condiSchema => {
       const ref = option(condiSchema.ref).map(ref => getValues(ref)).getOrNull();
       const rawData = getValues()
 
       const filterSwitch = condiSchema.switch.find(s => {
         if (typeof s.condition === 'function') {
-          return s.condition({ rawData, ref })
+          return s.condition({rawData, ref})
         } else {
           return s.condition === ref
         }
@@ -633,32 +652,32 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
 
       return option(filterSwitch).getOrElse(condiSchema.switch.find(s => s.default))
     })
-    .getOrElse({ schema, flow })
+      .getOrElse({schema, flow})
 
-  const prevSchema = usePrevious(schemaAndFlow.schema);
+      const prevSchema = usePrevious(schemaAndFlow.schema);
   useEffect(() => {
     if (JSON.stringify(prevSchema) !== JSON.stringify(schemaAndFlow.schema)) {
       const def = getDefaultValues(schemaAndFlow.flow, schemaAndFlow.schema);
-      setValue(parent, def, { shouldValidate: false })
+      setValue(parent, def, {shouldValidate: false })
     }
   }, [prevSchema, schemaAndFlow.schema])
 
-  return (
-    <div style={{ borderLeft: '2px solid lightGray', paddingLeft: '.5rem', marginBottom: '.5rem' }}>
-      {schemaAndFlow.flow.map((entry, idx) => {
-        const step = schemaAndFlow.schema[entry]
-        const realError = error && error[entry]
+      return (
+      <div style={{ borderLeft: '2px solid lightGray', paddingLeft: '.5rem', marginBottom: '.5rem' }}>
+        {schemaAndFlow.flow.map((entry, idx) => {
+          const step = schemaAndFlow.schema[entry]
+          const realError = error && error[entry]
 
-        return (
-          <BasicWrapper key={`${entry}.${idx}`} entry={`${parent}.${entry}`} error={realError} label={step.label || entry} help={step.help} render={inputWrapper}>
-            <Step key={`step.${entry}.${idx}`} entry={`${parent}.${entry}`} step={schemaAndFlow.schema[entry]} error={realError}
-              register={register} schema={schemaAndFlow.schema} control={control} trigger={trigger} getValues={getValues}
-              setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient}
-              defaultValue={value && value[entry]}
-            />
-          </BasicWrapper>
-        )
-      })}
-    </div>
-  )
+          return (
+            <BasicWrapper key={`${entry}.${idx}`} entry={`${parent}.${entry}`} error={realError} label={step.label || entry} help={step.help} render={inputWrapper}>
+              <Step key={`step.${entry}.${idx}`} entry={`${parent}.${entry}`} step={schemaAndFlow.schema[entry]} error={realError}
+                register={register} schema={schemaAndFlow.schema} control={control} trigger={trigger} getValues={getValues}
+                setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient}
+                defaultValue={value && value[entry]}
+              />
+            </BasicWrapper>
+          )
+        })}
+      </div>
+      )
 }
