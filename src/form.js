@@ -1,6 +1,6 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import classNames from 'classnames';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { HelpCircle, Loader, Upload } from 'react-feather';
 import { useForm, useFormContext, Controller, useFieldArray, FormProvider } from 'react-hook-form';
 import { DatePicker } from 'react-rainbow-components';
@@ -12,6 +12,20 @@ import { types } from './types';
 import { BooleanInput, Collapse, SelectInput, ObjectInput, CodeInput, MarkdownInput } from './inputs/index';
 import { getShapeAndDependencies } from './resolvers/index';
 import { option } from './Option'
+
+const usePrevious = (value) => {
+  // The ref object is a generic container whose current property is mutable ...
+  // ... and can hold any value, similar to an instance property on a class
+  const ref = useRef();
+
+  // Store current value in ref
+  useEffect(() => {
+    ref.current = value;
+  }, [value]); // Only re-run if value changes
+
+  // Return previous value (happens before update in useEffect above)
+  return ref.current;
+}
 
 
 const BasicWrapper = ({ entry, label, error, help, children, render }) => {
@@ -95,8 +109,6 @@ export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, http
     const { shape, dependencies } = getShapeAndDependencies(formFlow, schema, [], rawData);
     const resolver = yup.object().shape(shape, dependencies);
 
-    console.log({rawData, shape, resolver})
-
     return resolver;
   }
 
@@ -123,7 +135,6 @@ export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, http
   
   // console.log(watch())
 
-  console.log({errors})
   return (
     <FormProvider {...methods} >
       <form className="col-12 section pt-2 pr-2" onSubmit={handleSubmit(onChange)}>
@@ -542,7 +553,7 @@ const ArrayStep = ({ entry, step, control, trigger, register, error, component, 
 const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, index, error, value, step }) => {
   const { register, control, getValues, setValue, trigger, watch } = useFormContext(); // retrieve all hook methods
 
-  const schemaAndfFlow = option(step.conditionalSchema)
+  const schemaAndFlow = option(step.conditionalSchema)
     .map(condiSchema => {
       const ref = option(condiSchema.ref).map(ref => getValues(ref)).getOrNull();
       const rawData = getValues()
@@ -559,17 +570,24 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
     })
     .getOrElse({schema, flow})
 
+  const prevSchema = usePrevious(schemaAndFlow.schema);
+  useEffect(() => {
+    if (JSON.stringify(prevSchema) !== JSON.stringify(schemaAndFlow.schema)) {
+      const def = getDefaultValues(schemaAndFlow.flow, schemaAndFlow.schema);
+      setValue(parent, def, { shouldValidate: false })
+    }
+  }, [prevSchema, schemaAndFlow.schema])
 
   return (
     <div style={{ borderLeft: '2px solid lightGray', paddingLeft: '.5rem', marginBottom: '.5rem' }}>
-      {schemaAndfFlow.flow.map((entry, idx) => {
-        const step = schemaAndfFlow.schema[entry]
+      {schemaAndFlow.flow.map((entry, idx) => {
+        const step = schemaAndFlow.schema[entry]
         const realError = index !== undefined ? error && error[index] && error[index][entry] : error && error[entry]
 
         return (
           <BasicWrapper key={`${entry}.${idx}`} entry={`${parent}.${entry}`} error={realError} label={step.label || entry} help={step.help} render={inputWrapper}>
-            <Step key={`step.${entry}.${idx}`} entry={`${parent}.${entry}`} step={schemaAndfFlow.schema[entry]} error={realError}
-              register={register} schema={schemaAndfFlow.schema} control={control} trigger={trigger} getValues={getValues}
+            <Step key={`step.${entry}.${idx}`} entry={`${parent}.${entry}`} step={schemaAndFlow.schema[entry]} error={realError}
+              register={register} schema={schemaAndFlow.schema} control={control} trigger={trigger} getValues={getValues}
               setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient}
               defaultValue={value && value[entry]}
             />
