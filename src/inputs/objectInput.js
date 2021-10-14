@@ -41,17 +41,17 @@ export const ObjectInput = (props) => {
         <button
           disabled={props.disabled}
           type="button"
-          className="btn btn-primary"
+          className={`${props.classes.btn} ${props.classes.btn_blue}`}
           onClick={addFirst}>
           <PlusCircle />
         </button>
       )}
       {values.map((value, idx) => (
-        <div className="d-flex flex-row" key={idx}>
+        <div className={`${props.classes.flex} ${props.classes.mt_5}`} key={idx}>
           <input
             disabled={props.disabled}
             type="text"
-            className="form-control"
+            className={`${props.classes.input}`}
             style={{ width: '50%' }}
             placeholder={props.placeholderKey}
             value={value[0]}
@@ -60,7 +60,7 @@ export const ObjectInput = (props) => {
           <input
             disabled={props.disabled}
             type="text"
-            className="form-control"
+            className={`${props.classes.input}`}
             style={{ width: '50%' }}
             placeholder={props.placeholderValue}
             value={value[1]}
@@ -69,7 +69,7 @@ export const ObjectInput = (props) => {
           <button
             disabled={props.disabled}
             type="button"
-            className="btn btn-danger"
+            className={`${props.classes.btn} ${props.classes.btn_red} ${props.classes.ml_5}`}
             onClick={(e) => remove(e, value[0])}>
             <MinusCircle />
           </button>
@@ -77,7 +77,7 @@ export const ObjectInput = (props) => {
             <button
               disabled={props.disabled}
               type="button"
-              className="btn btn-primary"
+              className={`${props.classes.btn} ${props.classes.btn_blue} ${props.classes.ml_5}`}
               onClick={addNext}>
               <PlusCircle />
             </button>
