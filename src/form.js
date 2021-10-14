@@ -43,9 +43,9 @@ const BasicWrapper = ({
   }
 
   return (
-    <div className={`${classes.mt_10}`}>
-      <label className={`${classes.flex}`} htmlFor={entry}>
-        <span className="mr-2">{label}</span>
+    <div className={`${classes.mt_20}`}>
+      <label className={`${classes.flex} ${classes.ai_center}`} htmlFor={entry}>
+        <span className={`${classes.mb_5}`} >{label}</span>
         {help && (
           <>
             <ReactToolTip html={true} place={"bottom"} id={id} />
@@ -134,7 +134,7 @@ export const Form = ({
     myLabel: {
       fontStyle: "italic",
     },
-    content: {
+    input: {
       display: "block",
       width: "100%",
       padding: "8px 12px",
@@ -154,6 +154,10 @@ export const Form = ({
       cursor: "pointer",
       border: 0,
     },
+    btn_sm:{
+      fontSize:"0.875rem",
+      padding:".25rem .5rem"
+    },
     btn_red: {
       color: "#fff",
       backgroundColor: "#dc3545",
@@ -171,15 +175,36 @@ export const Form = ({
         backgroundColor: "#218838",
         borderColor: "#1e7e34",
       },
+    },    
+    btn_blue: {
+      color: "#fff",
+      backgroundColor: "#007bff",
+      borderColor: "#007bff",
+      "&:hover": {
+        backgroundColor: "#0069d9",
+        borderColor: "#0062cc",
+      },
     },
     txt_red: {
       color: "#dc3545",
     },
+    ml_5: {
+      marginLeft: 5,
+    },
     ml_10: {
       marginLeft: 10,
     },
+    mt_5: {
+      marginTop: 5,
+    },
     mt_10: {
       marginTop: 10,
+    },
+    mt_20: {
+      marginTop: 20,
+    },
+    mb_5: {
+      marginBottom: 5,
     },
     p_15: {
       padding: 15,
@@ -195,6 +220,21 @@ export const Form = ({
     },
     ac_center: {
       alignContent: "center",
+    },
+    ai_center: {
+      alignItems: "center",
+    },
+    cursor_pointer: {
+      cursor: "pointer",
+    },
+    collapse: {
+      display: 'flex',
+       justifyContent: "space-between",
+       cursor: "pointer"
+    },
+    collapse_label: {
+      fontWeight: 'bold',
+       marginTop: 7
     },
   });
 
@@ -282,6 +322,7 @@ export const Form = ({
                 label={entry.label}
                 collapsed={entry.collapsed}
                 errored={errored}
+                classes={classes}
               >
                 {entry.flow.map((entry, idx) => {
                   const step = schema[entry];
@@ -477,7 +518,7 @@ const Step = ({
               <textarea
                 type="text"
                 id={entry}
-                className={classNames(`${classes.content}`, {
+                className={classNames(`${classes.input}`, {
                   "is-invalid": error,
                 })}
                 readOnly={step.disabled ? "readOnly" : null}
@@ -583,7 +624,7 @@ const Step = ({
                 // {...step.props}
                 type={step.format || "text"}
                 id={entry}
-                className={classNames(`${classes.content}`, {
+                className={classNames(`${classes.input}`, {
                   "is-invalid": error,
                 })}
                 readOnly={step.disabled ? "readOnly" : null}
@@ -612,7 +653,7 @@ const Step = ({
                 {...step.props}
                 type="number"
                 id={entry}
-                className={classNames(`${classes.content}`, {
+                className={classNames(`${classes.input}`, {
                   "is-invalid": error,
                 })}
                 readOnly={step.disabled ? "readOnly" : null}
@@ -731,6 +772,7 @@ const Step = ({
                       onChange={field.onChange}
                       value={field.value}
                       possibleValues={step.options}
+                      classes={classes}
                       {...step}
                     />
                   </CustomizableInput>
@@ -805,7 +847,7 @@ const Step = ({
                     />
                     <button
                       type="button"
-                      className={`${props.classes.btn} btn-outline-success pl`}
+                      className={`${classes.btn}`}
                       disabled={uploading}
                       onClick={trigger}
                     >
@@ -906,7 +948,7 @@ const ArrayStep = ({
       <div>
         <input
           type="button"
-          className={classNames("btn btn-info mt-2", { "is-invalid": error })}
+          className={classNames(`${classes.btn} ${classes.btn_blue} ${classes.mt_5}`, { "is-invalid": error })}
           onClick={() => {
             append(defaultValue);
             trigger(entry);
