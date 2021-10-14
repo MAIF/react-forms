@@ -20,12 +20,12 @@ You must define a form flow (this is just a javascript array which that represen
 ## example
 
 ```javascript
-import { Form, types, constraints } from 'react-form'
+import { Form, type, constraints } from 'react-form'
 
 export const Example = () => { 
   const schema = {
     age: {
-      type: types.number,
+      type: type.number,
       label: 'age',
       placeholder: 'Your age',
       help: "Just your age",
@@ -36,7 +36,7 @@ export const Example = () => {
       ]
     }, 
     name: {
-      type: types.string,
+      type: type.string,
       disabled: true,
       label: 'name',
       placeholder: 'your name',
@@ -63,11 +63,14 @@ export const Example = () => {
 - **type** : the type of value. It provided by the imported object `Type` and could be `string`, `number`, `bool`, `object`, `date` or `file`
 - **format**: Over the type you can display a special format for the field. 
   - `array`: if the value is an array of basic type, display multiple fields with "add" and "remove" buttons
-  - `select`: display a react-select field with provided options
+  - `select`: display a [react-select](https://react-select.com/home) field with provided options
+  - `code`: if the type is `string`, display a code input (draw with [react-ace](https://github.com/securingsincity/react-ace))
   - `markdown`: if the type is `string`, display a markdown input
   - `text`: if the type is `string`, display a textarea
+  - `email`: if the type is `string`, display an email input
   - `password`: if the type is `string`, display a password input
   - `hidden`: if the type is `string`, add an hidden input in your form
+  - `form`: if the type is `object`, display a form in your form draw with given schema and flow.
 - **isMulti**: if `select` format is choosen, `isMulti` property is to render a multiselect component
 - **defaultKeyValue**: if the format is setup to object, this default key/value is set for all added entries
 - **visible**: a boolean option to hide/display form field. It can be an object with `ref` property to get a value by reference an a key `test` as a function to test it. if there is no `test` key, it's base just on boolean value of the reference.
@@ -80,7 +83,7 @@ export const Example = () => {
 - **style**: to styling a field, you can provide a json object with css
 - **render**: a function to completely custom the rendering of form field 
   ```javascript
-  ({value, onChange}) => <input type="text" className="is-invalid" value={props.value} onChange={e => props.onChange(e.target.value)} />
+  ({rawValues, value, onChange, error}) => <input type="text" className="is-invalid" value={value} onChange={e => onChange(e.target.value)} />
   ```
 - **props**: a json object merged with default props
 - **options**: An array of options for the select field (if format `select` is setup)

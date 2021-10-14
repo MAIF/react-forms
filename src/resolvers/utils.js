@@ -1,14 +1,14 @@
 import * as yup from 'yup';
-import { types } from '../types';
+import { type } from '../type';
 import { option } from '../Option'
 
 const resolvers = {
-  [types.string]: () => yup.string(),
-  [types.number]: (typeErrorMessage) => yup.number().typeError(typeErrorMessage || 'Value must be a number'),
-  [types.bool]: () => yup.bool(),
-  [types.object]: () => yup.object(),
-  [types.date]: (typeErrorMessage) => yup.date().typeError(typeErrorMessage || 'Value must be a date'),
-  [types.file]: () => yup.mixed()
+  [type.string]: () => yup.string(),
+  [type.number]: (typeErrorMessage) => yup.number().typeError(typeErrorMessage || 'Value must be a number'),
+  [type.bool]: () => yup.bool(),
+  [type.object]: () => yup.object(),
+  [type.date]: (typeErrorMessage) => yup.date().typeError(typeErrorMessage || 'Value must be a date'),
+  [type.file]: () => yup.mixed()
 }
 
 export const buildSubResolver = (props, key, dependencies, rawData) => {
@@ -28,12 +28,12 @@ export const buildSubResolver = (props, key, dependencies, rawData) => {
     return constraints.reduce((resolver, constraint) => {
       return constraint(resolver, key, dependencies)
     }, arrayResolver)
-  } else if (props.type === types.object && props.schema) {
+  } else if (props.type === type.object && props.schema) {
     const subResolver = getShapeAndDependencies(props.flow || Object.keys(props.schema), props.schema, dependencies, rawData);
     return constraints.reduce((resolver, constraint) => {
       return constraint(resolver, key, dependencies)
     }, yup.object().shape(subResolver.shape, dependencies))
-  } else if (props.type === types.object && props.conditionalSchema) {
+  } else if (props.type === type.object && props.conditionalSchema) {
     // console.group("*** here ***")
     // console.log({props})
     const { schema, flow } = option(props.conditionalSchema)

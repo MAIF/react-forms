@@ -8,7 +8,8 @@ import ReactToolTip from 'react-tooltip';
 import { v4 as uuid } from 'uuid';
 import * as yup from "yup";
 
-import { types } from './types';
+import { type } from './type';
+import { format } from './format';
 import { BooleanInput, Collapse, SelectInput, ObjectInput, CodeInput, MarkdownInput } from './inputs/index';
 import { getShapeAndDependencies } from './resolvers/index';
 import { option } from './Option'
@@ -66,10 +67,10 @@ const defaultVal = (type, array, defaultValue) => {
   if (!!array) return []
   if (!!defaultValue) return defaultValue
   switch (type) {
-    case types.bool: return false;
-    case types.number: return 0;
-    case types.object: return {};
-    case types.string: return "";
+    case type.bool: return false;
+    case type.number: return 0;
+    case type.object: return {};
+    case type.string: return "";
     default: return undefined;
   }
 }
@@ -224,9 +225,9 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
   }
 
   switch (step.type) {
-    case types.string:
+    case type.string:
       switch (step.format) {
-        case 'text':
+        case format.text:
           return (
             <CustomizableInput render={step.render} field={{ rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v) }} error={error}>
               <textarea
@@ -240,7 +241,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
                 {...register(entry)} />
             </CustomizableInput>
           );
-        case 'code': return (
+        case format.code: return (
           <Controller
             name={entry}
             control={control}
@@ -261,7 +262,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
             }}
           />
         )
-        case 'markdown': return (
+        case format.markdown: return (
           <Controller
             name={entry}
             control={control}
@@ -282,7 +283,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
             }}
           />
         )
-        case 'select':
+        case format.select:
           return (
             <Controller
               name={entry}
@@ -320,14 +321,14 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
           );
       }
 
-    case types.number:
+    case type.number:
       switch (step.format) {
         default:
           return (
             <CustomizableInput render={step.render} field={{ rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v) }} error={error}>
               <input
                 {...step.props}
-                type="number" id={entry}
+                type={step.format || 'text'} id={entry}
                 className={classNames("form-control", { 'is-invalid': error })}
                 readOnly={step.disabled ? 'readOnly' : null}
                 name={entry}
@@ -338,7 +339,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
           );
       }
 
-    case types.bool:
+    case type.bool:
       return (
         <Controller
           name={entry}
@@ -359,9 +360,9 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
         />
       )
 
-    case types.object:
+    case type.object:
       switch (step.format) {
-        case 'select':
+        case format.select:
           return (
             <Controller
               name={entry}
@@ -385,7 +386,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
               }}
             />
           )
-        case 'form':
+        case format.form:
           const flow = option(step.flow).getOrElse(option(step.schema).map(s => Object.keys(s)).getOrNull());
           return (
             <CustomizableInput render={step.render} field={{ rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error}>
@@ -420,7 +421,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
             />
           )
       }
-    case types.date:
+    case type.date:
       return (
         <Controller
           name={entry}
@@ -444,8 +445,8 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
           }}
         />
       )
-    case types.file:
-      if (step.format === 'hidden') {
+    case type.file:
+      if (step.format === format.hidden) {
         return (
           <Controller
             name={entry}
