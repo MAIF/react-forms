@@ -52,7 +52,7 @@ export const Example = () => {
     <Form
         schema={schema}
         flow={flow}
-        onChange={item => console.log({ item })}
+        onSubmit={item => console.log({ item })}
       />
     )
 }
@@ -144,7 +144,7 @@ export const Example = () => {
 ## Form properties
 - **schema** (required): the form schema
 - **flow** (optional): the flow
-- **onChange** (required): a function run on the form submission (in case if the form is valid )
+- **onSubmit** (required): a function run on the form submission (in case if the form is valid )
 - **value** (optional): default value
 - **inputWrapper** (optional): A custom component to wrap all input of the form
 - **footer** (optional):  a component to override the footer provided

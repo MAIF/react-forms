@@ -84,7 +84,7 @@ const getDefaultValues = (flow, schema) => {
   }, {})
 }
 
-export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, options }) => {
+export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, options }) => {
   const formFlow = flow || Object.keys(schema)
 
   const maybeCustomHttpClient = (url, method) => {
@@ -134,7 +134,7 @@ export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, opti
   useEffect(() => {
     //todo: with debounce
     if (!!options.autosubmit) {
-      handleSubmit(onChange)
+      handleSubmit(onSubmit)
     }
   }, [data])
   
@@ -142,7 +142,7 @@ export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, opti
 
   return (
     <FormProvider {...methods} >
-      <form className="col-12 section pt-2 pr-2" onSubmit={handleSubmit(onChange)}>
+      <form className="col-12 section pt-2 pr-2" onSubmit={handleSubmit(onSubmit)}>
         {formFlow.map((entry, idx) => {
           if (entry && typeof entry === 'object') {
             const errored = entry.flow.some(step => !!errors[step])
@@ -174,7 +174,7 @@ export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, opti
             </BasicWrapper>
           )
         })}
-        <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(onChange)} labels={options.labels}/>
+        <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(onSubmit)} labels={options.labels}/>
       </form>
     </FormProvider>
   )
