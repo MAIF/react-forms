@@ -63,10 +63,10 @@ const CustomizableInput = props => {
   return props.children
 }
 
-const defaultVal = (type, array, defaultValue) => {
+const defaultVal = (t, array, defaultValue) => {
   if (!!array) return []
   if (!!defaultValue) return defaultValue
-  switch (type) {
+  switch (t) {
     case type.bool: return false;
     case type.number: return 0;
     case type.object: return {};
@@ -84,13 +84,13 @@ const getDefaultValues = (flow, schema) => {
   }, {})
 }
 
-export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, httpClient, autosave }) => {
+export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, options }) => {
   const formFlow = flow || Object.keys(schema)
 
   const maybeCustomHttpClient = (url, method) => {
     //todo: if present props.resolve()
-    if (httpClient) {
-      return httpClient(url, method)
+    if (options.httpClient) {
+      return options.httpClient(url, method)
     }
     return fetch(url, {
       method,
@@ -125,11 +125,15 @@ export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, http
       reset(value)
     }
   }, [value, formFlow, reset])
+
+  useEffect(() => {
+    reset(value);
+  }, [schema])
   
   const data = watch();
   useEffect(() => {
     //todo: with debounce
-    if (!!autosave) {
+    if (!!options.autosubmit) {
       handleSubmit(onChange)
     }
   }, [data])
@@ -170,7 +174,7 @@ export const Form = ({ schema, flow, value, inputWrapper, onChange, footer, http
             </BasicWrapper>
           )
         })}
-        <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(onChange)} />
+        <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(onChange)} labels={options.labels}/>
       </form>
     </FormProvider>
   )
@@ -182,8 +186,9 @@ const Footer = (props) => {
   }
   return (
     <div className="d-flex flex-row justify-content-end">
-      <button className="btn btn-danger" type="button" onClick={props.reset}>Reset</button>
-      <button className="btn btn-success ml-1" type="submit">Save</button>
+      <button className="btn btn-danger" type="button" onClick={props.cancel}>{props.labels?.reset || 'Cancel'}</button>
+      <button className="btn btn-danger" type="button" onClick={props.reset}>{props.labels?.reset || 'Reset'}</button>
+      <button className="btn btn-success ml-1" type="submit">{props.labels?.submit || 'Save'}</button>
     </div>
   )
 }
@@ -229,7 +234,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
       switch (step.format) {
         case format.text:
           return (
-            <CustomizableInput render={step.render} field={{ rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v) }} error={error}>
+            <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v) }} error={error}>
               <textarea
                 type="text" id={entry}
                 className={classNames("form-control", { 'is-invalid': error })}
@@ -247,7 +252,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
             control={control}
             render={({ field }) => {
               return (
-                <CustomizableInput render={step.render} field={{ rawValues: getValues(), ...field }} error={error}>
+                <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
                   <CodeInput
                     {...step.props}
                     className={classNames({ 'is-invalid': error })}
@@ -268,7 +273,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
             control={control}
             render={({ field }) => {
               return (
-                <CustomizableInput render={step.render} field={{ rawValues: getValues(), ...field }} error={error}>
+                <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
                   <MarkdownInput
                     {...step.props}
                     className={classNames({ 'is-invalid': error })}
@@ -290,7 +295,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
               control={control}
               render={({ field }) => {
                 return (
-                  <CustomizableInput render={step.render} field={{ rawValues: getValues(), ...field }} error={error}>
+                  <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
                     <SelectInput
                       {...step.props}
                       className={classNames({ 'is-invalid': error })}
@@ -308,7 +313,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
           )
         default:
           return (
-            <CustomizableInput render={step.render} field={{ rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error}>
+            <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error}>
               <input
                 // {...step.props}
                 type={step.format || 'text'} id={entry}
@@ -325,7 +330,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
       switch (step.format) {
         default:
           return (
-            <CustomizableInput render={step.render} field={{ rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v) }} error={error}>
+            <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v) }} error={error}>
               <input
                 {...step.props}
                 type={step.format || 'text'} id={entry}
@@ -346,7 +351,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
           control={control}
           render={({ field }) => {
             return (
-              <CustomizableInput render={step.render} field={{ rawValues: getValues(), ...field }} error={error}>
+              <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
                 <BooleanInput
                   {...step.props}
                   className={classNames({ 'is-invalid': error })}
@@ -370,7 +375,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
               defaultValue={step.defaultValue}
               render={({ field }) => {
                 return (
-                  <CustomizableInput render={step.render} field={{ rawValues: getValues(), ...field }} error={error}>
+                  <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
                     <SelectInput
                       {...step.props}
                       className={classNames({ 'is-invalid': error })}
@@ -389,7 +394,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
         case format.form:
           const flow = option(step.flow).getOrElse(option(step.schema).map(s => Object.keys(s)).getOrNull());
           return (
-            <CustomizableInput render={step.render} field={{ rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error}>
+            <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error}>
               <NestedForm
                 schema={step.schema} flow={flow} step={step} parent={entry}
                 inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={defaultValue} error={error}
@@ -405,7 +410,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
               defaultValue={step.defaultValue}
               render={({ field }) => {
                 return (
-                  <CustomizableInput render={step.render} field={{ rawValues: getValues(), ...field }} error={error}>
+                  <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
                     <ObjectInput
                       {...step.props}
                       className={classNames({ 'is-invalid': error })}
@@ -429,7 +434,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
           defaultValue={step.defaultValue}
           render={({ field }) => {
             return (
-              <CustomizableInput render={step.render} field={{ rawValues: getValues(), ...field }} error={error}>
+              <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
                 <DatePicker
                   {...step.props}
                   id="datePicker-1"
@@ -490,7 +495,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
               };
 
               return (
-                <CustomizableInput render={step.render} field={{ rawValues: getValues(), ...field }} error={error}>
+                <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
                   <FileInput onChange={field.onChange} error={error} />
                 </CustomizableInput>
               )
@@ -499,7 +504,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
         )
       }
       return (
-        <CustomizableInput render={step.render} field={{ rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error}>
+        <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error}>
           <input
             {...step.props}
             type='file' id={entry}

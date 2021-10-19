@@ -20,7 +20,7 @@ You must define a form flow (this is just a javascript array which that represen
 ## example
 
 ```javascript
-import { Form, type, constraints } from 'react-form'
+import { Form, type, format, constraints } from 'react-form'
 
 export const Example = () => { 
   const schema = {
@@ -60,8 +60,8 @@ export const Example = () => {
 
 ## schema properties
 
-- **type** : the type of value. It provided by the imported object `Type` and could be `string`, `number`, `bool`, `object`, `date` or `file`
-- **format**: Over the type you can display a special format for the field. 
+- **type** (required): the type of value. It provided by the imported object `type` and could be `string`, `number`, `bool`, `object`, `date` or `file`
+- **format**: Over the type you can display a special format for the field. It provided by the imported object `format`
   - `array`: if the value is an array of basic type, display multiple fields with "add" and "remove" buttons
   - `select`: display a [react-select](https://react-select.com/home) field with provided options
   - `code`: if the type is `string`, display a code input (draw with [react-ace](https://github.com/securingsincity/react-ace))
@@ -95,21 +95,59 @@ export const Example = () => {
   }
   ```
 - **schema**: a sub schema for the object value. this schema can contains constraints
+- **conditionalSchema**: an object to conditionnaly render an object value. Contains a `ref` to test as string and a `switch` as an array of object which contains `default` for a boolean options to set default value, `condition` as a function to run or just a value to test against ref value and `schema` and `flow` to draw the object value.
+  ```javascript
+  {
+    type: {
+      type: type.string,
+      format: format.select,
+      defaultValue: "mammal",
+      options: ["mammal", "fish"]
+    },
+    place: {
+      type: type.object,
+      format: format.form,
+      conditionalSchema: {
+        ref: 'type',
+        switch: [
+          {
+            default: true,
+            condition: ({rawData, ref}) => ref === "mammal",
+            schema: {
+              continent: {
+                type: type.string,
+              },
+              country: {
+                type: type.string,
+              }
+            }
+          },
+          {
+            condition: "fish",
+            schema: {
+              ocean: {
+                type: type.string,
+              },
+              deepness: {
+                type: type.number,
+              }
+            }
+          },
+        ]
+      }
+    }
+  }
+  ```
 - **constraints**: a JSON array of constraints. see [constraints section](#constraints)
 
 
-
-
-
-
-
 ## Form properties
-- **schema**: the form schema
-- **flow**: the flow
-- **onChange**: a function run on the form submission (in case if the form is valid )
-- **value**: default value
-- **inputWrapper**: A custom component to wrap all input of the form
-- **footer**: a component to override the footer provided
+- **schema** (required): the form schema
+- **flow** (optional): the flow
+- **onChange** (required): a function run on the form submission (in case if the form is valid )
+- **value** (optional): default value
+- **inputWrapper** (optional): A custom component to wrap all input of the form
+- **footer** (optional):  a component to override the footer provided
 ```javascripts
 {({ reset, valid }) => {
             return (
@@ -120,6 +158,9 @@ export const Example = () => {
             )
           }}
 ```
+- **options** (optional):  an object to put some options for your form. see [Form options](#form-options) for more informations.
+
+## Form options
 - **httpClient**: a function to override the basic fetch used by react-forms to get async values (for optionsFrom)
 ```javascript
 httpClient = {(url, method) => fetch(url, {
@@ -131,7 +172,22 @@ httpClient = {(url, method) => fetch(url, {
   }
 })} 
 ```
-
+- **autosubmit**: a boolean to activate the automatic run of the `onSubmit` form properties on every change of values.
+- **actions**: an object to parameter footer buttons key. By default just `submit` button is displayed.
+```javascript
+<Form 
+  actions={
+    reset: {
+      display: false (value by default)
+      label: 'reset' (value by default)
+    },
+    submit: {
+      display: true (value by default)
+      label: "save" (value by default)
+    }
+  }
+/>
+```
 ## constraints
 Possible constraints are provided by import `constraints` from **@maif/react-form**
 
