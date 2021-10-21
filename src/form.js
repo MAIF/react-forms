@@ -45,7 +45,7 @@ const BasicWrapper = ({
   return (
     <div className={`${classes.mt_20}`}>
       <label className={`${classes.flex} ${classes.ai_center}`} htmlFor={entry}>
-        <span className={`${classes.mb_5}`} >{label}</span>
+        <span className={`${classes.mb_5}`}>{label}</span>
         {help && (
           <>
             <ReactToolTip html={true} place={"bottom"} id={id} />
@@ -64,7 +64,7 @@ const BasicWrapper = ({
       </label>
 
       {children}
-      {error && <div className={`${classes.txt_red}`} >{error.message}</div>}
+      {error && <div className={`${classes.txt_red}`}>{error.message}</div>}
     </div>
   );
 };
@@ -116,24 +116,6 @@ export const Form = ({
   autosave,
 }) => {
   const useStyles = createUseStyles({
-    myButton: {
-      color: "white",
-      backgroundColor: "forestgreen",
-      margin: {
-        // jss-expand gives more readable syntax
-        top: 5, // jss-default-unit makes this 5px
-        right: 0,
-        bottom: 0,
-        left: "1rem",
-      },
-      "& span": {
-        // jss-nested applies this to a child span
-        fontWeight: "bold", // jss-camel-case turns this into 'font-weight'
-      },
-    },
-    myLabel: {
-      fontStyle: "italic",
-    },
     input: {
       display: "block",
       width: "100%",
@@ -154,9 +136,19 @@ export const Form = ({
       cursor: "pointer",
       border: 0,
     },
-    btn_sm:{
-      fontSize:"0.875rem",
-      padding:".25rem .5rem"
+    btn_sm: {
+      fontSize: "0.875rem",
+      padding: ".25rem .5rem",
+    },
+    btn_group: {
+      "& > button:not(:last-child)": {
+        borderTopRightRadius: 0,
+        borderBottomRightRadius: 0,
+      },
+      "& > button:not(:first-child)": {
+        borderTopLeftRadius: 0,
+        borderBottomLeftRadius: 0,
+      },
     },
     btn_red: {
       color: "#fff",
@@ -175,7 +167,7 @@ export const Form = ({
         backgroundColor: "#218838",
         borderColor: "#1e7e34",
       },
-    },    
+    },
     btn_blue: {
       color: "#fff",
       backgroundColor: "#007bff",
@@ -183,6 +175,15 @@ export const Form = ({
       "&:hover": {
         backgroundColor: "#0069d9",
         borderColor: "#0062cc",
+      },
+    },
+    btn_grey: {
+      color: "#fff",
+      backgroundColor: "#6c757d",
+      borderColor: "#6c757d",
+      "&:hover": {
+        backgroundColor: "#5c636a",
+        borderColor: "#5c636a",
       },
     },
     txt_red: {
@@ -212,8 +213,14 @@ export const Form = ({
     pr_15: {
       paddingRight: 15,
     },
+    d_none: {
+      display: "none",
+    },
     flex: {
       display: "flex",
+    },
+    flexDirection: {
+      flexDirection: "column",
     },
     jc_end: {
       justifyContent: "end",
@@ -228,14 +235,20 @@ export const Form = ({
       cursor: "pointer",
     },
     collapse: {
-      display: 'flex',
-       justifyContent: "space-between",
-       cursor: "pointer"
+      display: "flex",
+      justifyContent: "space-between",
+      cursor: "pointer",
     },
     collapse_label: {
-      fontWeight: 'bold',
-       marginTop: 7
+      fontWeight: "bold",
+      marginTop: 7,
     },
+    datepicker: {
+      "& input": {
+        borderRadius: "4px",
+      },
+    },
+    code: {},
   });
 
   const classes = useStyles();
@@ -575,6 +588,7 @@ const Step = ({
                       onChange={field.onChange}
                       value={field.value}
                       defaultValue={defaultValue}
+                      classes={classes}
                       {...step}
                     />
                   </CustomizableInput>
@@ -797,7 +811,9 @@ const Step = ({
                 <DatePicker
                   {...step.props}
                   id="datePicker-1"
-                  className={classNames({ "is-invalid": error })}
+                  className={classNames(`${classes.datepicker}`, {
+                    "is-invalid": error,
+                  })}
                   readOnly={step.disabled ? "readOnly" : null}
                   value={field.value}
                   onChange={field.onChange}
@@ -832,28 +848,23 @@ const Step = ({
                 };
 
                 return (
-                  <div
-                    className={classNames(
-                      "d-flex flex-row justify-content-start",
-                      { "is-invalid": error }
-                    )}
-                  >
+                  <div className={classNames({ "is-invalid": error })}>
                     <input
                       ref={(r) => setInput(r)}
                       type="file"
                       multiple
-                      className="form-control d-none"
+                      className={`${classes.d_none}`}
                       onChange={setFiles}
                     />
                     <button
                       type="button"
-                      className={`${classes.btn}`}
+                      className={`${classes.btn} ${classes.flex} ${classes.ai_center}`}
                       disabled={uploading}
                       onClick={trigger}
                     >
                       {uploading && <Loader />}
                       {!uploading && <Upload />}
-                      Select file
+                      <span className={`${classes.ml_5}`}>Select file</span>
                     </button>
                   </div>
                 );
@@ -948,14 +959,17 @@ const ArrayStep = ({
       <div>
         <input
           type="button"
-          className={classNames(`${classes.btn} ${classes.btn_blue} ${classes.mt_5}`, { "is-invalid": error })}
+          className={classNames(
+            `${classes.btn} ${classes.btn_blue} ${classes.mt_5}`,
+            { "is-invalid": error }
+          )}
           onClick={() => {
             append(defaultValue);
             trigger(entry);
           }}
           value="Add"
         />
-        {error && <div className={`${classes.txt_red}`} >{error.message}</div>}
+        {error && <div className={`${classes.txt_red}`}>{error.message}</div>}
       </div>
     </>
   );
