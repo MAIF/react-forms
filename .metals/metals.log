@@ -1,0 +1,4 @@
+[0m2021.11.16 11:45:58 INFO  Started: Metals version 0.10.9 in workspace '/Users/qaubert/Sources/react-forms' for client Visual Studio Code 1.62.2.[0m
+[0m2021.11.16 11:46:03 INFO  time: initialize in 5.7s[0m
+[0m2021.11.16 11:46:04 WARN  Build server is not auto-connectable.[0m
+[0m2021.11.16 11:46:04 WARN  no build tool detected in workspace '/Users/qaubert/Sources/react-forms'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. [0m

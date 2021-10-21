@@ -40,7 +40,7 @@ const BasicWrapper = ({ entry, label, error, help, children, render, classes }) 
   return (
     <div className={`${classes.mt_20}`}>
       <label className={`${classes.flex} ${classes.ai_center}`} htmlFor={entry}>
-        <span className={`${classes.mb_5}`} >{label}</span>
+        <span className={`${classes.mb_5}`}>{label}</span>
         {help && (
           <>
             <ReactToolTip html={true} place={"bottom"} id={id} />
@@ -59,7 +59,7 @@ const BasicWrapper = ({ entry, label, error, help, children, render, classes }) 
       </label>
 
       {children}
-      {error && <div className={`${classes.txt_red}`} >{error.message}</div>}
+      {error && <div className={`${classes.txt_red}`}>{error.message}</div>}
     </div>
   );
 };
@@ -94,24 +94,6 @@ const getDefaultValues = (flow, schema) => {
 
 export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, style, className, options = {} }) => {
   const useStyles = createUseStyles({
-    myButton: {
-      color: "white",
-      backgroundColor: "forestgreen",
-      margin: {
-        // jss-expand gives more readable syntax
-        top: 5, // jss-default-unit makes this 5px
-        right: 0,
-        bottom: 0,
-        left: "1rem",
-      },
-      "& span": {
-        // jss-nested applies this to a child span
-        fontWeight: "bold", // jss-camel-case turns this into 'font-weight'
-      },
-    },
-    myLabel: {
-      fontStyle: "italic",
-    },
     input: {
       display: "block",
       width: "100%",
@@ -132,9 +114,19 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, styl
       cursor: "pointer",
       border: 0,
     },
-    btn_sm:{
-      fontSize:"0.875rem",
-      padding:".25rem .5rem"
+    btn_sm: {
+      fontSize: "0.875rem",
+      padding: ".25rem .5rem",
+    },
+    btn_group: {
+      "& > button:not(:last-child)": {
+        borderTopRightRadius: 0,
+        borderBottomRightRadius: 0,
+      },
+      "& > button:not(:first-child)": {
+        borderTopLeftRadius: 0,
+        borderBottomLeftRadius: 0,
+      },
     },
     btn_red: {
       color: "#fff",
@@ -153,7 +145,7 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, styl
         backgroundColor: "#218838",
         borderColor: "#1e7e34",
       },
-    },    
+    },
     btn_blue: {
       color: "#fff",
       backgroundColor: "#007bff",
@@ -161,6 +153,15 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, styl
       "&:hover": {
         backgroundColor: "#0069d9",
         borderColor: "#0062cc",
+      },
+    },
+    btn_grey: {
+      color: "#fff",
+      backgroundColor: "#6c757d",
+      borderColor: "#6c757d",
+      "&:hover": {
+        backgroundColor: "#5c636a",
+        borderColor: "#5c636a",
       },
     },
     txt_red: {
@@ -190,8 +191,14 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, styl
     pr_15: {
       paddingRight: 15,
     },
+    d_none: {
+      display: "none",
+    },
     flex: {
       display: "flex",
+    },
+    flexDirection: {
+      flexDirection: "column",
     },
     jc_end: {
       justifyContent: "end",
@@ -206,14 +213,20 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, styl
       cursor: "pointer",
     },
     collapse: {
-      display: 'flex',
-       justifyContent: "space-between",
-       cursor: "pointer"
+      display: "flex",
+      justifyContent: "space-between",
+      cursor: "pointer",
     },
     collapse_label: {
-      fontWeight: 'bold',
-       marginTop: 7
+      fontWeight: "bold",
+      marginTop: 7,
     },
+    datepicker: {
+      "& input": {
+        borderRadius: "4px",
+      },
+    },
+    code: {},
   });
 
   const classes = useStyles();
@@ -328,53 +341,12 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, styl
           if (entry && typeof entry === 'object') {
             const errored = entry.flow.some(step => !!errors[step])
             return (
-<<<<<<< HEAD
               <BasicWrapper key={idx} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper} classes={classes}>
                 <Step key={idx} entry={entry} step={step} error={error}
                   register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
                   setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient} classes={classes} />
               </BasicWrapper>
             )
-=======
-              <Collapse
-                key={idx}
-                label={entry.label}
-                collapsed={entry.collapsed}
-                errored={errored}
-                classes={classes}
-              >
-                {entry.flow.map((entry, idx) => {
-                  const step = schema[entry];
-                  return (
-                    <BasicWrapper
-                      key={idx}
-                      entry={entry}
-                      error={error}
-                      label={step.label || entry}
-                      help={step.help}
-                      render={inputWrapper}
-                      classes={classes}
-                    >
-                      <Step
-                        entry={entry}
-                        step={schema[entry]}
-                        error={error}
-                        register={register}
-                        schema={schema}
-                        control={control}
-                        trigger={trigger}
-                        getValues={getValues}
-                        setValue={setValue}
-                        watch={watch}
-                        inputWrapper={inputWrapper}
-                        classes={classes}
-                      />
-                    </BasicWrapper>
-                  );
-                })}
-              </Collapse>
-            );
->>>>>>> 23689d9 (wip)
           }
 
           const step = schema[entry]
@@ -454,14 +426,9 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
           return (
             <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v) }} error={error}>
               <textarea
-<<<<<<< HEAD
-                type="text" id={entry}
-                className={classNames(`${classes.content}`, {
-=======
                 type="text"
                 id={entry}
                 className={classNames(`${classes.input}`, {
->>>>>>> 23689d9 (wip)
                   "is-invalid": error,
                 })}
                 readOnly={step.disabled ? 'readOnly' : null}
@@ -582,57 +549,17 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
                 )
               }}
             />
-<<<<<<< HEAD
           )
-=======
-          );
-        default:
-          return (
-            <CustomizableInput
-              render={step.render}
-              field={{
-                rawValues: getValues(),
-                value: getValues(entry),
-                onChange: (v) => setValue(entry, v, { shouldValidate: true }),
-              }}
-              error={error}
-            >
-              <input
-                // {...step.props}
-                type={step.format || "text"}
-                id={entry}
-                className={classNames(`${classes.input}`, {
-                  "is-invalid": error,
-                })}
-                readOnly={step.disabled ? "readOnly" : null}
-                // defaultValue={defaultValue}
-                placeholder={step.placeholder}
-                {...register(entry)}
-              />
-            </CustomizableInput>
-          );
-      }
-
-    case types.number:
-      switch (step.format) {
->>>>>>> 23689d9 (wip)
         default:
           return (
             <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v) }} error={error}>
               <input
                 {...step.props}
-<<<<<<< HEAD
                 type={step.format || 'number'} id={entry}
-                className={classNames("form-control", { 'is-invalid': error })}
-                readOnly={step.disabled ? 'readOnly' : null}
-=======
-                type="number"
-                id={entry}
                 className={classNames(`${classes.input}`, {
                   "is-invalid": error,
                 })}
-                readOnly={step.disabled ? "readOnly" : null}
->>>>>>> 23689d9 (wip)
+                readOnly={step.disabled ? 'readOnly' : null}
                 name={entry}
                 placeholder={step.placeholder}
                 defaultValue={defaultValue}
@@ -737,7 +664,9 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
                 <DatePicker
                   {...step.props}
                   id="datePicker-1"
-                  className={classNames({ 'is-invalid': error })}
+                  className={classNames(`${classes.datepicker}`, {
+                    "is-invalid": error,
+                  })}
                   readOnly={step.disabled ? 'readOnly' : null}
                   value={field.value}
                   onChange={field.onChange}
@@ -772,22 +701,22 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
                 };
 
                 return (
-                  <div className={classNames("d-flex flex-row justify-content-start", { 'is-invalid': error })}>
+                  <div className={classNames({ "is-invalid": error })}>
                     <input
                       ref={(r) => setInput(r)}
                       type="file"
                       multiple
-                      className="form-control d-none"
+                      className={`${classes.d_none}`}
                       onChange={setFiles}
                     />
                     <button
                       type="button"
-                      className={`${classes.btn}`}
+                      className={`${classes.btn} ${classes.flex} ${classes.ai_center}`}
                       disabled={uploading}
                       onClick={trigger}>
                       {uploading && <Loader />}
                       {!uploading && <Upload />}
-                      Select file
+                      <span className={`${classes.ml_5}`}>Select file</span>
                     </button>
                   </div>
                 );
@@ -846,24 +775,31 @@ const ArrayStep = ({ entry, step, control, trigger, register, error, component, 
         })}
       <div>
 <<<<<<< HEAD
-        <input type="button" className={classNames("btn btn-info mt-2", { 'is-invalid': error })} onClick={() => {
-          append({ value: defaultValue })
-          trigger(entry);
-        }} value="Add" />
-        {error && <div className={`${classes.txt_red}`}>{error.message}</div>}
+  <input type="button" className={classNames("btn btn-info mt-2", { 'is-invalid': error })} onClick={() => {
+    append({ value: defaultValue })
+    trigger(entry);
+  }} value="Add" />
+  { error && <div className={`${classes.txt_red}`}>{error.message}</div> }
 =======
         <input
           type="button"
-          className={classNames(`${classes.btn} ${classes.btn_blue} ${classes.mt_5}`, { "is-invalid": error })}
+          className={classNames(
+            `${classes.btn} ${classes.btn_blue} ${classes.mt_5}`,
+            { "is-invalid": error }
+          )}
           onClick={() => {
             append(defaultValue);
             trigger(entry);
           }}
           value="Add"
         />
+<<<<<<< HEAD
         {error && <div className={`${classes.txt_red}`} >{error.message}</div>}
 >>>>>>> 23689d9 (wip)
-      </div>
+=======
+        {error && <div className={`${classes.txt_red}`}>{error.message}</div>}
+>>>>>>> 36ff50f (bootstrapless)
+      </div >
     </>
   )
 }

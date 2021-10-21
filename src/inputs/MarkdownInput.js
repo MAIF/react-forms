@@ -256,32 +256,32 @@ Proin vehicula ligula vel enim euismod, sed congue mi egestas. Nullam varius ut 
   };
 
   return (
-    <div className={classNames("d-flex flex-column", props.className)}>
+    <div className={classNames(`${props.classes.flex} ${props.classes.flexDirection}`, props.className)}>
       <div
         style={{
           marginBottom: 10,
           flexWrap: 'wrap',
         }}
-        className="d-flex flex-sm-row flex-column align-items-center">
+        className={classNames(`${props.classes.flex} ${props.classes.ai_center}` )}>
         <div>
-          <div className="btn-group">
+          <div className={`${props.classes.btn_group}`}>
             <button
               type="button"
-              className="btn btn-secondary"
+              className={classNames(`${props.classes.btn} ${props.classes.btn_grey}`)}
               style={{ color: !preview ? '#7f96af' : 'white' }}
               onClick={() => setPreview(false)}>
               Write
             </button>
             <button
               type="button"
-              className="btn btn-secondary"
+              className={classNames(`${props.classes.btn} ${props.classes.btn_grey}`)}
               style={{ color: preview ? '#7f96af' : 'white' }}
               onClick={() => setPreview(true)}>
               Preview
             </button>
           </div>
         </div>
-        <div className="d-flex flex-row">{injectButtons()}</div>
+        <div>{injectButtons()}</div>
       </div>
       {!preview && (
         <AceEditor
