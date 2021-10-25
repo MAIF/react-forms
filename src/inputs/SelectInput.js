@@ -3,9 +3,12 @@ import CreatableSelect from 'react-select/creatable';
 import Select from 'react-select';
 import { option } from '../Option';
 
-const valueToSelectoption = (value) => {
+const valueToSelectOption = (value, isMulti= false) => {
   if (value === null) {
     return null;
+  }
+  if (isMulti) {
+    return value.map(x => valueToSelectOption(x));
   }
   return {
     label: value?.label || value,
@@ -15,36 +18,23 @@ const valueToSelectoption = (value) => {
 
 export const SelectInput = (props) => {
   const [loading, setLoading] = useState(false);
-  const [value, setValue] = useState(props.isMulti ? [] : undefined)
+  const [value, setValue] = useState(valueToSelectOption(props.value || props.defaultValue, props.isMulti))
   const [values, setValues] = useState((props.possibleValues || [])
     .map(v => props.transformer ? props.transformer(v) : v)
-    .map(valueToSelectoption))
+    .map(v => valueToSelectOption(v)))
 
-
-  useEffect(() => {
-    //todo: better code
-    if (props.isMulti) {
-      const v = option(values)
-        .map(maybeValues => (props.value || [])
-          .map(v => maybeValues.find(item => JSON.stringify(item.value) === JSON.stringify(v))))
-        .getOrElse(([])
-          .map(valueToSelectoption))
-      setValue(v)
-    } else {
-      const v = option(values).map(maybeValues => maybeValues.find(item => item.value === props.value)).getOrElse(valueToSelectoption(props.value))
-      setValue(v)
-    }
-  }, [props.value, values, props.isMulti])
 
   useEffect(() => {
     if (props.optionsFrom) {
-      const cond = option(props.fetchCondition).map(cond => cond()).getOrElse(true);
+      const cond = option(props.fetchCondition)
+        .map(cond => cond())
+        .getOrElse(true);
 
       if (cond) {
         setLoading(true);
         return props.httpClient(props.optionsFrom, 'GET')
           .then((r) => r.json())
-          .then((values) => values.map(props.transformer || valueToSelectoption))
+          .then((values) => values.map(x => props.transformer ? props.transformer(x) : valueToSelectOption(x)))
           .then((values) => {
             setValues(values);
             setValue(values.find((item) => item.value === (value ? value.value : value)) || null);
@@ -52,7 +42,7 @@ export const SelectInput = (props) => {
           });
       }
     }
-  }, [])
+  }, [values, props.isMulti])
 
 
   const onChange = (changes) => {

@@ -84,7 +84,7 @@ const getDefaultValues = (flow, schema) => {
   }, {})
 }
 
-export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, options }) => {
+export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, options = {} }) => {
   const formFlow = flow || Object.keys(schema)
 
   const maybeCustomHttpClient = (url, method) => {
@@ -174,7 +174,7 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, opti
             </BasicWrapper>
           )
         })}
-        <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(onSubmit)} labels={options.labels}/>
+        <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(onSubmit)} actions={options.actions}/>
       </form>
     </FormProvider>
   )
@@ -184,11 +184,13 @@ const Footer = (props) => {
   if (props.render) {
     return props.render({ reset: props.reset, valid: props.valid })
   }
+
+  const isSubmitDisplayed = props.actions?.submit?.display === undefined ? true : !!props.actions?.submit?.display
+
   return (
     <div className="d-flex flex-row justify-content-end">
-      <button className="btn btn-danger" type="button" onClick={props.cancel}>{props.labels?.reset || 'Cancel'}</button>
-      <button className="btn btn-danger" type="button" onClick={props.reset}>{props.labels?.reset || 'Reset'}</button>
-      <button className="btn btn-success ml-1" type="submit">{props.labels?.submit || 'Save'}</button>
+      {props.actions?.reset?.display && <button className="btn btn-danger" type="button" onClick={props.reset}>{props.actions?.reset?.label || 'Reset'}</button>}
+      {isSubmitDisplayed && <button className="btn btn-success ml-1" type="submit">{props.labels?.submit?.label || 'Save'}</button>}
     </div>
   )
 }
