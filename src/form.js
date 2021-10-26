@@ -335,7 +335,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
             <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v) }} error={error}>
               <input
                 {...step.props}
-                type={step.format || 'text'} id={entry}
+                type={step.format || 'number'} id={entry}
                 className={classNames("form-control", { 'is-invalid': error })}
                 readOnly={step.disabled ? 'readOnly' : null}
                 name={entry}

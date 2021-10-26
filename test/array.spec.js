@@ -1,7 +1,5 @@
 
 import * as constraints from '../src/constraints';
-import * as types from '../src/types';
-import { testBasicConstraints } from './testUtils';
 import * as yup from 'yup';
 import { getShapeAndDependencies } from '../src/resolvers';
 
@@ -9,7 +7,7 @@ const testArrayConstraints = (constraints = [], message, right, wrong, type) => 
   const schema = {
     test: {
       type,
-      format: 'array',
+      array: true,
       constraints
     }
   }
@@ -19,18 +17,14 @@ const testArrayConstraints = (constraints = [], message, right, wrong, type) => 
   const { shape, dependencies } = getShapeAndDependencies(flow, schema);
   const resolver = yup.object().shape(shape, dependencies);
 
-  // return Promise.all([
-  //   resolver.isValid(right),
-  //   resolver.isValid(wrong),
-  // ]).then(([rR, rW]) => {
-  //   expect(rR).to.equal(true)
-  //   expect(rW).to.equal(false)
-  // })
-
   return resolver.validate(right)
-    .then(r => expect(r).to.equal(right))
+    .then(r => {
+      console.log({r})
+      return expect(r).to.equal(right)})
     .then(() => resolver.validate(wrong))
-    .catch(e => expect(e.errors[0]).to.equal(message))
+    .catch(e => {
+      console.warn({e})
+      expect(e.errors[0]).to.equal(message)})
 };
 
 describe('Array resolver', () => {
@@ -41,7 +35,7 @@ describe('Array resolver', () => {
 
     const right = { test: [1, 2, 3] }
     const wrong = { test: 'fifou' }
-    
+
 
     return testArrayConstraints(testConstraints, errorMessage, right, wrong, 'number')
   })

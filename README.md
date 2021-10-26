@@ -60,8 +60,8 @@ export const Example = () => {
 
 ## schema properties
 
-- **type** (required): the type of value. It provided by the imported object `type` and could be `string`, `number`, `bool`, `object`, `date` or `file`
-- **format**: Over the type you can display a special format for the field. It provided by the imported object `format`
+- **type** (required): the type of value. It provided by the imported object `type`. It could be just string like `string`, `number`, `bool`, `object`, `date` or `file`
+- **format**: Over the type you can display a special format for the field. It provided by the imported object `format` or just a string
   - `array`: if the value is an array of basic type, display multiple fields with "add" and "remove" buttons
   - `select`: display a [react-select](https://react-select.com/home) field with provided options
   - `code`: if the type is `string`, display a code input (draw with [react-ace](https://github.com/securingsincity/react-ace))
@@ -189,7 +189,7 @@ httpClient = {(url, method) => fetch(url, {
 />
 ```
 ## constraints
-Possible constraints are provided by import `constraints` from **@maif/react-form**
+Possible constraints are provided by import `constraints` from **@maif/react-form** or can be wrotes on json
 
   - [mixed](#mixed)
     - [`constraints.required(message?:string)`](#constraintsrequiredmessagestring)
@@ -213,12 +213,18 @@ the following methods works for all type types of value.
    ```javascript
   constraints.required("this field is required")
   ```
+  ```javascript
+  {type: 'required', message: "this field is required"}
+  ```
 
 #### `constraints.test(name: string, message?:string, test: (val: any) => boolean | Promise<boolean>)`
   Adds a test function to the validation chain. The test must provide a `name`, an error `message` and a validation function that takes in entry the current value and must return a boolean result. The test can return a promise that resolve a boolean result
 
   ```javascript
   constraints.test("name", 'not fifou', value => value === 'fifou')
+  ```
+  ```javascript
+  {type: 'test', name: "name", message: 'not fifou', test: value => value === 'fifou'}
   ```
 
 #### `constraints.when(ref: string, test: (val: any) => boolean, then: any = [], otherwise: any = [])`
@@ -231,6 +237,15 @@ the following methods works for all type types of value.
     [constraint.count(5)],
     [constraint.count(1)],)
   ```
+  ```javascript
+  {
+    type: 'when', 
+    ref: 'isBig', 
+    test: (isBig) => !!isBig,
+    then: [constraint.count(5)],
+    otherwise: [constraint.count(1)],
+  }
+  ```
 
 #### `constraints.oneOf(arrayOfValues: any[], message?:string)`
   Whitelist a set of values and display an error under field if the provided value is not contains in this set.
@@ -238,24 +253,40 @@ the following methods works for all type types of value.
   ```javascript
   constraints.oneOf(['foo', 'bar'], 'not foo or bar :(')
   ```
+  ```javascript
+  {type: 'oneOf', arrayOfValues: ['foo', 'bar'], message: 'not foo or bar :('}
+  ```
 
 ### string
 the following methods works for string values. All methods for [mixed](#mixed) are available.
 
 #### `constraints.url(message?:string)`
 Validate that the provided value matches an url pattern via regexp and display an error if the result id false.
+ ```javascript
+  constraints.oneOf(['foo', 'bar'], 'not foo or bar :(')
+  ```
+  ```javascript
+  {type: 'oneOf', arrayOfValues: ['foo', 'bar'], message: 'not foo or bar :('}
+  ```
 
 #### `constraints.email(message?:string)`
 Validate that the provided value matches an email pattern via regexp and display an error if the result id false.
-
+```javascript
+{type: 'email', message: 'not an email'}
+```
 #### `constraints.uuid(message?:string)`
 Validate that the provided value matches an uuid pattern via regexp and display an error if the result id false.
-
+```javascript
+{type: 'uuid', message: 'not an uuid'}
+```
 #### `constraints.matches(regexp: RegExp, message?:string)`
 Test if value matche the provided regexp and display an error if the result id false.
 
 ```javascript
 constraints.matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#$^+=!*()@%&]).{8,1000}$/, errorMessage)
+```
+```javascript
+{type: 'matches', regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#$^+=!*()@%&]).{8,1000}$/, message: 'error'}
 ```
 
 ### string or number
@@ -264,33 +295,56 @@ the following methods works for string or number values. All methods for [mixed]
 
 #### `constraints.min(ref: number | Reference<number>, message: string)`
 Set the minimum value allowed and display an error if the provided value (for a number) or the length of the string is bigger.
+```javascript
+{type: 'min', ref: 1, message: 'too small'}
+```
 
 #### `constraints.max(ref: number | Reference<number>, message: string)`
 Set the maximun value allowed and display an error if provided value (for a number) or the length of the string is smaller.
+```javascript
+{type: 'max', ref: 5, message: 'too high'}
+```
 
 ### number
 The following methods works for number values. All methods for [mixed](#mixed) are available.
 
 #### `constraints.positive(message?:string)`
 The value must be a positive number and display an error if it's not.
-
+```javascript
+{type: 'positive', message: 'positive please'}
+```
 #### `constraints.negative(message?:string)`
 The value must be a negative number and display an error if it's not.
+```javascript
+{type: 'negative', message: 'negative please'}
+```
 
 #### `constraints.integer(message?:string)`
 The value must be aa integer number and display an error if it's not.
+```javascript
+{type: 'integer', message: 'integer please'}
+```
 
 #### `constraints.lessThan(ref: number | Reference<number>, message: string)`
 Set the maximun value allowed and display an error if provided value (for a number) or the length of the string is smaller.
+```javascript
+{type: 'lessThan', ref: 5, message: 'less please'}
+```
 
 #### `constraints.moreThan(ref: number | Reference<number>, message: string)`
 Set the minimum value allowed and display an error if provided value (for a number) or the length of the string is bigger.
+```javascript
+{type: 'moreThan', ref: 5, message: 'more please'}
+```
 
 ### array
 the following methods works for basic types if the format is define to `array`. All methods for [mixed](#mixed) are available.
 
-#### `constraints.length(value: number, message?:string)`
+#### `constraints.length(value: number | Reference<number>, message?:string)`
 Set the length of the array and display an error if it's different.
+```javascript
+{type: 'length', ref: 5, message: 'this array must have 5 elements'}
+```
 
 ### date
 the following methods works for date values. All methods for [mixed](#mixed) are available.
@@ -300,10 +354,19 @@ the following methods works for file values. All methods for [mixed](#mixed) are
 
 #### `constraints.supportedFormat(arrayOfValues: string[], message?:string)`
 Whitelist a set of supported format for the provided file and display an error under field if the format is not contains in this set.
+```javascript
+{type: 'supportedFormat', arrayOfValues: ['jpg', 'jpeg', 'png'], message: 'unsupported format'}
+```
 
 
 #### `constraints.unsupportedFormat(arrayOfValues: string[], message?:string)`
 Whitelist a set of unsupported format for the provided file and display an error under field if the format is contains in this set.
+```javascript
+{type: 'unsupportedFormat', arrayOfValues: ['jpg', 'jpeg', 'png'], message: 'unsupported format'}
+```
 
 #### `constraints.maxSize(value: number, message?:string)`
 Set the maximun value allowed for the file size and display an error if the size of provided file is bigger.
+```javascript
+{type: 'maxSize', message: 'file size too big'}
+```

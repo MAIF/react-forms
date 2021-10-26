@@ -1,6 +1,7 @@
 import * as yup from 'yup';
 import { type } from '../type';
 import { option } from '../Option'
+import * as CONSTRAINTS from '../constraints'
 
 const resolvers = {
   [type.string]: () => yup.string(),
@@ -18,7 +19,7 @@ export const buildSubResolver = (props, key, dependencies, rawData) => {
     let arrayResolver = yup.array()
 
     if (props.schema && props.schema.type) {
-      subResolver = buildSubResolver(props.schema, key, dependencies, rawData) //todo: ca peut pas marcher non ?
+      subResolver = buildSubResolver(props.schema, key, dependencies, rawData)
       arrayResolver = arrayResolver.of(subResolver)
     } else if (props.schema) {
       const deps = [];
@@ -26,21 +27,17 @@ export const buildSubResolver = (props, key, dependencies, rawData) => {
       arrayResolver = arrayResolver.of(subResolver)
     }
     return constraints.reduce((resolver, constraint) => {
-      return constraint(resolver, key, dependencies)
+      return jsonOrFunctionConstraint(constraint, resolver, key, dependencies)
     }, arrayResolver)
   } else if (props.type === type.object && props.schema) {
     const subResolver = getShapeAndDependencies(props.flow || Object.keys(props.schema), props.schema, dependencies, rawData);
     return constraints.reduce((resolver, constraint) => {
-      return constraint(resolver, key, dependencies)
+      return jsonOrFunctionConstraint(constraint, resolver, key, dependencies)
     }, yup.object().shape(subResolver.shape, dependencies))
   } else if (props.type === type.object && props.conditionalSchema) {
-    // console.group("*** here ***")
-    // console.log({props})
     const { schema, flow } = option(props.conditionalSchema)
       .map(condiSchema => {
-        // console.log({rawData})
         const ref = option(condiSchema.ref).map(ref => rawData[ref]).getOrNull();
-        // console.log({ref})
 
         const filterSwitch = condiSchema.switch.find(s => {
           if (typeof s.condition === 'function') {
@@ -50,21 +47,25 @@ export const buildSubResolver = (props, key, dependencies, rawData) => {
           }
         })
 
-        // console.log({filterSwitch})
         return option(filterSwitch).getOrElse(condiSchema.switch.find(s => s.default))
       }).getOrElse({})
-    // console.log({ schema, flow })
     const subResolver = getShapeAndDependencies(flow || Object.keys(schema), schema, dependencies, rawData);
-    // console.log({ subResolver })
-    // console.groupEnd()
     return constraints.reduce((resolver, constraint) => {
-      return constraint(resolver, key, dependencies)
+      return jsonOrFunctionConstraint(constraint, resolver, key, dependencies)
     }, yup.object().shape(subResolver.shape, dependencies))
 
   } else {
     return constraints.reduce((resolver, constraint) => {
-      return constraint(resolver, key, dependencies)
+      return jsonOrFunctionConstraint(constraint, resolver, key, dependencies)
     }, resolvers[type]())
+  }
+}
+
+const jsonOrFunctionConstraint = (constraint, resolver, key, dependencies) => {
+  if (typeof constraint === 'function') {
+    return constraint(resolver, key, dependencies)
+  } else {
+    return CONSTRAINTS[constraint.type + 'JSON'](constraint)(resolver, key, dependencies)
   }
 }
 
