@@ -2,6 +2,7 @@
   "name": "@maif/react-forms-playground",
   "version": "1.0.0",
   "private": true,
+  "homepage": "https://maif.github.io/react-forms/",
   "dependencies": {
     "@maif/react-forms": "file:.yalc/@maif/react-forms",
     "ace-builds": "1.4.12",
