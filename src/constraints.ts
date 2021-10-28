@@ -102,42 +102,30 @@ export const when = (ref: string, test: (val: any) => boolean, then: any = [], o
 export const oneOf = (arrayOfValues: any[], message: string = `This value must be one of ${arrayOfValues.join(', ')}`) => (r: yup.AnySchema) => r.oneOf(arrayOfValues.map(maybeRef), message)
 
 export const ref = (ref: string): Reference => yup.ref(ref)
-const maybeRef = (x: any) => x.ref ? ref(x) : x
+const maybeRef = (x: any) => x.ref ? ref(x.ref) : x
 
 
 
 //### JSON method ###
-
-const requiredJSON = ({ message = "Value required" }) => required(message)
-
-//string
-const urlJSON = ({ message = "That is not a valid url" }) => url(message)
-const emailJSON = ({ message = "That is not a valid email" }) => email(message)
-const uuidJSON = ({ message = "That is not a valid uuid" }) => uuid(message)
-const matchesJSON = ({ regexp = /.*/, message = "This field does not match the pattern" }) => matches(regexp, message)
-
-//string & number
-const minJSON = ({ ref, message = "Min value is required" }: NumberReference) => min(ref, message)
-const maxJSON = ({ ref, message = "Max value is required" }: NumberReference) => max(ref, message)
-
-//number
-const positiveJSON = ({ message = "Positive value is required" }) => positive(message)
-const negativeJSON = ({ message = "Negative value is required" }) => negative(message)
-const integerJSON = ({ message = "an integer please" }) => integer(message)
-const lessThanJSON = ({ ref, message = `This field must be less than ${ref}` }: NumberReference) => lessThan(ref, message)
-const moreThanJSON = ({ ref, message = `This field must be more than ${ref}` }: NumberReference) => moreThan(ref, message)
-
-//array
-const lengthJSON = ({ ref, message = `The size of this collection must be ${ref}` }: NumberReference) => length(ref, message)
-
-// //file
-const supportedFormatJSON = ({ arrayOfValues, message = 'Unsupported File Format' }: ArrayOfStringConstraint) => supportedFormat(arrayOfValues, message)
-const unsupportedFormatJSON = ({ arrayOfValues, message = 'Unsupported File Format' }: ArrayOfStringConstraint) => unsupportedFormat(arrayOfValues, message)
-
-const maxSizeJSON = ({ ref, message = `size is excedeed ${ref}` }: NumberReference) => maxSize(ref, message)
-
-//mixed
-const testJSON = (c: TestConstraint) => test(c.name, c.message, c.test)
-const whenJSON = ({ ref, test, then = [], otherwise = [] }: WhenConstraint) => when(ref, test, then, otherwise)
-const oneOfJSON = ({ arrayOfValues, message = `This value must be one of ${arrayOfValues.join(', ')}` }: ArrayOfAnyConstraint) => oneOf(arrayOfValues, message)
-const refJSON = (val: Ref): Reference => ref(val.ref)
+export const jsonConstraints = {
+  required: ({ message = "Value required" }) => required(message),
+  url: ({ message = "That is not a valid url" }) => url(message),
+  email: ({ message = "That is not a valid email" }) => email(message),
+  uuid: ({ message = "That is not a valid uuid" }) => uuid(message),
+  matches: ({ regexp = /.*/, message = "This field does not match the pattern" }) => matches(regexp, message),
+  min: ({ ref, message = "Min value is required" }: NumberReference) => min(ref, message),
+  max: ({ ref, message = "Max value is required" }: NumberReference) => max(ref, message),
+  positive: ({ message = "Positive value is required" }) => positive(message),
+  negative: ({ message = "Negative value is required" }) => negative(message),
+  integer: ({ message = "an integer please" }) => integer(message),
+  lessThan: ({ ref, message = `This field must be less than ${ref}` }: NumberReference) => lessThan(ref, message),
+  moreThan: ({ ref, message = `This field must be more than ${ref}` }: NumberReference) => moreThan(ref, message),
+  length: ({ ref, message = `The size of this collection must be ${ref}` }: NumberReference) => length(ref, message),
+  supportedFormat: ({ arrayOfValues, message = 'Unsupported File Format' }: ArrayOfStringConstraint) => supportedFormat(arrayOfValues, message),
+  unsupportedFormat: ({ arrayOfValues, message = 'Unsupported File Format' }: ArrayOfStringConstraint) => unsupportedFormat(arrayOfValues, message),
+  maxSize: ({ ref, message = `size is excedeed ${ref}` }: NumberReference) => maxSize(ref, message),
+  test: (c: TestConstraint) => test(c.name, c.message, c.test),
+  when: ({ ref, test, then = [], otherwise = [] }: WhenConstraint) => when(ref, test, then, otherwise),
+  oneOf: ({ arrayOfValues, message = `This value must be one of ${arrayOfValues.join(', ')}` }: ArrayOfAnyConstraint) => oneOf(arrayOfValues, message),
+  ref: (val: Ref): Reference => ref(val.ref),
+}

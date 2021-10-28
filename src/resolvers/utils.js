@@ -1,7 +1,7 @@
 import * as yup from 'yup';
 import { type } from '../type';
 import { option } from '../Option'
-import * as CONSTRAINTS from '../constraints'
+import { jsonConstraints } from '../constraints';
 
 const resolvers = {
   [type.string]: () => yup.string(),
@@ -65,7 +65,7 @@ const jsonOrFunctionConstraint = (constraint, resolver, key, dependencies) => {
   if (typeof constraint === 'function') {
     return constraint(resolver, key, dependencies)
   } else {
-    return CONSTRAINTS[constraint.type + 'JSON'](constraint)(resolver, key, dependencies)
+    return jsonConstraints[constraint.type](constraint)(resolver, key, dependencies)
   }
 }
 

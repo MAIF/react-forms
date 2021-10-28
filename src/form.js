@@ -101,7 +101,9 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, opti
     })
   }
 
+  //FIXME: defautl values are miss calculated ??
   const defaultValues = getDefaultValues(formFlow, schema);
+  console.log({ defaultValues})
 
 
   //FIXME: get real schema through the switch
@@ -121,13 +123,13 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, opti
   const { register, handleSubmit, formState: { errors }, control, reset, watch, trigger, getValues, setValue } = methods
 
   useEffect(() => {
-    if (formFlow && value) {
+    if (value) {
       reset(value)
     }
-  }, [value, formFlow, reset])
+  }, [value, reset])
 
   useEffect(() => {
-    reset(value);
+    reset(value || defaultValues);
   }, [schema])
   
   const data = watch();
@@ -188,9 +190,9 @@ const Footer = (props) => {
   const isSubmitDisplayed = props.actions?.submit?.display === undefined ? true : !!props.actions?.submit?.display
 
   return (
-    <div className="d-flex flex-row justify-content-end">
+    <div className="d-flex flex-row justify-content-end mt-2">
       {props.actions?.reset?.display && <button className="btn btn-danger" type="button" onClick={props.reset}>{props.actions?.reset?.label || 'Reset'}</button>}
-      {isSubmitDisplayed && <button className="btn btn-success ml-1" type="submit">{props.labels?.submit?.label || 'Save'}</button>}
+      {isSubmitDisplayed && <button className="btn btn-success ml-1" type="submit">{props.actions?.submit?.label || 'Save'}</button>}
     </div>
   )
 }

@@ -1,0 +1,10 @@
+.App {
+  text-align: center;
+}
+
+.tagline {
+  padding: 10px;
+  font-weight: 200;
+  margin-top: -1em;
+  font-size: 12px;
+}
