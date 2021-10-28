@@ -1,0 +1,58 @@
+name: Release Daikoku
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2.2.0
+    - uses: coursier/cache-action@v5
+    # install node 14
+    - name: setup node
+      uses: actions/setup-node@v1
+      with:
+        node-version: '16'
+    # release
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: |
+          echo "::set-output name=dir::$(yarn cache dir)"
+    - name: CACHE ACTION
+      uses: actions/cache@v2
+      env:
+          cache-version: v1
+      id: yarn-cache
+      with:
+        path: |
+            ${{ steps.yarn-cache-dir-path.outputs.dir }}
+            **/node_modules
+        key: ${{ runner.os }}-yarn-${{ env.cache-version }}-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+            ${{ runner.os }}-yarn-${{ env.cache-version }}-
+            ${{ runner.os }}-yarn-
+            ${{ runner.os }}-
+    - name: Build
+      run: sh ./scripts/build.sh github
+    # create github release
+    - name: Create a Release
+      id: create_release
+      uses: actions/create-release@v1.1.4
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ github.ref }}
+        release_name: v${{ github.ref }}
+        draft: false
+        
+  # close milestone (with the latest release found)
+    - name: Close milestone 
+      uses: adlerhsieh/prepare-release@0.1.2
+      env: 
+        GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+        REPO_OWNER: ${{ github.repository_owner }}
+        REPO: daikoku
+        IGNORE_MILESTONE_NOT_FOUND: true
+  
