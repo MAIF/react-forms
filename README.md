@@ -4,6 +4,9 @@
 
 **@maif/react-forms** use [yup](https://github.com/jquense/yup) and [react-hook-form](https://react-hook-form.com/) to build its forms
 
+# Playground
+If you think that an example will explain it better, you can go roght now to our [react-forms playground](https://maif.github.io/react-forms/) to discover a couple of examples with an inline editor. 
+
 # Install
 
 ```bash
