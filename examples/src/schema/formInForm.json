@@ -1,0 +1,39 @@
+{
+  "type": {
+    "type": "string",
+    "label": "type",
+    "format": "select",
+    "options": [
+      "mammal",
+      "fish",
+      "bird",
+      "insect"
+    ],
+    "defaultValue": "fish"
+  },
+  "habitat": {
+    "type": "object",
+    "label": "habitat",
+    "format": "form",
+    "schema": {
+      "continent": {
+        "type": "string",
+        "label": "continent",
+        "format": "select",
+        "options": [
+          "Africa",
+          "Asia",
+          "Europe",
+          "North America",
+          "Océania",
+          "South America"
+        ]
+      },
+      "country": {
+        "type": "string",
+        "label": "country"
+      }
+    }
+    
+  }
+}

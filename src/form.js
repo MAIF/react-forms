@@ -101,9 +101,7 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, opti
     })
   }
 
-  //FIXME: defautl values are miss calculated ??
   const defaultValues = getDefaultValues(formFlow, schema);
-  console.log({ defaultValues})
 
 
   //FIXME: get real schema through the switch
@@ -112,6 +110,7 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, opti
     const { shape, dependencies } = getShapeAndDependencies(formFlow, schema, [], rawData);
     const resolver = yup.object().shape(shape, dependencies);
 
+    console.log({shape, resolver})
     return resolver;
   }
 

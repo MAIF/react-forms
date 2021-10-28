@@ -1,0 +1,14 @@
+{
+  "type": {
+    "type": "string",
+    "label": "type",
+    "format": "select",
+    "options": [
+      "mammal",
+      "fish",
+      "bird",
+      "insect"
+    ],
+    "defaultValue": "fish"
+  }
+}

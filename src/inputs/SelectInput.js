@@ -23,6 +23,10 @@ export const SelectInput = (props) => {
     .map(v => props.transformer ? props.transformer(v) : v)
     .map(v => valueToSelectOption(v)))
 
+  useEffect(() => {
+    setValue(valueToSelectOption(props.value || props.defaultValue, props.isMulti))
+  }, [props.value, props.defaultValue])
+
 
   useEffect(() => {
     if (props.optionsFrom) {

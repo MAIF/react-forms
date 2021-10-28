@@ -1,0 +1,28 @@
+{
+  "name": {
+    "type": "string",
+    "label": "name",
+    "placeholder": "Your name",
+    "constraints": [
+      {
+        "type": "required",
+        "message": "required field"
+      }
+    ]
+  },
+  "age": {
+    "type": "number",
+    "label": "Your age",
+    "constraints": [
+      {
+        "type": "required",
+        "message": "required field"
+      },
+      {
+        "type": "min",
+        "ref": 18,
+        "message": "You must be an adult"
+      }
+    ]
+  }
+}

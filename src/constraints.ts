@@ -102,7 +102,7 @@ export const when = (ref: string, test: (val: any) => boolean, then: any = [], o
 export const oneOf = (arrayOfValues: any[], message: string = `This value must be one of ${arrayOfValues.join(', ')}`) => (r: yup.AnySchema) => r.oneOf(arrayOfValues.map(maybeRef), message)
 
 export const ref = (ref: string): Reference => yup.ref(ref)
-const maybeRef = (x: any) => x.ref ? ref(x.ref) : x
+const maybeRef = (x: any) => x?.ref ? ref(x.ref) : x
 
 
 
@@ -112,7 +112,9 @@ export const jsonConstraints = {
   url: ({ message = "That is not a valid url" }) => url(message),
   email: ({ message = "That is not a valid email" }) => email(message),
   uuid: ({ message = "That is not a valid uuid" }) => uuid(message),
-  matches: ({ regexp = /.*/, message = "This field does not match the pattern" }) => matches(regexp, message),
+  matches: ({ regexp = /.*/, message = "This field does not match the pattern" }) => {
+    console.log({regexp, message})
+    return matches(regexp, message)},
   min: ({ ref, message = "Min value is required" }: NumberReference) => min(ref, message),
   max: ({ ref, message = "Max value is required" }: NumberReference) => max(ref, message),
   positive: ({ message = "Positive value is required" }) => positive(message),

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Form, type, format } from '@maif/react-forms'
+import { Form } from '@maif/react-forms'
 import Select from 'react-select';
 import AceEditor from 'react-ace';
 
@@ -13,60 +13,26 @@ import 'ace-builds/src-noconflict/ext-language_tools'
 
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css'
+
+import basic from './schema/basic.json';
+import constrainedBasic from './schema/constrainedBasic.json';
+import constraintsWithRef from './schema/constraintsWithRef.json';
+import simpleSelector from './schema/selector.json';
+import formInForm from './schema/formInForm.json';
+import dynamicForm from './schema/dynamicForm.json';
+
 const examples = {
-  simpleSchema: {
-    name: {
-      type: type.string,
-      label: 'name',
-      placeholder: 'Your name'
-    },
-    age: {
-      type: type.number,
-      label: 'Your age'
-    }
-  },
-  changePasswordSchema: {
-    oldPassword: {
-      type: type.string,
-      format: format.password,
-      label: 'Old Password',
-      constraints: [
-        { type: 'required', message: 'Your old password is required' }
-      ]
-    },
-    newPassword: {
-      type: type.string,
-      format: format.password,
-      label: 'New password',
-      constraints: [
-        { type: 'required', message: 'Your new password is required' },
-        { type: 'matches', regexp: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#$^+=!*()@%&]).{8,1000}$/, message: 'Your new password must have 8 letters min with Capital, number and special caractere' }
-      ]
-    },
-    confirmNewPassword: {
-      type: type.string,
-      format: format.password,
-      label: 'Confirm new password',
-      constraints: [
-        { type: 'required', message: 'confirm password is required' },
-        { type: 'oneOf', arrayOfValues: [{ ref: 'newPassword' }], message: 'confirm and password must be equal' }
-      ]
-    }
-  },
-  selectorSchema: {
-    type: {
-      type: type.string,
-      label: 'type',
-      format: format.select,
-      options: ['mammal', 'fish', 'bird', 'insect'],
-      defaultValue: 'fish'
-    }
-  },
+  basic,
+  constrainedBasic,
+  constraintsWithRef,
+  simpleSelector,
+  formInForm,
+  dynamicForm
 }
 
-export const App = () => {
-  const [schema, setSchema] = useState(JSON.stringify(examples.simpleSchema, 0, 4))
-  const [realSchema, setRealSchema] = useState(examples.simpleSchema)
+export const Playground = () => {
+  const [schema, setSchema] = useState(JSON.stringify(basic, 0, 4))
+  const [realSchema, setRealSchema] = useState(basic)
   const [error, setError] = useState(undefined)
   
   useEffect(() => {
@@ -107,14 +73,14 @@ export const App = () => {
       <div className="container" style={{marginTop: '70px'}}>
         <em className='tagline'>Choose a JSON schema below and check the generated form. Check the <a href='https://github.com/MAIF/react-forms'>documentation</a> for more details.</em>
         <div className="d-flex">
-          <div style={{marginRight: '10px'}}>
+          <div className='col-6' style={{marginRight: '10px'}}>
             <label htmlFor="selector">try with a schema</label>
             <Select
               options={Object.keys(examples).map(value => ({ label: value, value }))}
-              defaultValue={{ value: "simpleSchema", label: "simpleSchema" }}
+              defaultValue={{ value: basic, label: "basic" }}
               onChange={e => setSchema(JSON.stringify(examples[e.value], null, 4))} />
             <AceEditor
-              style={{ marginTop: '15px', zIndex: 0, isolation: 'isolate' }}
+              style={{ marginTop: '15px', zIndex: 0, isolation: 'isolate', width: '100%' }}
               mode="json"
               theme="monokai"
               onChange={setSchema}
@@ -128,7 +94,7 @@ export const App = () => {
               enableLiveAutocompletion={false}
             />
           </div>
-          <div>
+          <div className='col-4'>
             <h2>Generated form</h2>
             {error && <span style={{ color: 'tomato' }}>{error}</span>}
             <div style={{backgroundColor: '#ececec', padding: '10px 15px'}}>
@@ -153,4 +119,4 @@ export const App = () => {
   )
 }
 
-export default App;
+export default Playground;

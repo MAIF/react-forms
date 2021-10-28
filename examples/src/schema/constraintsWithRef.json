@@ -1,0 +1,44 @@
+{
+  "oldPassword": {
+    "type": "string",
+    "format": "password",
+    "label": "Old Password",
+    "constraints": [
+      {
+        "type": "required",
+        "message": "Your old password is required"
+      }
+    ]
+  },
+  "newPassword": {
+    "type": "string",
+    "format": "password",
+    "label": "New password",
+    "constraints": [
+      {
+        "type": "required",
+        "message": "Your new password is required"
+      }
+    ]
+  },
+  "confirmNewPassword": {
+    "type": "string",
+    "format": "password",
+    "label": "Confirm new password",
+    "constraints": [
+      {
+        "type": "required",
+        "message": "confirm password is required"
+      },
+      {
+        "type": "oneOf",
+        "arrayOfValues": [
+          {
+            "ref": "newPassword"
+          }
+        ],
+        "message": "confirm and password must be equal"
+      }
+    ]
+  }
+}
