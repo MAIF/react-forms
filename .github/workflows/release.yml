@@ -38,7 +38,7 @@ jobs:
     - name: install
       run: npm install 
     - name: build
-      run: npm build
+      run: npm run build
     - name: publish
       run: npm publish
       env:
