@@ -18,8 +18,6 @@ publish () {
 
   echo "Setting version to ${PACKAGE_VERSION}"
   npm version ${PACKAGE_VERSION}
-  echo 'Installing dependencies ...'
-  npm-install-peers
   echo 'Publishing'
   npm publish
 }
