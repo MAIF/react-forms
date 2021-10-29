@@ -9,6 +9,7 @@ on:
 
 jobs:
   build-playground:
+    name: Build playground
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
