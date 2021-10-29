@@ -1671,8 +1671,10 @@
     "@types/yargs" "^16.0.0"
     chalk "^4.0.0"
 
-"@maif/react-forms@file:.yalc/@maif/react-forms":
+"@maif/react-forms@1.0.0":
   version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@maif/react-forms/-/react-forms-1.0.0.tgz#add6e7de3ba6040fd3b6cd156ff999e671ebcf2e"
+  integrity sha512-MH9M/1sPFg96trZYDAS1iHgVEEoY982f+ccHhqJlqDIEBLcxP7G7LhceVMLL5cXNofWsL6IGh2ho2dUTyfQy4A==
   dependencies:
     "@fortawesome/fontawesome-free" "^5.15.3"
     "@hookform/resolvers" "2.4.0"

@@ -1,0 +1,31 @@
+name: Release notes
+
+on:
+  push:
+    paths:
+      - 'examples/**'
+    branches:
+      - master
+
+jobs:
+  build-playground:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      #build playground
+      - name: Build playground
+        run: |
+          cd examples
+          yarn
+          yarn build
+      - name: Commit files
+          run: |
+            git config --local user.email "github-actions@users.noreply.github.com"
+            git config --local user.name "github-actions"
+            git add --all
+            git commit -am "Update playground"
+        - name: Push playground
+          uses: ad-m/github-push-action@master
+          with:
+            branch: master
+            github_token: ${{ secrets.GITHUB_TOKEN}}
