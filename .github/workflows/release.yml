@@ -10,6 +10,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2.2.0
     - uses: coursier/cache-action@v5
+    #get version
+    - name: Get the version
+      id: get_version
+      run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
     # install node 14
     - name: setup node
       uses: actions/setup-node@v2
@@ -29,7 +33,7 @@ jobs:
       run: npm run build
     - name: publish
       run: |
-        npm version ${{GITHUB_REF#refs/*/}}
+        npm version ${{ steps.get_version.outputs.VERSION }}
         npm publish --access public
       env:
           CI: true
