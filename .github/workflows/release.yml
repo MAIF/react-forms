@@ -29,11 +29,22 @@ jobs:
       run: npm run build
     - name: publish
       run: |
-        npm version ${{ github.ref }}
+        npm version ${GITHUB_REF#refs/*/}
         npm publish --access public
       env:
           CI: true
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    - name: Commit files
+      run: |
+        git config --local user.email "github-actions@users.noreply.github.com"
+        git config --local user.name "github-actions"
+        git add --all
+        git commit -am "Update package version"
+    - name: Push
+      uses: ad-m/github-push-action@master
+      with:
+        branch: main
+        github_token: ${{ secrets.GITHUB_TOKEN}}
     # create github release
     - name: Create a Release
       id: create_release
