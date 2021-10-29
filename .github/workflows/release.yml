@@ -34,8 +34,14 @@ jobs:
             ${{ runner.os }}-yarn-${{ env.cache-version }}-
             ${{ runner.os }}-yarn-
             ${{ runner.os }}-
-    - name: Build
-      run: sh ./scripts/build.sh github
+    - name: install
+      run: yarn install 
+    - name: build
+      run: yarn build
+    - name: publish
+      run: yarn publish
+      env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     # create github release
     - name: Create a Release
       id: create_release
