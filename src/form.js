@@ -105,12 +105,12 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, opti
 
 
   //FIXME: get real schema through the switch
-  
+
   const resolver = (rawData) => {
     const { shape, dependencies } = getShapeAndDependencies(formFlow, schema, [], rawData);
     const resolver = yup.object().shape(shape, dependencies);
 
-    console.log({shape, resolver})
+    console.log({ shape, resolver })
     return resolver;
   }
 
@@ -130,7 +130,7 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, opti
   useEffect(() => {
     reset(value || defaultValues);
   }, [schema])
-  
+
   const data = watch();
   useEffect(() => {
     //todo: with debounce
@@ -138,7 +138,7 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, opti
       handleSubmit(onSubmit)
     }
   }, [data])
-  
+
   // console.log(watch())
 
   return (
@@ -175,7 +175,7 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, opti
             </BasicWrapper>
           )
         })}
-        <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(onSubmit)} actions={options.actions}/>
+        <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(onSubmit)} actions={options.actions} />
       </form>
     </FormProvider>
   )
@@ -206,10 +206,10 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
         component={((props, idx) => {
           <div>{idx}</div>
           return (
-              <Step entry={`${entry}[${idx}]`} step={{ ...schema[entry], array: false }} error={error}
-                register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-                setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient}
-                defaultValue={props.defaultValue} value={props.defaultValue} index={idx}/>
+            <Step entry={`${entry}[${idx}]`} step={{ ...schema[entry], array: false }} error={error}
+              register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
+              setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient}
+              defaultValue={props.defaultValue} value={props.defaultValue} index={idx} />
           )
         })} />
     )
@@ -307,6 +307,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
                       value={field.value}
                       possibleValues={step.options}
                       defaultValue={defaultValue}
+                      httpClient={httpClient}
                       {...step}
                     />
                   </CustomizableInput>
@@ -331,6 +332,30 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
 
     case type.number:
       switch (step.format) {
+        case format.select:
+          return (
+            <Controller
+              name={entry}
+              control={control}
+              render={({ field }) => {
+                return (
+                  <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
+                    <SelectInput
+                      {...step.props}
+                      className={classNames({ 'is-invalid': error })}
+                      readOnly={step.disabled ? 'readOnly' : null}
+                      onChange={field.onChange}
+                      value={field.value}
+                      possibleValues={step.options}
+                      defaultValue={defaultValue}
+                      httpClient={httpClient}
+                      {...step}
+                    />
+                  </CustomizableInput>
+                )
+              }}
+            />
+          )
         default:
           return (
             <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v) }} error={error}>
@@ -401,7 +426,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
               <NestedForm
                 schema={step.schema} flow={flow} step={step} parent={entry}
                 inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={defaultValue} error={error}
-                index={index}/>
+                index={index} />
             </CustomizableInput>
           )
 
@@ -569,7 +594,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
 
       const filterSwitch = condiSchema.switch.find(s => {
         if (typeof s.condition === 'function') {
-          return s.condition({ rawData, ref})
+          return s.condition({ rawData, ref })
         } else {
           return s.condition === ref
         }
@@ -577,7 +602,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
 
       return option(filterSwitch).getOrElse(condiSchema.switch.find(s => s.default))
     })
-    .getOrElse({schema, flow})
+    .getOrElse({ schema, flow })
 
   const prevSchema = usePrevious(schemaAndFlow.schema);
   useEffect(() => {
