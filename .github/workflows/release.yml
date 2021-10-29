@@ -2,7 +2,7 @@ name: Release Daikoku
 on:
   push:
     tags:
-      - 'v*'
+      - '*.*.*'
 
 jobs:
   release:
@@ -28,7 +28,9 @@ jobs:
     - name: build
       run: npm run build
     - name: publish
-      run: npm publish --access public
+      run: |
+        npm version ${{ github.ref }}
+        npm publish --access public
       env:
           CI: true
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -39,7 +41,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: v${{ github.ref }}
+        tag_name: ${{ github.ref }}
         release_name: v${{ github.ref }}
         draft: false
 
