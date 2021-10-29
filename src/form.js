@@ -110,7 +110,6 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, opti
     const { shape, dependencies } = getShapeAndDependencies(formFlow, schema, [], rawData);
     const resolver = yup.object().shape(shape, dependencies);
 
-    console.log({ shape, resolver })
     return resolver;
   }
 

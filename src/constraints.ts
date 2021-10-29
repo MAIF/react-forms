@@ -112,9 +112,7 @@ export const jsonConstraints = {
   url: ({ message = "That is not a valid url" }) => url(message),
   email: ({ message = "That is not a valid email" }) => email(message),
   uuid: ({ message = "That is not a valid uuid" }) => uuid(message),
-  matches: ({ regexp = /.*/, message = "This field does not match the pattern" }) => {
-    console.log({regexp, message})
-    return matches(regexp, message)},
+  matches: ({ regexp = /.*/, message = "This field does not match the pattern" }) => matches(regexp, message),
   min: ({ ref, message = "Min value is required" }: NumberReference) => min(ref, message),
   max: ({ ref, message = "Max value is required" }: NumberReference) => max(ref, message),
   positive: ({ message = "Positive value is required" }) => positive(message),
