@@ -1,11 +1,11 @@
-name: Release notes
+name: Build playground
 
 on:
   push:
     paths:
       - 'examples/**'
     branches:
-      - master
+      - main
 
 jobs:
   build-playground:
