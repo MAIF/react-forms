@@ -150,6 +150,8 @@ export const Example = () => {
 - **onSubmit** (required): a function run on the form submission (in case if the form is valid )
 - **value** (optional): default value
 - **inputWrapper** (optional): A custom component to wrap all input of the form
+- **className** (optional): A custom class name for the form
+- **style** (optional): A custom json style object for the form
 - **footer** (optional):  a component to override the footer provided
 ```javascripts
 {({ reset, valid }) => {
