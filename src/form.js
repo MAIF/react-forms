@@ -203,7 +203,6 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
         register={register} control={control} error={error}
         setValue={setValue} values={getValues(entry)} defaultValue={step.defaultValue || defaultVal(step.type)}
         component={((props, idx) => {
-          <div>{idx}</div>
           return (
             <Step entry={`${entry}[${idx}]`} step={{ ...schema[entry], array: false }} error={error}
               register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}

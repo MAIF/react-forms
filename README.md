@@ -65,7 +65,6 @@ export const Example = () => {
 
 - **type** (required): the type of value. It provided by the imported object `type`. It could be just string like `string`, `number`, `bool`, `object`, `date` or `file`
 - **format**: Over the type you can display a special format for the field. It provided by the imported object `format` or just a string
-  - `array`: if the value is an array of basic type, display multiple fields with "add" and "remove" buttons
   - `select`: display a [react-select](https://react-select.com/home) field with provided options
   - `code`: if the type is `string`, display a code input (draw with [react-ace](https://github.com/securingsincity/react-ace))
   - `markdown`: if the type is `string`, display a markdown input
@@ -74,13 +73,21 @@ export const Example = () => {
   - `password`: if the type is `string`, display a password input
   - `hidden`: if the type is `string`, add an hidden input in your form
   - `form`: if the type is `object`, display a form in your form draw with given schema and flow.
+- **array**: boolean value to display multiple fields with "add" and "remove" buttons (`false` by default)
+- **createOption**: if `select` format is choosen, `createOption` property is to render a Creatable component
+- **onCreateOption**: if `select` format is choosen, `onCreateOption` property is a function called before new option creation
+  ```javascript
+  {
+    onCreateOption: (option) => myFunction(option)
+  }
+  ```
 - **isMulti**: if `select` format is choosen, `isMulti` property is to render a multiselect component
 - **defaultKeyValue**: if the format is setup to object, this default key/value is set for all added entries
 - **visible**: a boolean option to hide/display form field. It can be an object with `ref` property to get a value by reference an a key `test` as a function to test it. if there is no `test` key, it's base just on boolean value of the reference.
 - **disabled**: A boolean option to enable/disable form field
 - **label**: The label of form field
 - **placeholder**: the placeholder of form field
-- **defaultValue**: A default value to fill field y default
+- **defaultValue**: A default value to fill field by default
 - **help**: the text display hover a help button
 - **className**: you can customize classnames of field,
 - **style**: to styling a field, you can provide a json object with css
@@ -88,7 +95,7 @@ export const Example = () => {
   ```javascript
   ({rawValues, value, onChange, error}) => <input type="text" className="is-invalid" value={value} onChange={e => onChange(e.target.value)} />
   ```
-- **props**: a json object merged with default props
+- **props**: a json object merged with default props. For exemple, if format `select` is setup, you can add all [props](https://react-select.com/props) to csutomize react-select
 - **options**: An array of options for the select field (if format `select` is setup)
 - **optionsFrom**: A url to fetch array of options for the select field (if format `select` is setup)
 - **transformer**: A function to transform options to a valid format for react select, by default the code try to do it himself.

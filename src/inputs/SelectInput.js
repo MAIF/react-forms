@@ -25,8 +25,7 @@ export const SelectInput = (props) => {
 
   useEffect(() => {
     setValue(valueToSelectOption(props.value || props.defaultValue, props.isMulti))
-  }, [props.value, props.defaultValue])
-
+  }, [])
 
   useEffect(() => {
     if (props.optionsFrom) {
@@ -58,6 +57,12 @@ export const SelectInput = (props) => {
     }
   };
 
+  const createOption = (option, fn = () => {}) => {
+    fn(option)
+    setValues([...values, valueToSelectOption(option)])
+    onChange(valueToSelectOption(option))
+  }
+
   if (props.createOption) {
     return (
       <CreatableSelect
@@ -70,8 +75,7 @@ export const SelectInput = (props) => {
         isClearable
         onChange={onChange}
         options={values}
-        onCreateOption={option => props.onCreateOption ? props.onCreateOption(option) : undefined} //todo: default onCreateOption
-        formatCreateLabel={(value) => props.formatCreateLabel ? props.formatCreateLabel(value) : `create ${value} ?`} //todo: default formatCreateLabel
+        onCreateOption={option => props.onCreateOption ? createOption(option, props.onCreateOption) : createOption(option)}
         classNamePrefix="react-form-select"
         className={props.className}
       />
