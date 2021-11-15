@@ -28,12 +28,11 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-node-
     - name: install
-      run: npm install 
-    - name: build
-      run: npm run build
-    - name: publish
+      run: npm install
+    - name: build & publish
       run: |
         npm version ${{ steps.get_version.outputs.VERSION }}
+        npm run build
         npm publish --access public
       env:
           CI: true
