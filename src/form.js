@@ -340,15 +340,23 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, styl
         {formFlow.map((entry, idx) => {
           if (entry && typeof entry === 'object') {
             const errored = entry.flow.some(step => !!errors[step])
+
             return (
-              <BasicWrapper key={idx} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper} classes={classes}>
-                <Step key={idx} entry={entry} step={step} error={error}
-                  register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-                  setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient} classes={classes} />
-              </BasicWrapper>
+              <Collapse key={idx} label={entry.label} collapsed={entry.collapsed} errored={errored} classes={classes}>
+                {entry.flow.map((entry, idx) => {
+                  const step = schema[entry]
+                  return (
+                    <BasicWrapper key={idx} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper} classes={classes}>
+                      <Step key={idx} entry={entry} step={step} error={error}
+                        register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
+                        setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient} classes={classes} />
+                    </BasicWrapper>
+                  )}
+                )}
+              </Collapse>
+            
             )
           }
-
           const step = schema[entry]
           const error = entry.split('.').reduce((object, key) => {
             return object && object[key];
@@ -396,7 +404,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
             <Step entry={`${entry}[${idx}].value`} step={{ ...schema[entry], array: false }} error={error && error[idx]?.value}
               register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
               setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient}
-              defaultValue={props.defaultValue} value={props.defaultValue} index={idx} />
+              defaultValue={props.defaultValue} value={props.defaultValue} index={idx} classes={classes} />
           )
         })} />
     )
@@ -475,6 +483,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
                     value={field.value}
                     defaultValue={defaultValue}
                     {...step}
+                    classes={classes}
                   />
                 </CustomizableInput>
               )
@@ -511,7 +520,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
               <input
                 // {...step.props}
                 type={step.format || 'text'} id={entry}
-                className={classNames(`${classes.content}`, {
+                className={classNames(`${classes.input}`, {
                   "is-invalid": error,
                 })}
                 readOnly={step.disabled ? 'readOnly' : null}
@@ -765,7 +774,7 @@ const ArrayStep = ({ entry, step, control, trigger, register, error, component, 
             <div key={field.id} className="d-flex flex-row">
               {component({ key: field.id, ...field, defaultValue: values[idx] || defaultValue }, idx)}
               <div className="input-group-append">
-                <button className="btn btn-danger btn-sm" onClick={() => {
+                <button className={`${classes.btn} ${classes.btn_red} ${classes.mt_5}`} onClick={() => {
                   remove(idx)
                   trigger(entry);
                 }}>remove</button>
@@ -774,31 +783,11 @@ const ArrayStep = ({ entry, step, control, trigger, register, error, component, 
           )
         })}
       <div>
-<<<<<<< HEAD
-  <input type="button" className={classNames("btn btn-info mt-2", { 'is-invalid': error })} onClick={() => {
-    append({ value: defaultValue })
-    trigger(entry);
-  }} value="Add" />
-  { error && <div className={`${classes.txt_red}`}>{error.message}</div> }
-=======
-        <input
-          type="button"
-          className={classNames(
-            `${classes.btn} ${classes.btn_blue} ${classes.mt_5}`,
-            { "is-invalid": error }
-          )}
-          onClick={() => {
-            append(defaultValue);
-            trigger(entry);
-          }}
-          value="Add"
-        />
-<<<<<<< HEAD
-        {error && <div className={`${classes.txt_red}`} >{error.message}</div>}
->>>>>>> 23689d9 (wip)
-=======
+        <input type="button" className={classNames(`${classes.btn} ${classes.btn_blue} ${classes.mt_5}`, { 'is-invalid': error })} onClick={() => {
+          append({ value: defaultValue })
+          trigger(entry);
+        }} value="Add" />
         {error && <div className={`${classes.txt_red}`}>{error.message}</div>}
->>>>>>> 36ff50f (bootstrapless)
       </div >
     </>
   )
