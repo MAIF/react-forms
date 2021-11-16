@@ -134,7 +134,7 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, styl
       
       if (Array.isArray(v)) {
         return { ...acc, [key]: v.map(({value}) => value ) }
-      } else if (typeof v === 'object') {
+      } else if (!!v && typeof v === 'object') {
         return { ...acc, [key]: cleanOutputArray(v) }
       } else {
         return { ...acc, [key]: v }
