@@ -24,7 +24,7 @@ export const buildSubResolver = (props, key, dependencies, rawData) => {
     } else if (props.schema) {
       const deps = [];
       subResolver = yup.object().shape(getShapeAndDependencies(props.flow || Object.keys(props.schema), props.schema, deps, rawData).shape, deps);
-      arrayResolver = arrayResolver.of(subResolver)
+      arrayResolver = arrayResolver.of(yup.object().shape({ value: subResolver }))
     }
     return constraints.reduce((resolver, constraint) => {
       return jsonOrFunctionConstraint(constraint, resolver, key, dependencies)

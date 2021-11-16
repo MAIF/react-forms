@@ -113,36 +113,69 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, styl
     return resolver;
   }
 
+  const cleanInputArray = (obj) => {
+    return Object.entries(obj).reduce((acc, curr) => {
+      const [key, v] = curr;
+
+      if (Array.isArray(v)) {
+        return {...acc, [key]: v.map(value => ({value}))}
+      } else if (typeof v === 'object') {
+        return {...acc, [key]: cleanInputArray(v)}
+      } else {
+        return {...acc, [key]: v}
+      }
+    }, {})
+  }
+
+  const cleanOutputArray = (obj) => {
+    return Object.entries(obj).reduce((acc, curr) => {
+
+      const [key, v] = curr;
+      
+      if (Array.isArray(v)) {
+        return { ...acc, [key]: v.map(({value}) => value ) }
+      } else if (typeof v === 'object') {
+        return { ...acc, [key]: cleanOutputArray(v) }
+      } else {
+        return { ...acc, [key]: v }
+      }
+    }, {})
+  }
+
   const methods = useForm({
     resolver: (data, context, options) => yupResolver(resolver(data))(data, context, options),
-    defaultValues: value || defaultValues
+    defaultValues: cleanInputArray(value || defaultValues)
   });
 
   const { register, handleSubmit, formState: { errors }, control, reset, watch, trigger, getValues, setValue } = methods
 
   useEffect(() => {
     if (value) {
-      reset(value)
+      reset(cleanInputArray(value))
     }
   }, [value, reset])
 
   useEffect(() => {
-    reset(value || defaultValues);
+    reset(cleanInputArray(value || defaultValues));
   }, [schema])
 
   const data = watch();
   useEffect(() => {
     //todo: with debounce
     if (!!options.autosubmit) {
-      handleSubmit(onSubmit)
+      handleSubmit(data => onSubmit(cleanOutputArray(data)))
     }
   }, [data])
 
-  // console.log(watch())
+  if (options.watch) {
+    console.log(watch())
+  }
 
   return (
     <FormProvider {...methods} >
-      <form className={className || "col-12 section pt-2 pr-2"} style={style} onSubmit={handleSubmit(onSubmit)}>
+      <form className={className || "col-12 section pt-2 pr-2"} style={style} onSubmit={handleSubmit(data => {
+        const clean = cleanOutputArray(data)
+        return onSubmit(clean)})}>
         {formFlow.map((entry, idx) => {
           if (entry && typeof entry === 'object') {
             const errored = entry.flow.some(step => !!errors[step])
@@ -174,7 +207,7 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, styl
             </BasicWrapper>
           )
         })}
-        <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(onSubmit)} actions={options.actions} />
+        <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(data => onSubmit(cleanOutputArray(data)))} actions={options.actions} />
       </form>
     </FormProvider>
   )
@@ -204,7 +237,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
         setValue={setValue} values={getValues(entry)} defaultValue={step.defaultValue || defaultVal(step.type)}
         component={((props, idx) => {
           return (
-            <Step entry={`${entry}[${idx}]`} step={{ ...schema[entry], array: false }} error={error}
+            <Step entry={`${entry}[${idx}].value`} step={{ ...schema[entry], array: false }} error={error && error[idx]?.value}
               register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
               setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient}
               defaultValue={props.defaultValue} value={props.defaultValue} index={idx} />
@@ -573,7 +606,7 @@ const ArrayStep = ({ entry, step, control, trigger, register, error, component, 
         })}
       <div>
         <input type="button" className={classNames("btn btn-info mt-2", { 'is-invalid': error })} onClick={() => {
-          append(defaultValue)
+          append({value: defaultValue})
           trigger(entry);
         }} value="Add" />
         {error && <div className="invalid-feedback">{error.message}</div>}
@@ -614,7 +647,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
     <div style={{ borderLeft: '2px solid lightGray', paddingLeft: '.5rem', marginBottom: '.5rem' }}>
       {schemaAndFlow.flow.map((entry, idx) => {
         const step = schemaAndFlow.schema[entry]
-        const realError = index !== undefined ? error && error[index] && error[index][entry] : error && error[entry]
+        const realError = error && error[entry]
 
         return (
           <BasicWrapper key={`${entry}.${idx}`} entry={`${parent}.${entry}`} error={realError} label={step.label || entry} help={step.help} render={inputWrapper}>
