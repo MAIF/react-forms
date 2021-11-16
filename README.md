@@ -205,6 +205,7 @@ Possible constraints are provided by import `constraints` from **@maif/react-for
 
   - [mixed](#mixed)
     - [`constraints.required(message?:string)`](#constraintsrequiredmessagestring)
+    - [`constraints.nullable()`](#constraintsnullable)
     - [`constraints.test(name: string, message?:string, test: (val: any) => boolean | Promise<boolean>)`](#constraintstestname-string-messagestring-test-val-any--boolean--promiseboolean)
     - [`constraints.when(ref: string, test: (val: any) => boolean, then: any = [], otherwise: any = [])`](#constraintswhenref-string-test-val-any--boolean-then-any---otherwise-any--)
     - [`constraints.oneOf(arrayOfValues: any[], message?:string)`](#constraintsoneofarrayofvalues-any-messagestring)
@@ -227,6 +228,16 @@ the following methods works for all type types of value.
   ```
   ```javascript
   {type: 'required', message: "this field is required"}
+  ```
+
+  #### `constraints.nullable()`
+  Indicates the `null` is a valid value for the schema. Without `nullable` `null` will be treated as an error.
+
+   ```javascript
+  constraints.nullable()
+  ```
+  ```javascript
+  {type: 'nullable'}
   ```
 
 #### `constraints.test(name: string, message?:string, test: (val: any) => boolean | Promise<boolean>)`

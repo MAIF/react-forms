@@ -87,6 +87,7 @@ export const maxSize = (ref: number | Reference<number>, message: string = `size
 }
 
 //mixed
+export const nullable  = () => (r: yup.AnySchema) => r.nullable()
 export const test = (name: string, message: string = 'Test failed', test: (val: any) => boolean) => (r: yup.AnySchema) => r.test(name, message, test)
 export const when = (ref: string, test: (val: any) => boolean, then: any = [], otherwise: any = []) => (r: yup.AnySchema, key: string, dependencies: any) => {
   // dependencies.push([key, ref])
@@ -128,4 +129,5 @@ export const jsonConstraints = {
   when: ({ ref, test, then = [], otherwise = [] }: WhenConstraint) => when(ref, test, then, otherwise),
   oneOf: ({ arrayOfValues, message = `This value must be one of ${arrayOfValues.join(', ')}` }: ArrayOfAnyConstraint) => oneOf(arrayOfValues, message),
   ref: (val: Ref): Reference => ref(val.ref),
+  nullable: () => nullable()
 }
