@@ -163,7 +163,7 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, styl
   useEffect(() => {
     //todo: with debounce
     if (!!options.autosubmit) {
-      handleSubmit(data => onSubmit(cleanOutputArray(data)))
+      handleSubmit(() => onSubmit(cleanOutputArray(data)))
     }
   }, [data])
 
