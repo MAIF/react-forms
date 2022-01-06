@@ -1,6 +1,6 @@
+import React, { useEffect, useState, useRef } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup';
 import classNames from 'classnames';
-import React, { useEffect, useState, useRef } from 'react'
 import { HelpCircle, Loader, Upload } from 'react-feather';
 import { useForm, useFormContext, Controller, useFieldArray, FormProvider } from 'react-hook-form';
 import { DatePicker } from 'react-rainbow-components';
@@ -8,6 +8,7 @@ import ReactToolTip from 'react-tooltip';
 import { v4 as uuid } from 'uuid';
 import * as yup from "yup";
 
+import { useCustomStyle } from './styleContext';
 import { type } from './type';
 import { format } from './format';
 import { BooleanInput, Collapse, SelectInput, ObjectInput, CodeInput, MarkdownInput } from './inputs/index';
@@ -27,7 +28,6 @@ const usePrevious = (value) => {
   // Return previous value (happens before update in useEffect above)
   return ref.current;
 }
-
 
 const BasicWrapper = ({ entry, label, error, help, children, render }) => {
   const id = uuid();
@@ -84,7 +84,8 @@ const getDefaultValues = (flow, schema) => {
   }, {})
 }
 
-export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, style, className, options = {} }) => {
+export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, style = {}, className, options = {} }) => {
+  const classes = useCustomStyle(style)
   const formFlow = flow || Object.keys(schema)
 
   const maybeCustomHttpClient = (url, method) => {
@@ -118,11 +119,11 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, styl
       const [key, v] = curr;
 
       if (Array.isArray(v)) {
-        return {...acc, [key]: v.map(value => ({value}))}
+        return { ...acc, [key]: v.map(value => ({ value })) }
       } else if (!!v && typeof v === 'object') {
-        return {...acc, [key]: cleanInputArray(v)}
+        return { ...acc, [key]: cleanInputArray(v) }
       } else {
-        return {...acc, [key]: v}
+        return { ...acc, [key]: v }
       }
     }, {})
   }
@@ -131,9 +132,9 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, styl
     return Object.entries(obj).reduce((acc, curr) => {
 
       const [key, v] = curr;
-      
+
       if (Array.isArray(v)) {
-        return { ...acc, [key]: v.map(({value}) => value ) }
+        return { ...acc, [key]: v.map(({ value }) => value) }
       } else if (!!v && typeof v === 'object') {
         return { ...acc, [key]: cleanOutputArray(v) }
       } else {
@@ -172,48 +173,51 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, styl
   }
 
   return (
-    <FormProvider {...methods} >
-      <form className={className || "col-12 section pt-2 pr-2"} style={style} onSubmit={handleSubmit(data => {
-        const clean = cleanOutputArray(data)
-        return onSubmit(clean)})}>
-        {formFlow.map((entry, idx) => {
-          if (entry && typeof entry === 'object') {
-            const errored = entry.flow.some(step => !!errors[step])
-            return (
-              <Collapse key={idx} label={entry.label} collapsed={entry.collapsed} errored={errored}>
-                {entry.flow.map((entry, idx) => {
-                  const step = schema[entry]
-                  return (
-                    <BasicWrapper key={idx} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
-                      <Step entry={entry} step={schema[entry]} error={error}
-                        register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-                        setValue={setValue} watch={watch} inputWrapper={inputWrapper} />
-                    </BasicWrapper>
-                  )
-                })}
-              </Collapse>
-            )
-          }
+      <FormProvider {...methods} >
+      <form className={className || classes.pr_15} onSubmit={handleSubmit(data => {
+          const clean = cleanOutputArray(data)
+          return onSubmit(clean)
+        })}>
+          {formFlow.map((entry, idx) => {
+            if (entry && typeof entry === 'object') {
+              const errored = entry.flow.some(step => !!errors[step])
+              return (
+                <Collapse key={idx} label={entry.label} collapsed={entry.collapsed} errored={errored}>
+                  {entry.flow.map((entry, idx) => {
+                    const step = schema[entry]
+                    return (
+                      <BasicWrapper key={idx} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
+                        <Step entry={entry} step={schema[entry]} error={error}
+                          register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
+                          setValue={setValue} watch={watch} inputWrapper={inputWrapper} />
+                      </BasicWrapper>
+                    )
+                  })}
+                </Collapse>
+              )
+            }
 
-          const step = schema[entry]
-          const error = entry.split('.').reduce((object, key) => {
-            return object && object[key];
-          }, errors);
-          return (
-            <BasicWrapper key={idx} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
-              <Step key={idx} entry={entry} step={step} error={error}
-                register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-                setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient} />
-            </BasicWrapper>
-          )
-        })}
-        <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(data => onSubmit(cleanOutputArray(data)))} actions={options.actions} />
-      </form>
-    </FormProvider>
+            const step = schema[entry]
+            const error = entry.split('.').reduce((object, key) => {
+              return object && object[key];
+            }, errors);
+            return (
+              <BasicWrapper key={idx} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
+                <Step key={idx} entry={entry} step={step} error={error}
+                  register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
+                  setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient} />
+              </BasicWrapper>
+            )
+          })}
+          <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(data => onSubmit(cleanOutputArray(data)))} actions={options.actions} />
+        </form>
+      </FormProvider>
   )
 }
 
 const Footer = (props) => {
+  const classes = useCustomStyle();
+
   if (props.render) {
     return props.render({ reset: props.reset, valid: props.valid })
   }
@@ -221,14 +225,16 @@ const Footer = (props) => {
   const isSubmitDisplayed = props.actions?.submit?.display === undefined ? true : !!props.actions?.submit?.display
 
   return (
-    <div className="d-flex flex-row justify-content-end mt-2">
-      {props.actions?.reset?.display && <button className="btn btn-danger" type="button" onClick={props.reset}>{props.actions?.reset?.label || 'Reset'}</button>}
-      {isSubmitDisplayed && <button className="btn btn-success ml-1" type="submit">{props.actions?.submit?.label || 'Save'}</button>}
+    <div className={`${classes.flex} ${classes.jc_end} ${classes.mt_5}`}>
+      {props.actions?.reset?.display && <button className={`${classes.btn} ${classes.btn_red}`} type="button" onClick={props.reset}>{props.actions?.reset?.label || 'Reset'}</button>}
+      {isSubmitDisplayed && <button className={`${classes.btn} ${classes.btn_green} ${classes.ml_10}`} type="submit">{props.actions?.submit?.label || 'Save'}</button>}
     </div>
   )
 }
 
 const Step = ({ entry, step, error, register, schema, control, trigger, getValues, setValue, watch, inputWrapper, httpClient, defaultValue, index }) => {
+  const classes = useCustomStyle();
+  
   if (step.array) {
     return (
       <ArrayStep
@@ -271,7 +277,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
             <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v) }} error={error}>
               <textarea
                 type="text" id={entry}
-                className={classNames("form-control", { 'is-invalid': error })}
+                className={classNames(classes.input, { 'is-invalid': error })}
                 readOnly={step.disabled ? 'readOnly' : null}
                 {...step.props}
                 name={entry}
@@ -352,7 +358,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
               <input
                 // {...step.props}
                 type={step.format || 'text'} id={entry}
-                className={classNames("form-control", { 'is-invalid': error })}
+                className={classNames(classes.input, { 'is-invalid': error })}
                 readOnly={step.disabled ? 'readOnly' : null}
                 // defaultValue={defaultValue}
                 placeholder={step.placeholder}
@@ -373,7 +379,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
                   <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
                     <SelectInput
                       {...step.props}
-                      className={classNames({ 'is-invalid': error })}
+                      className={classNames(classes.content, { 'is-invalid': error })}
                       readOnly={step.disabled ? 'readOnly' : null}
                       onChange={field.onChange}
                       value={field.value}
@@ -393,7 +399,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
               <input
                 {...step.props}
                 type={step.format || 'number'} id={entry}
-                className={classNames("form-control", { 'is-invalid': error })}
+                className={classNames(classes.input, { 'is-invalid': error })}
                 readOnly={step.disabled ? 'readOnly' : null}
                 name={entry}
                 placeholder={step.placeholder}
@@ -537,17 +543,17 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
                       ref={(r) => setInput(r)}
                       type="file"
                       multiple
-                      className="form-control d-none"
+                      className={classes.d_none}
                       onChange={setFiles}
                     />
                     <button
                       type="button"
-                      className="btn btn-outline-success pl"
+                      className={`${classes.btn} ${classes.flex} ${classes.ai_center}`}
                       disabled={uploading}
                       onClick={trigger}>
                       {uploading && <Loader />}
                       {!uploading && <Upload />}
-                      Select file
+                      <span className={`${classes.ml_5}`}>Select file</span>
                     </button>
                   </div>
                 );
@@ -567,7 +573,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
           <input
             {...step.props}
             type='file' id={entry}
-            className={classNames("form-control", { 'is-invalid': error })}
+            className={classNames(classes.input, { 'is-invalid': error })}
             readOnly={step.disabled ? 'readOnly' : null}
             name={entry}
             placeholder={step.placeholder}
@@ -606,7 +612,7 @@ const ArrayStep = ({ entry, step, control, trigger, register, error, component, 
         })}
       <div>
         <input type="button" className={classNames("btn btn-info mt-2", { 'is-invalid': error })} onClick={() => {
-          append({value: defaultValue})
+          append({ value: defaultValue })
           trigger(entry);
         }} value="Add" />
         {error && <div className="invalid-feedback">{error.message}</div>}

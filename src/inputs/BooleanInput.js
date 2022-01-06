@@ -1,19 +1,13 @@
 import React from 'react';
 import { ToggleLeft, ToggleRight } from 'react-feather';
+import { useCustomStyle } from '../styleContext';
 
 export const BooleanInput = ({ onChange, value }) => {
+  const classes = useCustomStyle();
   return (
-    <div>
-      <div className="form-group row">
-        <div className="col-sm-10">
-          <div className="row">
-            <div className="col-sm-6 cursor-pointer">
-              {!!value && <ToggleRight className="input__boolean__on" onClick={() => onChange(false)} />}
-              {!value && <ToggleLeft className="input__boolean__off" onClick={() => onChange(true)} />}
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className={classes.cursor_pointer}>
+      {!!value && <ToggleRight className={classes.input__boolean__on} onClick={() => onChange(false)} />}
+      {!value && <ToggleLeft className={classes.input__boolean__off} onClick={() => onChange(true)} />}
     </div>
   );
 

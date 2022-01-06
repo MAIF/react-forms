@@ -3,7 +3,7 @@ import CreatableSelect from 'react-select/creatable';
 import Select from 'react-select';
 import { option } from '../Option';
 
-const valueToSelectOption = (value, isMulti= false) => {
+const valueToSelectOption = (value, isMulti = false) => {
   if (value === null) {
     return null;
   }
@@ -17,15 +17,26 @@ const valueToSelectOption = (value, isMulti= false) => {
 };
 
 export const SelectInput = (props) => {
-  const [loading, setLoading] = useState(false);
-  const [value, setValue] = useState(valueToSelectOption(props.value || props.defaultValue, props.isMulti))
-  const [values, setValues] = useState((props.possibleValues || [])
+  const possibleValues = (props.possibleValues || [])
     .map(v => props.transformer ? props.transformer(v) : v)
-    .map(v => valueToSelectOption(v)))
+    .map(v => valueToSelectOption(v))
+
+  const [loading, setLoading] = useState(false);
+
+  const [values, setValues] = useState(possibleValues);
+
+  const [value, setValue] = useState(valueToSelectOption(
+    option(possibleValues
+      .find(v => v.value === props.value))
+      .orElse(option(possibleValues.find(v => v.value === props.defaultValue)))
+      .getOrElse(props.value || props.defaultValue), props.isMulti))
 
   useEffect(() => {
-    setValue(valueToSelectOption(props.value || props.defaultValue, props.isMulti))
-  }, [])
+    setValue(valueToSelectOption(
+      option(possibleValues
+        .find(v => v.value === props.value))
+        .getOrElse(props.value || props.defaultValue), props.isMulti))
+  }, [props.value])
 
   useEffect(() => {
     if (props.optionsFrom) {
@@ -57,7 +68,7 @@ export const SelectInput = (props) => {
     }
   };
 
-  const createOption = (option, fn = () => {}) => {
+  const createOption = (option, fn = () => { }) => {
     fn(option)
     setValues([...values, valueToSelectOption(option)])
     onChange(valueToSelectOption(option))

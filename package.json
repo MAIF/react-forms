@@ -113,6 +113,7 @@
     "react-ace": "9.4.3",
     "react-feather": "2.0.9",
     "react-hook-form": "7.17.1",
+    "react-jss": "10.8.2",
     "react-rainbow-components": "1.26.0",
     "react-select": "4.3.1",
     "react-tooltip": "4.2.21",

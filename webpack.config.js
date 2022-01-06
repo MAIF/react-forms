@@ -65,7 +65,7 @@ const commons = {
 
 
 if (isDev) {
-  module.exports = { ...commons, devtool: 'inline-source-map', mode: 'development' };
+  module.exports = { ...commons, devtool: 'eval-source-map', mode: 'development' };
 } else {
   module.exports = { ...commons, optimization: { minimize: true }, devtool: false, mode: 'production' };
 }
