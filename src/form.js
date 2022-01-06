@@ -114,14 +114,23 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, styl
     return resolver;
   }
 
-  const cleanInputArray = (obj) => {
+  const cleanInputArray = (obj, subSchema) => {
     return Object.entries(obj).reduce((acc, curr) => {
       const [key, v] = curr;
 
       if (Array.isArray(v)) {
-        return { ...acc, [key]: v.map(value => ({ value })) }
+        const isArray = option(subSchema)
+          .orElse(schema)
+          .map(s => s[key])
+          .map(entry => entry.format === format.array)
+          .getOrElse(false)
+        console.log({key, format: schema[key].format})
+        if (isArray) {
+          return { ...acc, [key]: v.map(value => ({value})) }
+        }
+        return { ...acc, [key]: v }
       } else if (!!v && typeof v === 'object') {
-        return { ...acc, [key]: cleanInputArray(v) }
+        return { ...acc, [key]: cleanInputArray(v, schema[key]?.schema || {}) }
       } else {
         return { ...acc, [key]: v }
       }
@@ -134,7 +143,12 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, styl
       const [key, v] = curr;
 
       if (Array.isArray(v)) {
-        return { ...acc, [key]: v.map(({ value }) => value) }
+        const isArray = schema[key].format === format.array
+        console.log({ key, format: schema[key].format })
+        if (isArray) {
+          return { ...acc, [key]: v.map(({ value }) => value) }
+        }
+        return { ...acc, [key]: v }
       } else if (!!v && typeof v === 'object') {
         return { ...acc, [key]: cleanOutputArray(v) }
       } else {
