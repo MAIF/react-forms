@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useImperativeHandle } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup';
 import classNames from 'classnames';
 import { HelpCircle, Loader, Upload } from 'react-feather';
@@ -84,9 +84,11 @@ const getDefaultValues = (flow, schema) => {
   }, {})
 }
 
-export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, style = {}, className, options = {} }) => {
+export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSubmit, onError = () => {}, footer, style = {}, className, options = {} }, ref) => {
   const classes = useCustomStyle(style)
   const formFlow = flow || Object.keys(schema)
+
+  
 
   const maybeCustomHttpClient = (url, method) => {
     //todo: if present props.resolve()
@@ -177,10 +179,14 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, styl
   }, [schema])
 
   const data = watch();
+  const prevData = usePrevious(data)
   useEffect(() => {
     //todo: with debounce
-    if (!!options.autosubmit) {
-      handleSubmit(() => onSubmit(cleanOutputArray(data)))
+    if (!!options.autosubmit && JSON.stringify(data) !== JSON.stringify(prevData)) {
+      handleSubmit(data => {
+        const clean = cleanOutputArray(data)
+        onSubmit(clean)
+      }, onError)()
     }
   }, [data])
 
@@ -188,12 +194,19 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, styl
     console.log(watch())
   }
 
+  useImperativeHandle(ref, () => ({
+    handleSubmit: () => handleSubmit(data => {
+        const clean = cleanOutputArray(data)
+        onSubmit(clean)
+      }, onError)()
+  }));
+
   return (
       <FormProvider {...methods} >
       <form className={className || classes.pr_15} onSubmit={handleSubmit(data => {
           const clean = cleanOutputArray(data)
-          return onSubmit(clean)
-        })}>
+          onSubmit(clean)
+        }, onError)}>
           {formFlow.map((entry, idx) => {
             if (entry && typeof entry === 'object') {
               const errored = entry.flow.some(step => !!errors[step])
@@ -225,11 +238,11 @@ export const Form = ({ schema, flow, value, inputWrapper, onSubmit, footer, styl
               </BasicWrapper>
             )
           })}
-          <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(data => onSubmit(cleanOutputArray(data)))} actions={options.actions} />
+          <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(data => onSubmit(cleanOutputArray(data)), onError)} actions={options.actions} />
         </form>
       </FormProvider>
   )
-}
+})
 
 const Footer = (props) => {
   const classes = useCustomStyle();
