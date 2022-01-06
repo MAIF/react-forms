@@ -1,4 +1,4 @@
-name: Release Daikoku
+name: Release react-forms
 on:
   push:
     tags:
