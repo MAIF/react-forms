@@ -2,19 +2,22 @@ import React, { useState, useEffect } from 'react';
 import CreatableSelect from 'react-select/creatable';
 import Select from 'react-select';
 import { option } from '../Option';
+import { deepEqual } from '../utils'
 
-const valueToSelectOption = (value, possibleValues = [], isMulti = false) => {
+const valueToSelectOption = (value, possibleValues = [], isMulti = false, maybeTransformer) => {
   if (value === null) {
     return null;
   }
   if (isMulti) {
-    return value.map(x => valueToSelectOption(x, possibleValues, false));
+    return option(value).map(v => v.map(x => valueToSelectOption(x, possibleValues, false, maybeTransformer))).getOrElse([]);
   }
-  const maybeValue = option(possibleValues.find(v => v.value === value))
-  return {
-    label: maybeValue.map(v => v.label).getOrElse(value),
-    value: maybeValue.map(v => v.value).getOrElse(value),
-  };
+  const maybeValue = option(possibleValues.find(v => deepEqual(v.value, value)))
+  return option(maybeTransformer)
+    .flatMap(transformer => maybeValue.map(({value}) => transformer(value)))
+    .getOrElse({
+      label: maybeValue.map(v => v.label).getOrElse(value),
+      value: maybeValue.map(v => v.value).getOrElse(value),
+    });
 };
 
 export const SelectInput = (props) => {
@@ -27,10 +30,10 @@ export const SelectInput = (props) => {
 
   const [loading, setLoading] = useState(false);
   const [values, setValues] = useState(possibleValues);
-  const [value, setValue] = useState(valueToSelectOption(props.value || props.defaultValue, possibleValues, props.isMulti))
+  const [value, setValue] = useState(valueToSelectOption(props.value || props.defaultValue, possibleValues, props.isMulti, props.transformer))
 
   useEffect(() => {
-    setValue(valueToSelectOption(props.value, values, props.isMulti))
+    setValue(valueToSelectOption(props.value, values, props.isMulti, props.transformer))
   }, [props.value, values])
 
   useEffect(() => {
@@ -43,7 +46,7 @@ export const SelectInput = (props) => {
         setLoading(true);
         return props.httpClient(props.optionsFrom, 'GET')
           .then((r) => r.json())
-          .then((values) => values.map(x => props.transformer ? props.transformer(x) : valueToSelectOption(x)))
+          .then((values) => values.map(x => props.transformer ? props.transformer(x) : valueToSelectOption(x, values, props.isMulti, props.transformer)))
           .then((values) => {
             setValues(values);
             setValue(values.find((item) => item.value === (value ? value.value : value)) || null);
@@ -65,8 +68,8 @@ export const SelectInput = (props) => {
 
   const createOption = (option, fn = () => { }) => {
     fn(option)
-    setValues([...values, valueToSelectOption(option, values)])
-    onChange([...value, valueToSelectOption(option, [...values, valueToSelectOption(option, values)])])
+    setValues([...values, valueToSelectOption(option, values, props.isMulti, props.transformer)])
+    onChange([...value, valueToSelectOption(option, [...values, valueToSelectOption(option, values, props.isMulti, props.transformer)], props.isMulti, props.transformer)])
   }
 
   if (props.createOption) {

@@ -64,12 +64,12 @@ const CustomizableInput = props => {
 }
 
 const defaultVal = (t, array, defaultValue) => {
-  if (!!array) return []
   if (!!defaultValue) return defaultValue
+  if (!!array) return []
   switch (t) {
     case type.bool: return false;
     case type.number: return 0;
-    case type.object: return {};
+    case type.object: return undefined; //todo: passur de moi
     case type.string: return "";
     default: return undefined;
   }
@@ -80,7 +80,7 @@ const getDefaultValues = (flow, schema) => {
     if (typeof key === 'object') {
       return { ...acc, ...getDefaultValues(key.flow, schema) }
     }
-    return { ...acc, [key]: defaultVal(entry.type, entry.array, entry.defaultValue) }
+    return { ...acc, [key]: defaultVal(entry.type, entry.array || entry.isMulti, entry.defaultValue) }
   }, {})
 }
 
@@ -211,11 +211,12 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
             if (entry && typeof entry === 'object') {
               const errored = entry.flow.some(step => !!errors[step])
               return (
-                <Collapse key={idx} label={entry.label} collapsed={entry.collapsed} errored={errored}>
-                  {entry.flow.map((entry, idx) => {
+                <Collapse key={`collapse-${idx}`} label={entry.label} collapsed={entry.collapsed} errored={errored}>
+                  {entry.flow.map((entry, entryIdx) => {
                     const step = schema[entry]
+                    //FIXME: better key ==> entry name + idx
                     return (
-                      <BasicWrapper key={idx} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
+                      <BasicWrapper key={`collapse-${idx}-${entry}-${entryIdx}`} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}> 
                         <Step entry={entry} step={schema[entry]} error={error}
                           register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
                           setValue={setValue} watch={watch} inputWrapper={inputWrapper} />
@@ -231,7 +232,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
               return object && object[key];
             }, errors);
             return (
-              <BasicWrapper key={idx} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
+              <BasicWrapper key={`${entry}-${idx}`} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
                 <Step key={idx} entry={entry} step={step} error={error}
                   register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
                   setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient} />
