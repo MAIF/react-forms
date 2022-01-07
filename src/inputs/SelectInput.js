@@ -12,8 +12,7 @@ const valueToSelectOption = (value, possibleValues = [], isMulti = false, maybeT
     return option(value).map(v => v.map(x => valueToSelectOption(x, possibleValues, false, maybeTransformer))).getOrElse([]);
   }
   const maybeValue = option(possibleValues.find(v => deepEqual(v.value, value)))
-  return option(maybeTransformer)
-    .flatMap(transformer => maybeValue.map(({value}) => transformer(value)))
+  return maybeValue
     .getOrElse({
       label: maybeValue.map(v => v.label).getOrElse(value),
       value: maybeValue.map(v => v.value).getOrElse(value),
@@ -66,10 +65,19 @@ export const SelectInput = (props) => {
     }
   };
 
-  const createOption = (option, fn = () => { }) => {
-    fn(option)
-    setValues([...values, valueToSelectOption(option, values, props.isMulti, props.transformer)])
-    onChange([...value, valueToSelectOption(option, [...values, valueToSelectOption(option, values, props.isMulti, props.transformer)], props.isMulti, props.transformer)])
+  const handleCreate = (label, fn) => {
+    const createdValue = option(fn)
+      .map(func => func(label))
+      .map(createdOpt => option(props.transformer).map(t => t(createdOpt)).getOrElse(createdOpt))
+      .getOrElse(valueToSelectOption(label, values))
+
+    setValues([...values, createdValue])
+
+    if (props.isMulti) {
+      onChange([...value, createdValue])
+    } else {
+      onChange(createdValue)
+    }
   }
 
   if (props.createOption) {
@@ -84,7 +92,7 @@ export const SelectInput = (props) => {
         isClearable
         onChange={onChange}
         options={values}
-        onCreateOption={option => props.onCreateOption ? createOption(option, props.onCreateOption) : createOption(option)}
+        onCreateOption={option => handleCreate(option, props.onCreateOption)}
         classNamePrefix="react-form-select"
         className={props.className}
       />

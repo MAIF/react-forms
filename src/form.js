@@ -84,11 +84,9 @@ const getDefaultValues = (flow, schema) => {
   }, {})
 }
 
-export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSubmit, onError = () => {}, footer, style = {}, className, options = {} }, ref) => {
+export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSubmit, onError = () => { }, footer, style = {}, className, options = {} }, ref) => {
   const classes = useCustomStyle(style)
   const formFlow = flow || Object.keys(schema)
-
-  
 
   const maybeCustomHttpClient = (url, method) => {
     //todo: if present props.resolve()
@@ -127,7 +125,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
           .map(entry => !!entry.array)
           .getOrElse(false)
         if (isArray) {
-          return { ...acc, [key]: v.map(value => ({value})) }
+          return { ...acc, [key]: v.map(value => ({ value })) }
         }
         return { ...acc, [key]: v }
       } else if (!!v && typeof v === 'object') {
@@ -196,52 +194,52 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 
   useImperativeHandle(ref, () => ({
     handleSubmit: () => handleSubmit(data => {
-        const clean = cleanOutputArray(data)
-        onSubmit(clean)
-      }, onError)()
+      const clean = cleanOutputArray(data)
+      onSubmit(clean)
+    }, onError)()
   }));
 
   return (
-      <FormProvider {...methods} >
+    <FormProvider {...methods} >
       <form className={className || classes.pr_15} onSubmit={handleSubmit(data => {
-          const clean = cleanOutputArray(data)
-          onSubmit(clean)
-        }, onError)}>
-          {formFlow.map((entry, idx) => {
-            if (entry && typeof entry === 'object') {
-              const errored = entry.flow.some(step => !!errors[step])
-              return (
-                <Collapse key={`collapse-${idx}`} label={entry.label} collapsed={entry.collapsed} errored={errored}>
-                  {entry.flow.map((entry, entryIdx) => {
-                    const step = schema[entry]
-                    //FIXME: better key ==> entry name + idx
-                    return (
-                      <BasicWrapper key={`collapse-${idx}-${entry}-${entryIdx}`} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}> 
-                        <Step entry={entry} step={schema[entry]} error={error}
-                          register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-                          setValue={setValue} watch={watch} inputWrapper={inputWrapper} />
-                      </BasicWrapper>
-                    )
-                  })}
-                </Collapse>
-              )
-            }
-
-            const step = schema[entry]
-            const error = entry.split('.').reduce((object, key) => {
-              return object && object[key];
-            }, errors);
+        const clean = cleanOutputArray(data)
+        onSubmit(clean)
+      }, onError)}>
+        {formFlow.map((entry, idx) => {
+          if (entry && typeof entry === 'object') {
+            const errored = entry.flow.some(step => !!errors[step])
             return (
-              <BasicWrapper key={`${entry}-${idx}`} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
-                <Step key={idx} entry={entry} step={step} error={error}
-                  register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-                  setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient} />
-              </BasicWrapper>
+              <Collapse key={`collapse-${idx}`} label={entry.label} collapsed={entry.collapsed} errored={errored}>
+                {entry.flow.map((entry, entryIdx) => {
+                  const step = schema[entry]
+                  //FIXME: better key ==> entry name + idx
+                  return (
+                    <BasicWrapper key={`collapse-${idx}-${entry}-${entryIdx}`} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
+                      <Step entry={entry} step={schema[entry]} error={error}
+                        register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
+                        setValue={setValue} watch={watch} inputWrapper={inputWrapper} />
+                    </BasicWrapper>
+                  )
+                })}
+              </Collapse>
             )
-          })}
-          <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(data => onSubmit(cleanOutputArray(data)), onError)} actions={options.actions} />
-        </form>
-      </FormProvider>
+          }
+
+          const step = schema[entry]
+          const error = entry.split('.').reduce((object, key) => {
+            return object && object[key];
+          }, errors);
+          return (
+            <BasicWrapper key={`${entry}-${idx}`} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
+              <Step key={idx} entry={entry} step={step} error={error}
+                register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
+                setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient} />
+            </BasicWrapper>
+          )
+        })}
+        <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(data => onSubmit(cleanOutputArray(data)), onError)} actions={options.actions} />
+      </form>
+    </FormProvider>
   )
 })
 
@@ -264,7 +262,7 @@ const Footer = (props) => {
 
 const Step = ({ entry, step, error, register, schema, control, trigger, getValues, setValue, watch, inputWrapper, httpClient, defaultValue, index }) => {
   const classes = useCustomStyle();
-  
+
   if (step.array) {
     return (
       <ArrayStep
@@ -624,13 +622,17 @@ const ArrayStep = ({ entry, step, control, trigger, register, error, component, 
     // keyName: "id", default to "id", you can change the key name
   });
 
+  console.log({ fields})
+
   return (
     <>
       {fields
         .map((field, idx) => {
           return (
             <div key={field.id} className="d-flex flex-row">
-              {component({ key: field.id, ...field, defaultValue: values[idx] || defaultValue }, idx)}
+              <div className="flex-grow-1">
+                {component({ key: field.id, ...field, defaultValue: values[idx] || defaultValue }, idx)}
+              </div>
               <div className="input-group-append">
                 <button className="btn btn-danger btn-sm" onClick={() => {
                   remove(idx)
@@ -642,7 +644,7 @@ const ArrayStep = ({ entry, step, control, trigger, register, error, component, 
         })}
       <div>
         <input type="button" className={classNames("btn btn-info mt-2", { 'is-invalid': error })} onClick={() => {
-          append({ value: defaultValue })
+          append({ value: step.addableDefaultValue })
           trigger(entry);
         }} value="Add" />
         {error && <div className="invalid-feedback">{error.message}</div>}
