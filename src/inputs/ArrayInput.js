@@ -43,7 +43,7 @@ export const ArrayInput = (props) => {
           });
       }
     }
-  }, [props, value])
+  }, [])
 
   const handleChanges = (changes) => {
     props.onChange(changes.map(x => x.value))
