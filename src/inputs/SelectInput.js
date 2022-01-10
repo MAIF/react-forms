@@ -53,7 +53,7 @@ export const SelectInput = (props) => {
           });
       }
     }
-  }, [])
+  }, [props.optionsFrom])
 
 
   const onChange = (changes) => {

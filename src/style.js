@@ -102,8 +102,11 @@ export const style = {
   flex: {
     display: "flex",
   },
-  flexDirection: {
+  flexColumn: {
     flexDirection: "column",
+  },
+  justifyContentBetween: {
+    justifyContent: "space-between",
   },
   jc_end: {
     justifyContent: "end",
@@ -137,5 +140,5 @@ export const style = {
   },
   input__boolean__off: {
     color: "tomato"
-  }
+  },
 }
