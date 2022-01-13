@@ -33,6 +33,10 @@ const BasicWrapper = ({ entry, label, error, help, children, render }) => {
   const classes = useCustomStyle()
   const id = uuid();
 
+  if (typeof entry === 'object') {
+    return children
+  }
+
   if (render) {
     return render({ entry, label, error, help, children })
   }
@@ -207,35 +211,34 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
         onSubmit(clean)
       }, onError)}>
         {formFlow.map((entry, idx) => {
-          if (entry && typeof entry === 'object') {
-            const errored = entry.flow.some(step => !!errors[step])
-            return (
-              <Collapse key={`collapse-${idx}`} label={entry.label} collapsed={entry.collapsed} errored={errored}>
-                {entry.flow.map((entry, entryIdx) => {
-                  const step = schema[entry]
-                  const error = entry.split('.').reduce((object, key) => {
-                    return object && object[key];
-                  }, errors);
-                  //FIXME: better key ==> entry name + idx
-                  return (
-                    <BasicWrapper key={`collapse-${idx}-${entry}-${entryIdx}`} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
-                      <Step entry={entry} step={schema[entry]} error={error}
-                        register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-                        setValue={setValue} watch={watch} inputWrapper={inputWrapper} />
-                    </BasicWrapper>
-                  )
-                })}
-              </Collapse>
-            )
-          }
-
           const step = schema[entry]
-          const error = entry.split('.').reduce((object, key) => {
+          const error = typeof entry === 'object' ? undefined : entry.split('.').reduce((object, key) => {
             return object && object[key];
           }, errors);
+
+          const visibleStep = option(step)
+            .map(s => s.visible)
+            .map(visible => {
+              switch (typeof visible) {
+                case 'object':
+                  const value = watch(step.visible.ref);
+                  return option(step.visible.test).map(test => test(value)).getOrElse(value)
+                case 'boolean':
+                  return visible;
+                default:
+                  return true;
+              }
+            })
+            .getOrElse(true)
+
+          if (!visibleStep) {
+            return null;
+          }
+
+
           return (
-            <BasicWrapper key={`${entry}-${idx}`} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
-              <Step key={idx} entry={entry} step={step} error={error}
+            <BasicWrapper key={`${entry}-${idx}`} entry={entry} error={error} label={step?.label || entry} help={step?.help} render={inputWrapper}>
+              <Step key={idx} entry={entry} step={step} error={error} errors={errors}
                 register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
                 setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient} />
             </BasicWrapper>
@@ -264,24 +267,28 @@ const Footer = (props) => {
   )
 }
 
-const Step = ({ entry, step, error, register, schema, control, trigger, getValues, setValue, watch, inputWrapper, httpClient, defaultValue, index }) => {
+const Step = ({ entry, step, error, errors, register, schema, control, trigger, getValues, setValue, watch, inputWrapper, httpClient, defaultValue, index }) => {
   const classes = useCustomStyle();
+  if (entry && typeof entry === 'object') {
+    const errored = entry.flow.some(step => !!errors[step])
+    return (
+      <Collapse label={entry.label} collapsed={entry.collapsed} errored={errored}>
+        {entry.flow.map((en, entryIdx) => {
+          const stp = schema[en]
+          const err = typeof entry === 'object' ? undefined : en.split('.').reduce((object, key) => {
+            return object && object[key];
+          }, errors);
 
-  const visibleStep = step && option(step.visible)
-    .map(visible => {
-      switch (typeof visible) {
-        case 'object':
-          const value = watch(step.visible.ref);
-          return option(step.visible.test).map(test => test(value)).getOrElse(value)
-        case 'boolean':
-          return visible;
-        default:
-          return true;
-      }
-    })
-    .getOrElse(true)
-  if (!visibleStep) {
-    return null;
+          return (
+            <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} error={err} label={stp?.label || en} help={stp?.help} render={inputWrapper}>
+              <Step entry={en} step={stp} error={err} errors={errors}
+                register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
+                setValue={setValue} watch={watch} inputWrapper={inputWrapper} />
+            </BasicWrapper>
+          )
+        })}
+      </Collapse>
+    )
   }
 
   if (step.array) {
@@ -623,6 +630,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
 
 
 const ArrayStep = ({ entry, step, control, trigger, register, error, component, values, defaultValue, setValue }) => {
+  const classes = useCustomStyle()
   const { fields, append, remove } = useFieldArray({
     control, // control props comes from useForm (optional: if you are using FormContext)
     name: entry, // unique name for your Field Array
