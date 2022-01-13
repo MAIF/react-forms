@@ -129,6 +129,13 @@ export const style = {
     fontWeight: "bold",
     marginTop: 7,
   },
+  collapse_label: {
+    fontWeight: "bold",
+    marginTop: 7,
+  },
+  collapse_error: {
+    color: '#dc3545'
+  },
   datepicker: {
     "& input": {
       borderRadius: "4px",
@@ -141,4 +148,13 @@ export const style = {
   input__boolean__off: {
     color: "tomato"
   },
+  input__invalid: {
+    borderColor: '#dc3545'
+  },
+  invalid_feedback: {
+    width: "100%",
+    marginTop: ".25rem",
+    fontSize: "80%",
+    color: "#dc3545"
+  }
 }

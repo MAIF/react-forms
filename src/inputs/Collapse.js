@@ -13,13 +13,13 @@ export const Collapse = (props) => {
   };
 
   return (
-    <div className={classNames('form__collapse', { errored: props.errored })}>
-      <hr />
+    <div>
+      <hr className={classNames({ [classes.collapse_error]: props.errored })}/>
       <div className={`${classes.cursor_pointer} ${classes.flex} ${classes.justifyContentBetween}`} onClick={toggle}>
-        <span className={classes.collapse_label}>{props.label}</span>
+        <span className={classNames(classes.collapse_label, { [classes.collapse_error]: props.errored })}>{props.label}</span>
         <button
           type="button"
-          className={classes.btn}
+          className={classNames(classes.btn, { [classes.collapse_error]: props.errored })}
           onClick={toggle}>
             {!!collapsed && <Eye />}
             {!collapsed && <EyeOff />}

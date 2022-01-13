@@ -30,6 +30,7 @@ const usePrevious = (value) => {
 }
 
 const BasicWrapper = ({ entry, label, error, help, children, render }) => {
+  const classes = useCustomStyle()
   const id = uuid();
 
   if (render) {
@@ -49,7 +50,7 @@ const BasicWrapper = ({ entry, label, error, help, children, render }) => {
       </label>
 
       {children}
-      {error && <div className="invalid-feedback">{error.message}</div>}
+      {error && <div className={classes.invalid_feedback}>{error.message}</div>}
     </div>
   )
 }
@@ -308,7 +309,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
             <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v) }} error={error}>
               <textarea
                 type="text" id={entry}
-                className={classNames(classes.input, { 'is-invalid': error })}
+                className={classNames(classes.input, { [classes.input__invalid]: error })}
                 readOnly={step.disabled ? 'readOnly' : null}
                 {...step.props}
                 name={entry}
@@ -326,7 +327,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
                 <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
                   <CodeInput
                     {...step.props}
-                    className={classNames({ 'is-invalid': error })}
+                    className={classNames({ [classes.input__invalid]: error })}
                     readOnly={step.disabled ? 'readOnly' : null}
                     onChange={field.onChange}
                     value={field.value}
@@ -347,7 +348,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
                 <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
                   <MarkdownInput
                     {...step.props}
-                    className={classNames({ 'is-invalid': error })}
+                    className={classNames({ [classes.input__invalid]: error })}
                     readOnly={step.disabled ? 'readOnly' : null}
                     onChange={field.onChange}
                     value={field.value}
@@ -369,7 +370,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
                   <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
                     <SelectInput
                       {...step.props}
-                      className={classNames({ 'is-invalid': error })}
+                      className={classNames({ [classes.input__invalid]: error })}
                       readOnly={step.disabled ? 'readOnly' : null}
                       onChange={field.onChange}
                       value={field.value}
@@ -389,7 +390,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
               <input
                 // {...step.props}
                 type={step.format || 'text'} id={entry}
-                className={classNames(classes.input, { 'is-invalid': error })}
+                className={classNames(classes.input, { [classes.input__invalid]: error })}
                 readOnly={step.disabled ? 'readOnly' : null}
                 // defaultValue={defaultValue}
                 placeholder={step.placeholder}
@@ -410,7 +411,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
                   <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
                     <SelectInput
                       {...step.props}
-                      className={classNames(classes.content, { 'is-invalid': error })}
+                      className={classNames(classes.content, { [classes.input__invalid]: error })}
                       readOnly={step.disabled ? 'readOnly' : null}
                       onChange={field.onChange}
                       value={field.value}
@@ -430,7 +431,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
               <input
                 {...step.props}
                 type={step.format || 'number'} id={entry}
-                className={classNames(classes.input, { 'is-invalid': error })}
+                className={classNames(classes.input, { [classes.input__invalid]: error })}
                 readOnly={step.disabled ? 'readOnly' : null}
                 name={entry}
                 placeholder={step.placeholder}
@@ -450,7 +451,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
               <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
                 <BooleanInput
                   {...step.props}
-                  className={classNames({ 'is-invalid': error })}
+                  className={classNames({ [classes.input__invalid]: error })}
                   readOnly={step.disabled ? 'readOnly' : null}
                   onChange={field.onChange}
                   value={field.value}
@@ -474,7 +475,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
                   <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
                     <SelectInput
                       {...step.props}
-                      className={classNames({ 'is-invalid': error })}
+                      className={classNames({ [classes.input__invalid]: error })}
                       readOnly={step.disabled ? 'readOnly' : null}
                       onChange={field.onChange}
                       value={field.value}
@@ -509,7 +510,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
                   <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
                     <ObjectInput
                       {...step.props}
-                      className={classNames({ 'is-invalid': error })}
+                      className={classNames({ [classes.input__invalid]: error })}
                       readOnly={step.disabled ? 'readOnly' : null}
                       onChange={field.onChange}
                       value={field.value}
@@ -534,7 +535,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
                 <DatePicker
                   {...step.props}
                   id="datePicker-1"
-                  className={classNames({ 'is-invalid': error })}
+                  className={classNames({ [classes.input__invalid]: error })}
                   readOnly={step.disabled ? 'readOnly' : null}
                   value={field.value}
                   onChange={field.onChange}
@@ -569,7 +570,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
                 };
 
                 return (
-                  <div className={classNames("d-flex flex-row justify-content-start", { 'is-invalid': error })}>
+                  <div className={classNames("d-flex flex-row justify-content-start", { [classes.input__invalid]: error })}>
                     <input
                       ref={(r) => setInput(r)}
                       type="file"
@@ -604,7 +605,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
           <input
             {...step.props}
             type='file' id={entry}
-            className={classNames(classes.input, { 'is-invalid': error })}
+            className={classNames(classes.input, { [classes.input__invalid]: error })}
             readOnly={step.disabled ? 'readOnly' : null}
             name={entry}
             placeholder={step.placeholder}
@@ -644,7 +645,7 @@ const ArrayStep = ({ entry, step, control, trigger, register, error, component, 
           )
         })}
       <div>
-        <input type="button" className={classNames("btn btn-info mt-2", { 'is-invalid': error })} onClick={() => {
+        <input type="button" className={classNames("btn btn-info mt-2", { [classes.input__invalid]: error })} onClick={() => {
           append({ value: step.addableDefaultValue })
           trigger(entry);
         }} value="Add" />
