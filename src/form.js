@@ -212,6 +212,9 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
               <Collapse key={`collapse-${idx}`} label={entry.label} collapsed={entry.collapsed} errored={errored}>
                 {entry.flow.map((entry, entryIdx) => {
                   const step = schema[entry]
+                  const error = entry.split('.').reduce((object, key) => {
+                    return object && object[key];
+                  }, errors);
                   //FIXME: better key ==> entry name + idx
                   return (
                     <BasicWrapper key={`collapse-${idx}-${entry}-${entryIdx}`} entry={entry} error={error} label={step.label || entry} help={step.help} render={inputWrapper}>
@@ -263,23 +266,6 @@ const Footer = (props) => {
 const Step = ({ entry, step, error, register, schema, control, trigger, getValues, setValue, watch, inputWrapper, httpClient, defaultValue, index }) => {
   const classes = useCustomStyle();
 
-  if (step.array) {
-    return (
-      <ArrayStep
-        entry={entry} step={step} trigger={trigger}
-        register={register} control={control} error={error}
-        setValue={setValue} values={getValues(entry)} defaultValue={step.defaultValue || defaultVal(step.type)}
-        component={((props, idx) => {
-          return (
-            <Step entry={`${entry}[${idx}].value`} step={{ ...schema[entry], array: false }} error={error && error[idx]?.value}
-              register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-              setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient}
-              defaultValue={props.defaultValue} value={props.defaultValue} index={idx} />
-          )
-        })} />
-    )
-  }
-
   const visibleStep = step && option(step.visible)
     .map(visible => {
       switch (typeof visible) {
@@ -295,6 +281,23 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
     .getOrElse(true)
   if (!visibleStep) {
     return null;
+  }
+
+  if (step.array) {
+    return (
+      <ArrayStep
+        entry={entry} step={step} trigger={trigger}
+        register={register} control={control} error={error}
+        setValue={setValue} values={getValues(entry)} defaultValue={step.defaultValue || defaultVal(step.type)}
+        component={((props, idx) => {
+          return (
+            <Step entry={`${entry}[${idx}].value`} step={{ ...schema[entry], array: false }} error={error && error[idx]?.value}
+              register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
+              setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient}
+              defaultValue={props.defaultValue} value={props.defaultValue} index={idx} />
+          )
+        })} />
+    )
   }
 
   switch (step.type) {
