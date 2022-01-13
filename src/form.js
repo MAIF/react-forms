@@ -360,6 +360,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
             }}
           />
         )
+        case format.buttonsSelect:
         case format.select:
           return (
             <Controller
@@ -401,6 +402,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
 
     case type.number:
       switch (step.format) {
+        case format.buttonsSelect:
         case format.select:
           return (
             <Controller
@@ -464,6 +466,7 @@ const Step = ({ entry, step, error, register, schema, control, trigger, getValue
 
     case type.object:
       switch (step.format) {
+        case format.buttonsSelect:
         case format.select:
           return (
             <Controller

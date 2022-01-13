@@ -66,6 +66,7 @@ export const Example = () => {
 - **type** (required): the type of value. It provided by the imported object `type`. It could be just string like `string`, `number`, `bool`, `object`, `date` or `file`
 - **format**: Over the type you can display a special format for the field. It provided by the imported object `format` or just a string
   - `select`: display a [react-select](https://react-select.com/home) field with provided options
+  - `buttonsSelect`: display a buttons group, drawn with the same options than the format `select`
   - `code`: if the type is `string`, display a code input (draw with [react-ace](https://github.com/securingsincity/react-ace))
   - `markdown`: if the type is `string`, display a markdown input
   - `text`: if the type is `string`, display a textarea

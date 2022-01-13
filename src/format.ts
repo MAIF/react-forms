@@ -7,5 +7,6 @@ export const format = {
   email: 'email',
   password: 'password',
   hidden: 'hidden',
-  form: 'form'
+  form: 'form',
+  buttonsSelect: 'buttons'
 }

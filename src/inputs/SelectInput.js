@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import classNames from 'classnames';
 import CreatableSelect from 'react-select/creatable';
 import Select from 'react-select';
 import { option } from '../Option';
 import { deepEqual } from '../utils'
+import { format } from '..';
+import { useCustomStyle } from '../styleContext';
 
 const valueToSelectOption = (value, possibleValues = [], isMulti = false, maybeTransformer) => {
   if (value === null) {
@@ -20,6 +23,7 @@ const valueToSelectOption = (value, possibleValues = [], isMulti = false, maybeT
 };
 
 export const SelectInput = (props) => {
+  const classes = useCustomStyle()
   const possibleValues = (props.possibleValues || [])
     .map(v => props.transformer ? props.transformer(v) : v)
     .map(v => ({
@@ -78,6 +82,36 @@ export const SelectInput = (props) => {
     } else {
       onChange(createdValue)
     }
+  }
+
+  const handleSelectButtonClick = (v) => {
+    if (props.isMulti) {
+      if (value.includes(v)) {
+        return onChange(value.filter(val => val.value !== v.value))
+      } else {
+        return onChange([...value, v])
+      }
+    }
+    return onChange(v)
+  }
+
+  if (props.format === format.buttonsSelect) {
+    return (
+      <div style={{ display: 'flex' }}>
+        {values.map((v, idx) => {
+          const active = props.isMulti ? value.includes(v) : v.value === value.value
+          return (
+            <button
+              key={idx}
+              type="button"
+              className={classNames(props.className, classes.btn, classes.btn_grey, classes.ml_5, { active })}
+              onClick={() => handleSelectButtonClick(v)}>
+              {v.label}
+            </button>
+          )
+        })}
+      </div>
+    )
   }
 
   if (props.createOption) {

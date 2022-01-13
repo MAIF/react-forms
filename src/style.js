@@ -1,3 +1,19 @@
+const buttonOutline = (color, darker) => ({
+  color,
+  borderColor: color,
+  "&:hover": {
+    color: '#fff',
+    backgroundColor: color,
+    borderColor: darker,
+  },
+  "&.active": {
+    color: '#fff',
+    backgroundColor: color,
+    borderColor: darker,
+  },
+
+})
+
 export const style = {
   input: {
     display: "block",
@@ -17,7 +33,8 @@ export const style = {
     padding: 10,
     fontSize: "1rem",
     cursor: "pointer",
-    border: 0,
+    borderWidth: '1px',
+    backgroundColor: '#fff'
   },
   btn_sm: {
     fontSize: "0.875rem",
@@ -33,42 +50,10 @@ export const style = {
       borderBottomLeftRadius: 0,
     },
   },
-  btn_red: {
-    color: "#fff",
-    backgroundColor: "#dc3545",
-    borderColor: "#dc3545",
-    "&:hover": {
-      backgroundColor: "#c82333",
-      borderColor: "#bd2130",
-    },
-  },
-  btn_green: {
-    color: "#fff",
-    backgroundColor: "#28a745",
-    borderColor: "#28a745",
-    "&:hover": {
-      backgroundColor: "#218838",
-      borderColor: "#1e7e34",
-    },
-  },
-  btn_blue: {
-    color: "#fff",
-    backgroundColor: "#007bff",
-    borderColor: "#007bff",
-    "&:hover": {
-      backgroundColor: "#0069d9",
-      borderColor: "#0062cc",
-    },
-  },
-  btn_grey: {
-    color: "#fff",
-    backgroundColor: "#6c757d",
-    borderColor: "#6c757d",
-    "&:hover": {
-      backgroundColor: "#5c636a",
-      borderColor: "#5c636a",
-    },
-  },
+  btn_red: buttonOutline("#dc3545", "#bd2130"),
+  btn_green: buttonOutline("#28a745", "#1e7e34"),
+  btn_blue: buttonOutline("#007bff", "#0069d9"),
+  btn_grey: buttonOutline("#6c757d", "#5c636a"),
   txt_red: {
     color: "#dc3545",
   },
@@ -149,7 +134,7 @@ export const style = {
     color: "tomato"
   },
   input__invalid: {
-    borderColor: '#dc3545'
+    borderColor: '#dc3545 !important',
   },
   invalid_feedback: {
     width: "100%",
