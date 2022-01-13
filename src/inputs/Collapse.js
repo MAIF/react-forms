@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import React, { useState } from 'react';
-import {Eye, EyeOff} from 'react-feather';
+import { Eye, EyeOff } from 'react-feather';
 import { useCustomStyle } from '../styleContext'
 
 export const Collapse = (props) => {
@@ -14,18 +14,22 @@ export const Collapse = (props) => {
 
   return (
     <div>
-      <hr className={classNames({ [classes.collapse_error]: props.errored })}/>
+      <hr className={classNames({ [classes.collapse_error]: props.errored })} />
       <div className={`${classes.cursor_pointer} ${classes.flex} ${classes.justifyContentBetween}`} onClick={toggle}>
         <span className={classNames(classes.collapse_label, { [classes.collapse_error]: props.errored })}>{props.label}</span>
         <button
           type="button"
           className={classNames(classes.btn, { [classes.collapse_error]: props.errored })}
           onClick={toggle}>
-            {!!collapsed && <Eye />}
-            {!collapsed && <EyeOff />}
+          {!!collapsed && <Eye />}
+          {!collapsed && <EyeOff />}
         </button>
       </div>
-      {!collapsed && props.children}
+      {!collapsed && (
+        <div className={classes.ml_10}>
+          {props.children}
+        </div>
+      )}
       {props.lineEnd && <hr />}
     </div>
   );
