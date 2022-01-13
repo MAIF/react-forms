@@ -625,8 +625,6 @@ const ArrayStep = ({ entry, step, control, trigger, register, error, component, 
     // keyName: "id", default to "id", you can change the key name
   });
 
-  console.log({ fields})
-
   return (
     <>
       {fields
