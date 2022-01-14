@@ -275,7 +275,7 @@ const Step = ({ entry, step, error, errors, register, schema, control, trigger, 
       <Collapse label={entry.label} collapsed={entry.collapsed} errored={errored}>
         {entry.flow.map((en, entryIdx) => {
           const stp = schema[en]
-          const err = typeof entry === 'object' ? undefined : en.split('.').reduce((object, key) => {
+          const err = typeof en === 'object' ? undefined : en.split('.').reduce((object, key) => {
             return object && object[key];
           }, errors);
 
