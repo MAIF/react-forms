@@ -206,7 +206,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 
   return (
     <FormProvider {...methods} >
-      <form className={className || classes.pr_15} onSubmit={handleSubmit(data => {
+      <form className={className || `${classes.pr_15} ${classes.full_width}`} onSubmit={handleSubmit(data => {
         const clean = cleanOutputArray(data)
         onSubmit(clean)
       }, onError)}>
@@ -280,6 +280,25 @@ const Step = ({ entry, step, error, errors, register, schema, control, trigger, 
             return object && object[key];
           }, errors);
 
+          const visibleStep = option(stp)
+            .map(s => s.visible)
+            .map(visible => {
+              switch (typeof visible) {
+                case 'object':
+                  const value = watch(visible.ref);
+                  return option(visible.test).map(test => test(value)).getOrElse(value)
+                case 'boolean':
+                  return visible;
+                default:
+                  return true;
+              }
+            })
+            .getOrElse(true)
+
+          if (!visibleStep) {
+            return null;
+          }
+
           return (
             <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} error={err} label={stp?.label || en} help={stp?.help} render={inputWrapper}>
               <Step entry={en} step={stp} error={err} errors={errors}
@@ -292,25 +311,7 @@ const Step = ({ entry, step, error, errors, register, schema, control, trigger, 
     )
   }
 
-  const visibleStep = option(step)
-    .map(s => s.visible)
-    .map(visible => {
-      switch (typeof visible) {
-        case 'object':
-          const value = watch(step.visible.ref);
-          console.log({ value, step })
-          return option(step.visible.test).map(test => test(value)).getOrElse(value)
-        case 'boolean':
-          return visible;
-        default:
-          return true;
-      }
-    })
-    .getOrElse(true)
-
-  if (!visibleStep) {
-    return null;
-  }
+  
 
   if (step.array) {
     return (

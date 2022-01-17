@@ -81,6 +81,9 @@ export const style = {
   pr_15: {
     paddingRight: 15,
   },
+  full_width: {
+    width: '100%'
+  },
   d_none: {
     display: "none",
   },
