@@ -222,6 +222,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
               switch (typeof visible) {
                 case 'object':
                   const value = watch(step.visible.ref);
+                  console.log({ value, step })
                   return option(step.visible.test).map(test => test(value)).getOrElse(value)
                 case 'boolean':
                   return visible;
@@ -289,6 +290,26 @@ const Step = ({ entry, step, error, errors, register, schema, control, trigger, 
         })}
       </Collapse>
     )
+  }
+
+  const visibleStep = option(step)
+    .map(s => s.visible)
+    .map(visible => {
+      switch (typeof visible) {
+        case 'object':
+          const value = watch(step.visible.ref);
+          console.log({ value, step })
+          return option(step.visible.test).map(test => test(value)).getOrElse(value)
+        case 'boolean':
+          return visible;
+        default:
+          return true;
+      }
+    })
+    .getOrElse(true)
+
+  if (!visibleStep) {
+    return null;
   }
 
   if (step.array) {
