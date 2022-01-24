@@ -222,7 +222,6 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
               switch (typeof visible) {
                 case 'object':
                   const value = watch(step.visible.ref);
-                  console.log({ value, step })
                   return option(step.visible.test).map(test => test(value)).getOrElse(value)
                 case 'boolean':
                   return visible;
@@ -303,7 +302,7 @@ const Step = ({ entry, step, error, errors, register, schema, control, trigger, 
             <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} error={err} label={stp?.label || en} help={stp?.help} render={inputWrapper}>
               <Step entry={en} step={stp} error={err} errors={errors}
                 register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-                setValue={setValue} watch={watch} inputWrapper={inputWrapper} />
+                setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient} defaultValue={stp.defaultValue}/>
             </BasicWrapper>
           )
         })}

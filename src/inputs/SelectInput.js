@@ -17,8 +17,8 @@ const valueToSelectOption = (value, possibleValues = [], isMulti = false, maybeT
   const maybeValue = option(possibleValues.find(v => deepEqual(v.value, value)))
   return maybeValue
     .getOrElse({
-      label: maybeValue.map(v => v.label).getOrElse(value),
-      value: maybeValue.map(v => v.value).getOrElse(value),
+      label: maybeValue.map(v => v.label).getOrElse(value?.label || value),
+      value: maybeValue.map(v => v.value).getOrElse(value?.value || value),
     });
 };
 
