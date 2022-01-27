@@ -22,7 +22,7 @@ const usePrevious = (value) => {
 
   // Store current value in ref
   useEffect(() => {
-    ref.current = value;
+    ref.current = JSON.parse(JSON.stringify(value));
   }, [value]); // Only re-run if value changes
 
   // Return previous value (happens before update in useEffect above)
@@ -43,7 +43,7 @@ const BasicWrapper = ({ entry, label, error, help, children, render }) => {
 
   return (
     <div className="form-group mt-3">
-      <label className="form-label d-flex align-content-center" htmlFor={entry}>
+      {label && <label className="form-label d-flex align-content-center" htmlFor={entry}>
         <span className="mr-2">{label}</span>
         {help && <>
           <ReactToolTip html={true} place={'bottom'} id={id} />
@@ -51,7 +51,7 @@ const BasicWrapper = ({ entry, label, error, help, children, render }) => {
             <HelpCircle style={{ color: 'gray', width: 17, marginLeft: '.5rem', cursor: 'help' }} />
           </span>
         </>}
-      </label>
+      </label>}
 
       {children}
       {error && <div className={classes.invalid_feedback}>{error.message}</div>}
@@ -194,7 +194,9 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
   }, [data])
 
   if (options.watch) {
+    console.group('react-form watch')
     console.log(watch())
+    console.groupEnd()
   }
 
   useImperativeHandle(ref, () => ({
@@ -237,7 +239,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 
 
           return (
-            <BasicWrapper key={`${entry}-${idx}`} entry={entry} error={error} label={step?.label || entry} help={step?.help} render={inputWrapper}>
+            <BasicWrapper key={`${entry}-${idx}`} entry={entry} error={error} label={step?.label === null ? null : step?.label || entry} help={step?.help} render={inputWrapper}>
               <Step key={idx} entry={entry} step={step} error={error} errors={errors}
                 register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
                 setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient} />
@@ -299,7 +301,7 @@ const Step = ({ entry, step, error, errors, register, schema, control, trigger, 
           }
 
           return (
-            <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} error={err} label={stp?.label || en} help={stp?.help} render={inputWrapper}>
+            <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} error={err} label={stp?.label === null ? null : stp?.label || en} help={stp?.help} render={inputWrapper}>
               <Step entry={en} step={stp} error={err} errors={errors}
                 register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
                 setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient} defaultValue={stp.defaultValue}/>
@@ -354,13 +356,12 @@ const Step = ({ entry, step, error, errors, register, schema, control, trigger, 
               return (
                 <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
                   <CodeInput
-                    {...step.props}
                     className={classNames({ [classes.input__invalid]: error })}
                     readOnly={step.disabled ? 'readOnly' : null}
                     onChange={field.onChange}
                     value={field.value}
                     defaultValue={defaultValue}
-                    {...step}
+                    {...step.props}
                   />
                 </CustomizableInput>
               )
@@ -722,7 +723,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
         const realError = error && error[entry]
 
         return (
-          <BasicWrapper key={`${entry}.${idx}`} entry={`${parent}.${entry}`} error={realError} label={step.label || entry} help={step.help} render={inputWrapper}>
+          <BasicWrapper key={`${entry}.${idx}`} entry={`${parent}.${entry}`} error={realError} label={step?.label === null ? null : step?.label || entry} help={step.help} render={inputWrapper}>
             <Step key={`step.${entry}.${idx}`} entry={`${parent}.${entry}`} step={schemaAndFlow.schema[entry]} error={realError}
               register={register} schema={schemaAndFlow.schema} control={control} trigger={trigger} getValues={getValues}
               setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient}

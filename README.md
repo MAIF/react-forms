@@ -67,7 +67,7 @@ export const Example = () => {
 - **format**: Over the type you can display a special format for the field. It provided by the imported object `format` or just a string
   - `select`: display a [react-select](https://react-select.com/home) field with provided options
   - `buttonsSelect`: display a buttons group, drawn with the same options than the format `select`
-  - `code`: if the type is `string`, display a code input (draw with [react-ace](https://github.com/securingsincity/react-ace))
+  - `code`: if the type is `string`, display a code input (draw with [react-ace](https://github.com/securingsincity/react-ace)) (add a props.setRef to get ace editor ref)
   - `markdown`: if the type is `string`, display a markdown input
   - `text`: if the type is `string`, display a textarea
   - `email`: if the type is `string`, display an email input
@@ -86,7 +86,7 @@ export const Example = () => {
 - **defaultKeyValue**: if the format is setup to object, this default key/value is set for all added entries
 - **visible**: a boolean option to hide/display form field. It can be an object with `ref` property to get a value by reference an a key `test` as a function to test it. if there is no `test` key, it's base just on boolean value of the reference.
 - **disabled**: A boolean option to enable/disable form field
-- **label**: The label of form field
+- **label**: The label of form field (you can pass `null` to not render a label)
 - **placeholder**: the placeholder of form field
 - **defaultValue**: A default value to fill field by default
 - **help**: the text display hover a help button
@@ -96,7 +96,7 @@ export const Example = () => {
   ```javascript
   ({rawValues, value, onChange, error}) => <input type="text" className="is-invalid" value={value} onChange={e => onChange(e.target.value)} />
   ```
-- **props**: a json object merged with default props. For exemple, if format `select` is setup, you can add all [props](https://react-select.com/props) to csutomize react-select
+- **props**: a json object merged with default props. For exemple, if format `select` is setup, you can add all [props](https://react-select.com/props) to customize react-select
 - **options**: An array of options for the select field (if format `select` is setup)
 - **optionsFrom**: A url to fetch array of options for the select field (if format `select` is setup)
 - **transformer**: A function to transform options to a valid format for react select, by default the code try to do it himself.

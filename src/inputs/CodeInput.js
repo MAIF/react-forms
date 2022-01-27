@@ -25,7 +25,8 @@ export const CodeInput = ({ onChange, value, className = '', readOnly, theme = '
       value={value}
       name="scriptParam"
       editorProps={{ $blockScrolling: true }}
-      onLoad={editorInstance => {
+      onLoad={editorInstance => { 
+
         editorInstance.container.style.resize = "both";
         // mouseup = css resize end
         document.addEventListener("mouseup", e => (
@@ -39,6 +40,8 @@ export const CodeInput = ({ onChange, value, className = '', readOnly, theme = '
       highlightActiveLine={true}
       enableBasicAutocompletion={true}
       enableLiveAutocompletion={true}
+      {...props}
+      ref={props.setRef}
     />
   );
 
