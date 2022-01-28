@@ -357,7 +357,7 @@ const Step = ({ entry, step, error, errors, register, schema, control, trigger, 
                 <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
                   <CodeInput
                     className={classNames({ [classes.input__invalid]: error })}
-                    readOnly={step.disabled ? 'readOnly' : null}
+                    readOnly={step.disabled ? true : false}
                     onChange={field.onChange}
                     value={field.value}
                     defaultValue={defaultValue}
