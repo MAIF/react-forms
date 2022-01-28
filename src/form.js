@@ -166,7 +166,8 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 
   const methods = useForm({
     resolver: (data, context, options) => yupResolver(resolver(data))(data, context, options),
-    defaultValues: cleanInputArray(value || defaultValues)
+    defaultValues: cleanInputArray(value || defaultValues),
+    shouldFocusError: !options.autosubmit,
   });
 
   const { register, handleSubmit, formState: { errors }, control, reset, watch, trigger, getValues, setValue } = methods
