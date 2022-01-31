@@ -1,16 +1,16 @@
 import React from 'react';
 import AceEditor from 'react-ace';
 
-import Beautify from 'ace-builds/src-noconflict/ext-beautify'
-import 'ace-builds/src-noconflict/mode-html'
-import 'ace-builds/src-noconflict/mode-json'
-import 'ace-builds/src-noconflict/mode-javascript'
-import 'ace-builds/src-noconflict/mode-css'
-import 'ace-builds/src-noconflict/mode-markdown'
-import 'ace-builds/src-noconflict/theme-monokai'
-import 'ace-builds/src-noconflict/theme-tomorrow'
-import 'ace-builds/src-noconflict/ext-searchbox'
-import 'ace-builds/src-noconflict/ext-language_tools'
+import Beautify from 'brace/ext/beautify'
+import 'brace/mode/html'
+import 'brace/mode/javascript'
+import 'brace/mode/json'
+import 'brace/mode/css'
+import 'brace/mode/markdown'
+import 'brace/theme/monokai'
+import 'brace/theme/tomorrow'
+import 'brace/ext/searchbox'
+import 'brace/ext/language_tools';
 
 export const CodeInput = ({ onChange, value, className = '', readOnly, theme = 'monokai', mode = 'javascript', ...props }) => {
   return (

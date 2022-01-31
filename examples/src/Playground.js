@@ -3,13 +3,11 @@ import { Form } from '@maif/react-forms'
 import Select from 'react-select';
 import AceEditor from 'react-ace';
 
-import 'ace-builds/src-noconflict/mode-html'
-import 'ace-builds/src-noconflict/mode-json'
-import 'ace-builds/src-noconflict/mode-javascript'
-import 'ace-builds/src-noconflict/mode-markdown'
-import 'ace-builds/src-noconflict/theme-monokai'
-import 'ace-builds/src-noconflict/ext-searchbox'
-import 'ace-builds/src-noconflict/ext-language_tools'
+import Beautify from 'brace/ext/beautify'
+import 'brace/mode/json'
+import 'brace/theme/monokai'
+import 'brace/ext/searchbox'
+import 'brace/ext/language_tools';
 
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css'
@@ -77,6 +75,7 @@ export const Playground = () => {
               defaultValue={{ value: basic, label: "basic" }}
               onChange={e => setSchema(JSON.stringify(examples[e.value], null, 4))} />
             <AceEditor
+              commands={Beautify.commands}
               style={{ marginTop: '15px', zIndex: 0, isolation: 'isolate', width: '100%' }}
               mode="json"
               theme="monokai"

@@ -6,14 +6,16 @@ import classNames from 'classnames';
 import '@fortawesome/fontawesome-free/css/all.css';
 import 'highlight.js/styles/monokai.css';
 
-import 'ace-builds/src-noconflict/mode-html'
-import 'ace-builds/src-noconflict/mode-json'
-import 'ace-builds/src-noconflict/mode-javascript'
-import 'ace-builds/src-noconflict/mode-markdown'
-import 'ace-builds/src-noconflict/theme-monokai'
-import 'ace-builds/src-noconflict/ext-searchbox'
-import 'ace-builds/src-noconflict/ext-language_tools'
-
+import Beautify from 'brace/ext/beautify'
+import 'brace/mode/html'
+import 'brace/mode/javascript'
+import 'brace/mode/json'
+import 'brace/mode/css'
+import 'brace/mode/markdown'
+import 'brace/theme/monokai'
+import 'brace/theme/tomorrow'
+import 'brace/ext/searchbox'
+import 'brace/ext/language_tools';
 
 import hljs from 'highlight.js';
 window.hljs = window.hljs || hljs;
@@ -231,6 +233,17 @@ Proin vehicula ligula vel enim euismod, sed congue mi egestas. Nullam varius ut 
         <button
           type="button"
           className="btn-for-descriptionToolbar"
+          style={{
+            textAlign: "left",
+            cursor: "pointer",
+            height: "22px",
+            padding: "4px",
+            border: "none",
+            background: "none",
+            color: "#242729",
+            marginRight: "5px",
+            marginLeft: "5px"
+          }}
           aria-label={command.name}
           title={command.name}
           key={`toolbar-btn-${idx}`}
@@ -285,15 +298,24 @@ Proin vehicula ligula vel enim euismod, sed congue mi egestas. Nullam varius ut 
       </div>
       {!preview && (
         <AceEditor
+          commands={Beautify.commands}
           ref={(r) => {
             if (r && r.editor) {
               setEditor(r.editor);
             }
           }}
           mode="markdown"
-          theme="monokai"
+          theme={props.theme | 'monokai'}
           style={{ zIndex: 0, isolation: 'isolate' }}
           onChange={props.onChange}
+          onLoad={editorInstance => {
+
+            editorInstance.container.style.resize = "both";
+            // mouseup = css resize end
+            document.addEventListener("mouseup", e => (
+              editorInstance.resize()
+            ));
+          }}
           value={props.value}
           name="scriptParam"
           editorProps={{ $blockScrolling: true }}
