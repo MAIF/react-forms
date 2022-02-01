@@ -305,7 +305,7 @@ Proin vehicula ligula vel enim euismod, sed congue mi egestas. Nullam varius ut 
             }
           }}
           mode="markdown"
-          theme={props.theme | 'monokai'}
+          theme={props.theme || 'monokai'}
           style={{ zIndex: 0, isolation: 'isolate' }}
           onChange={props.onChange}
           onLoad={editorInstance => {
