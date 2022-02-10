@@ -733,7 +733,9 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
           entry,
           result: option(schemaAndFlow.schema?.collapseField).map(f => f === entry).getOrElse(idx > 0)
         })
-        const isCollapsed = collapsed && option(!step.visibleOnCollapse).getOrElse(idx > 0)
+
+        const oneVisibleSetup = Object.values(schema).some(v => !!v.visibleOnCollapse)
+        const isCollapsed = collapsed && (oneVisibleSetup ? !step.visibleOnCollapse : idx > 0)
 
 
         return (
