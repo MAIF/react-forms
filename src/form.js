@@ -196,9 +196,13 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
   }, [data])
 
   if (options.watch) {
-    console.group('react-form watch')
-    console.log(watch())
-    console.groupEnd()
+    if (typeof options.watch === 'function') {
+      options.watch(watch())
+    } else {
+      console.group('react-form watch')
+      console.log(watch())
+      console.groupEnd()
+    }
   }
 
   useImperativeHandle(ref, () => ({
@@ -727,13 +731,6 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
       {schemaAndFlow.flow.map((entry, idx) => {
         const step = schemaAndFlow.schema[entry]
         const realError = error && error[entry]
-
-        console.debug({
-          schema,
-          entry,
-          result: option(schemaAndFlow.schema?.collapseField).map(f => f === entry).getOrElse(idx > 0)
-        })
-
         const oneVisibleSetup = Object.values(schema).some(v => !!v.visibleOnCollapse)
         const isCollapsed = collapsed && (oneVisibleSetup ? !step.visibleOnCollapse : idx > 0)
 
