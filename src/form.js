@@ -29,7 +29,7 @@ const usePrevious = (value) => {
   return ref.current;
 }
 
-const BasicWrapper = ({ entry, label, error, help, children, render }) => {
+const BasicWrapper = ({ entry, className, label, error, help, children, render }) => {
   const classes = useCustomStyle()
   const id = uuid();
 
@@ -42,7 +42,7 @@ const BasicWrapper = ({ entry, label, error, help, children, render }) => {
   }
 
   return (
-    <div className="form-group mt-3">
+    <div className={`form-group mt-3 ${className}`}>
       {label && <label className="form-label d-flex align-content-center" htmlFor={entry}>
         <span className="mr-2">{label}</span>
         {help && <>
@@ -276,7 +276,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
   if (entry && typeof entry === 'object') {
     const errored = entry.flow.some(step => !!errors[step])
     return (
-      <Collapse label={entry.label} collapsed={entry.collapsed} errored={errored}>
+      <Collapse {...entry} errored={errored}>
         {entry.flow.map((en, entryIdx) => {
           const stp = schema[en]
           const err = typeof en === 'object' ? undefined : en.split('.').reduce((object, key) => {
@@ -303,7 +303,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
           }
 
           return (
-            <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} error={err} label={stp?.label === null ? null : stp?.label || en} help={stp?.help} render={inputWrapper}>
+            <BasicWrapper key={`collapse-${en}-${entryIdx}`} className={classes.collapseInline} entry={en} error={err} label={stp?.label === null ? null : stp?.label || en} help={stp?.help} render={inputWrapper}>
               <Step entry={en} step={stp} error={err} errors={errors}
                 register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
                 setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient} defaultValue={stp.defaultValue}/>

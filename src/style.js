@@ -63,6 +63,12 @@ export const style = {
   ml_10: {
     marginLeft: 10,
   },
+  mr_5: {
+    marginRight: 5,
+  },
+  mr_10: {
+    marginRight: 10,
+  },
   mt_5: {
     marginTop: 5,
   },
@@ -147,5 +153,10 @@ export const style = {
   },
   display__none: {
     display: "none"
+  },
+  collapseInline: {
+    "&+ .form-group": {
+      marginLeft: '20px'
+    }
   }
 }
