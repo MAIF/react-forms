@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import CreatableSelect from 'react-select/creatable';
 import Select from 'react-select';
 import { option } from '../Option';
-import { deepEqual } from '../utils'
+import { deepEqual, isPromise } from '../utils'
 import { format } from '..';
 import { useCustomStyle } from '../styleContext';
 
@@ -47,9 +47,12 @@ export const SelectInput = (props) => {
 
       if (cond) {
         setLoading(true);
-        return props.httpClient(props.optionsFrom, 'GET')
-          .then((r) => r.json())
-          .then((values) => values.map(x => props.transformer ? props.transformer(x) : valueToSelectOption(x, values, props.isMulti, props.transformer)))
+        const promise = isPromise(props.optionsFrom) ? props.optionsFrom : props.httpClient(props.optionsFrom, 'GET')
+          .then((r) => r.json());
+        promise
+          .then((values) => {
+            return values.map(x => props.transformer ? props.transformer(x) : valueToSelectOption(x, values, props.isMulti, props.transformer))
+          })
           .then((values) => {
             setValues(values);
             setValue(values.find((item) => item.value === (value ? value.value : value)) || null);

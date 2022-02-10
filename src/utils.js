@@ -19,3 +19,7 @@ export const deepEqual = (a, b) => {
 
   return true;
 };
+
+export const isPromise = (value) => {
+  return Boolean(value && typeof value.then === 'function');
+}

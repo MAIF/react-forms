@@ -144,5 +144,8 @@ export const style = {
     marginTop: ".25rem",
     fontSize: "80%",
     color: "#dc3545"
+  },
+  display__none: {
+    display: "none"
   }
 }

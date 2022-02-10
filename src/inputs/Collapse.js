@@ -25,11 +25,9 @@ export const Collapse = (props) => {
           {!collapsed && <EyeOff />}
         </button>
       </div>
-      {!collapsed && (
-        <div className={classes.ml_10}>
-          {props.children}
-        </div>
-      )}
+      <div className={classNames(classes.ml_10, { [classes.display__none]: !!collapsed })}>
+        {props.children}
+      </div>
       {props.lineEnd && <hr />}
     </div>
   );

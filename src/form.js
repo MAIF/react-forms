@@ -134,7 +134,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
         }
         return { ...acc, [key]: v }
       } else if (!!v && typeof v === 'object') {
-        return { ...acc, [key]: cleanInputArray(v, schema[key]?.schema || {}) }
+        return { ...acc, [key]: cleanInputArray(v, subSchema[key]?.schema || {}) }
       } else {
         return { ...acc, [key]: v }
       }
@@ -157,7 +157,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
         }
         return { ...acc, [key]: v }
       } else if (!!v && typeof v === 'object') {
-        return { ...acc, [key]: cleanOutputArray(v, schema[key]?.schema || {}) }
+        return { ...acc, [key]: cleanOutputArray(v, subSchema[key]?.schema || {}) }
       } else {
         return { ...acc, [key]: v }
       }
@@ -166,20 +166,21 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 
   const methods = useForm({
     resolver: (data, context, options) => yupResolver(resolver(data))(data, context, options),
-    defaultValues: cleanInputArray(value || defaultValues),
+    defaultValues: cleanInputArray(value || defaultValues, schema),
     shouldFocusError: !options.autosubmit,
   });
 
   const { register, handleSubmit, formState: { errors }, control, reset, watch, trigger, getValues, setValue } = methods
 
+
   useEffect(() => {
     if (value) {
-      reset(cleanInputArray(value))
+      reset(cleanInputArray(value, schema))
     }
   }, [value, reset])
 
   useEffect(() => {
-    reset(cleanInputArray(value || defaultValues));
+    reset(cleanInputArray(value || defaultValues, schema));
   }, [schema])
 
   const data = watch();
@@ -188,7 +189,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
     //todo: with debounce
     if (!!options.autosubmit && JSON.stringify(data) !== JSON.stringify(prevData)) {
       handleSubmit(data => {
-        const clean = cleanOutputArray(data)
+        const clean = cleanOutputArray(data, schema)
         onSubmit(clean)
       }, onError)()
     }
@@ -202,7 +203,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 
   useImperativeHandle(ref, () => ({
     handleSubmit: () => handleSubmit(data => {
-      const clean = cleanOutputArray(data)
+      const clean = cleanOutputArray(data, schema)
       onSubmit(clean)
     }, onError)()
   }));
@@ -210,7 +211,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
   return (
     <FormProvider {...methods} >
       <form className={className || `${classes.pr_15} ${classes.full_width}`} onSubmit={handleSubmit(data => {
-        const clean = cleanOutputArray(data)
+        const clean = cleanOutputArray(data, schema)
         onSubmit(clean)
       }, onError)}>
         {formFlow.map((entry, idx) => {
@@ -238,7 +239,6 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
             return null;
           }
 
-
           return (
             <BasicWrapper key={`${entry}-${idx}`} entry={entry} error={error} label={step?.label === null ? null : step?.label || entry} help={step?.help} render={inputWrapper}>
               <Step key={idx} entry={entry} step={step} error={error} errors={errors}
@@ -247,7 +247,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
             </BasicWrapper>
           )
         })}
-        <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(data => onSubmit(cleanOutputArray(data)), onError)} actions={options.actions} />
+        <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(data => onSubmit(cleanOutputArray(data, schema)), onError)} actions={options.actions} />
       </form>
     </FormProvider>
   )
@@ -264,13 +264,14 @@ const Footer = (props) => {
 
   return (
     <div className={`${classes.flex} ${classes.jc_end} ${classes.mt_5}`}>
+      {props.actions?.cancel?.display && <button className={`${classes.btn} ${classes.btn_red}`} type="button" onClick={() => props.actions?.cancel.action()}>{props.actions?.cancel?.label || 'Cancel'}</button>}
       {props.actions?.reset?.display && <button className={`${classes.btn} ${classes.btn_red}`} type="button" onClick={props.reset}>{props.actions?.reset?.label || 'Reset'}</button>}
       {isSubmitDisplayed && <button className={`${classes.btn} ${classes.btn_green} ${classes.ml_10}`} type="submit">{props.actions?.submit?.label || 'Save'}</button>}
     </div>
   )
 }
 
-const Step = ({ entry, step, error, errors, register, schema, control, trigger, getValues, setValue, watch, inputWrapper, httpClient, defaultValue, index }) => {
+const Step = ({ entry, realEntry, step, error, errors, register, schema, control, trigger, getValues, setValue, watch, inputWrapper, httpClient, defaultValue, index }) => {
   const classes = useCustomStyle();
   if (entry && typeof entry === 'object') {
     const errored = entry.flow.some(step => !!errors[step])
@@ -313,8 +314,6 @@ const Step = ({ entry, step, error, errors, register, schema, control, trigger, 
     )
   }
 
-  
-
   if (step.array) {
     return (
       <ArrayStep
@@ -323,10 +322,10 @@ const Step = ({ entry, step, error, errors, register, schema, control, trigger, 
         setValue={setValue} values={getValues(entry)} defaultValue={step.defaultValue || defaultVal(step.type)}
         component={((props, idx) => {
           return (
-            <Step entry={`${entry}[${idx}].value`} step={{ ...schema[entry], array: false }} error={error && error[idx]?.value}
+            <Step entry={`${entry}[${idx}].value`} step={{ ...(schema[realEntry || entry]), array: false }} error={error && error[idx]?.value}
               register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
               setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient}
-              defaultValue={props.defaultValue} value={props.defaultValue} index={idx} />
+              defaultValue={props.defaultValue} value={props.value} index={idx} />
           )
         })} />
     )
@@ -527,7 +526,7 @@ const Step = ({ entry, step, error, errors, register, schema, control, trigger, 
             <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error}>
               <NestedForm
                 schema={step.schema} flow={flow} step={step} parent={entry}
-                inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={defaultValue} error={error}
+                inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={getValues(entry) || defaultValue} error={error}
                 index={index} />
             </CustomizableInput>
           )
@@ -711,7 +710,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
 
   const prevSchema = usePrevious(schemaAndFlow.schema);
   useEffect(() => {
-    if (JSON.stringify(prevSchema) !== JSON.stringify(schemaAndFlow.schema)) {
+    if (!!prevSchema && JSON.stringify(prevSchema) !== JSON.stringify(schemaAndFlow.schema)) {
       const def = getDefaultValues(schemaAndFlow.flow, schemaAndFlow.schema);
       setValue(parent, def, { shouldValidate: false })
     }
@@ -725,7 +724,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
 
         return (
           <BasicWrapper key={`${entry}.${idx}`} entry={`${parent}.${entry}`} error={realError} label={step?.label === null ? null : step?.label || entry} help={step.help} render={inputWrapper}>
-            <Step key={`step.${entry}.${idx}`} entry={`${parent}.${entry}`} step={schemaAndFlow.schema[entry]} error={realError}
+            <Step key={`step.${entry}.${idx}`} entry={`${parent}.${entry}`} realEntry={entry} step={schemaAndFlow.schema[entry]} error={realError}
               register={register} schema={schemaAndFlow.schema} control={control} trigger={trigger} getValues={getValues}
               setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient}
               defaultValue={value && value[entry]}
