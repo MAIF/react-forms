@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useImperativeHandle } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup';
 import classNames from 'classnames';
-import { HelpCircle, Loader, Upload } from 'react-feather';
+import { HelpCircle, Loader, Upload,  ArrowDown, ArrowUp } from 'react-feather';
 import { useForm, useFormContext, Controller, useFieldArray, FormProvider } from 'react-hook-form';
 import { DatePicker } from 'react-rainbow-components';
 import ReactToolTip from 'react-tooltip';
@@ -690,6 +690,9 @@ const ArrayStep = ({ entry, step, control, trigger, register, error, component, 
 
 const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, index, error, value, step }) => {
   const { register, control, getValues, setValue, trigger, watch } = useFormContext(); // retrieve all hook methods
+  const [collapsed, setCollapsed] = useState(false);
+
+  const classes = useCustomStyle();
 
   const schemaAndFlow = option(step.conditionalSchema)
     .map(condiSchema => {
@@ -717,13 +720,24 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
   }, [prevSchema, schemaAndFlow.schema])
 
   return (
-    <div style={{ borderLeft: '2px solid lightGray', paddingLeft: '.5rem', marginBottom: '.5rem' }}>
+    <div style={{ borderLeft: '2px solid lightGray', paddingLeft: '1rem', marginBottom: '.5rem', position: 'relative' }}>
+      {collapsed && <ArrowDown size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: '5px', left: '-16px' }} stroke-width="3" onClick={() => setCollapsed(!collapsed)}/>}
+      {!collapsed && <ArrowUp size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: '5px', left: '-16px' }} stroke-width="3" onClick={() => setCollapsed(!collapsed)}/>}
+     
       {schemaAndFlow.flow.map((entry, idx) => {
         const step = schemaAndFlow.schema[entry]
         const realError = error && error[entry]
 
+        console.debug({
+          schema,
+          entry,
+          result: option(schemaAndFlow.schema?.collapseField).map(f => f === entry).getOrElse(idx > 0)
+        })
+        const isCollapsed = collapsed && option(!step.visibleOnCollapse).getOrElse(idx > 0)
+
+
         return (
-          <BasicWrapper key={`${entry}.${idx}`} entry={`${parent}.${entry}`} error={realError} label={step?.label === null ? null : step?.label || entry} help={step.help} render={inputWrapper}>
+          <BasicWrapper key={`${entry}.${idx}`} className={classNames({ [classes.display__none]: isCollapsed})} entry={`${parent}.${entry}`} error={realError} label={step?.label === null ? null : step?.label || entry} help={step.help} render={inputWrapper}>
             <Step key={`step.${entry}.${idx}`} entry={`${parent}.${entry}`} realEntry={entry} step={schemaAndFlow.schema[entry]} error={realError}
               register={register} schema={schemaAndFlow.schema} control={control} trigger={trigger} getValues={getValues}
               setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient}

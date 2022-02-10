@@ -160,5 +160,5 @@ export const style = {
     "&+ .form-group": {
       marginLeft: '20px'
     }
-  }
+  },
 }
