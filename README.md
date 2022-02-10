@@ -154,7 +154,7 @@ export const Example = () => {
 
 ## Form properties
 - **schema** (required): the form schema
-- **flow** (optional): the flow. The order of the schema fields by key (Just a javascript array of strings). Fields can be group on collapsable item, in this case, you can add an object with `label`, `flow` and a boolean `collapse` property. Collapse item can draw inline form thanks to boolean `inlline` property
+- **flow** (optional): the flow. The order of the schema fields by key (Just a javascript array of strings). Fields can be group on collapsable item, in this case, you can add an object with `label`, `flow` and a boolean `collapse` property. Collapse item can draw inline form thanks to boolean `inline` property
 - **onSubmit** (required): a function run on the form submission (in case if the form is valid )
 - **value** (optional): default value
 - **inputWrapper** (optional): A custom component to wrap all input of the form
