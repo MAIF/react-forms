@@ -19,10 +19,10 @@ export const Collapse = (props) => {
         <span className={classNames(classes.collapse_label, { [classes.collapse_error]: props.errored })}>{props.label}</span>
         <button
           type="button"
-          className={classNames(classes.btn, { [classes.collapse_error]: props.errored })}
+          className={classNames(classes.btn, classes.btn_sm, { [classes.collapse_error]: props.errored })}
           onClick={toggle}>
-          {!!collapsed && <Eye />}
-          {!collapsed && <EyeOff />}
+          {!!collapsed && <Eye size={16}/>}
+          {!collapsed && <EyeOff size={16}/>}
         </button>
       </div>
       <div className={classNames(classes.ml_10, {

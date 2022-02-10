@@ -39,6 +39,8 @@ export const style = {
   btn_sm: {
     fontSize: "0.875rem",
     padding: ".25rem .5rem",
+    lineHeight: "1.5",
+    borderRadius: ".2rem"
   },
   btn_group: {
     "& > button:not(:last-child)": {
