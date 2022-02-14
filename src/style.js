@@ -156,9 +156,9 @@ export const style = {
   display__none: {
     display: "none"
   },
-  collapseInline: {
-    "&+ .form-group": {
-      marginLeft: '20px'
+  collapse__inline: {
+      "& .form-group+.form-group": {
+        marginLeft: '20px'
     }
   },
 }

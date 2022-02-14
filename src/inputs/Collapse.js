@@ -25,9 +25,10 @@ export const Collapse = (props) => {
           {!collapsed && <EyeOff size={16}/>}
         </button>
       </div>
-      <div className={classNames(classes.ml_10, {
+      <div className={classNames(`${classes.ml_10}`, {
         [classes.display__none]: !!collapsed,
-        [classes.flex]: !!props.inline
+        [classes.flex]: !!props.inline,
+        [classes.collapse__inline]: !!props.inline,
       })}>
         {props.children}
       </div>

@@ -92,7 +92,6 @@ const getDefaultValues = (flow, schema) => {
 export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSubmit, onError = () => { }, footer, style = {}, className, options = {} }, ref) => {
   const classes = useCustomStyle(style)
   const formFlow = flow || Object.keys(schema)
-
   const maybeCustomHttpClient = (url, method) => {
     //todo: if present props.resolve()
     if (options.httpClient) {
@@ -307,10 +306,10 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
           }
 
           return (
-            <BasicWrapper key={`collapse-${en}-${entryIdx}`} className={classes.collapseInline} entry={en} error={err} label={stp?.label === null ? null : stp?.label || en} help={stp?.help} render={inputWrapper}>
+            <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} error={err} label={stp?.label === null ? null : stp?.label || en} help={stp?.help} render={inputWrapper}>
               <Step entry={en} step={stp} error={err} errors={errors}
                 register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-                setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient} defaultValue={stp.defaultValue}/>
+                setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient} defaultValue={stp?.defaultValue}/>
             </BasicWrapper>
           )
         })}
@@ -725,8 +724,8 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
 
   return (
     <div style={{ borderLeft: '2px solid lightGray', paddingLeft: '1rem', marginBottom: '.5rem', position: 'relative' }}>
-      {collapsed && <ArrowDown size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: '5px', left: '-16px' }} stroke-width="3" onClick={() => setCollapsed(!collapsed)}/>}
-      {!collapsed && <ArrowUp size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: '5px', left: '-16px' }} stroke-width="3" onClick={() => setCollapsed(!collapsed)}/>}
+      {schemaAndFlow.flow.length > 1 && collapsed && <ArrowDown size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: '5px', left: '-16px' }} stroke-width="3" onClick={() => setCollapsed(!collapsed)}/>}
+      {schemaAndFlow.flow.length > 1 && !collapsed && <ArrowUp size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: '5px', left: '-16px' }} stroke-width="3" onClick={() => setCollapsed(!collapsed)}/>}
      
       {schemaAndFlow.flow.map((entry, idx) => {
         const step = schemaAndFlow.schema[entry]
@@ -734,9 +733,23 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
         const oneVisibleSetup = Object.values(schema).some(v => !!v.visibleOnCollapse)
         const isCollapsed = collapsed && (oneVisibleSetup ? !step.visibleOnCollapse : idx > 0)
 
+        const visibleStep = option(step)
+          .map(s => s.visible)
+          .map(visible => {
+            switch (typeof visible) {
+              case 'object':
+                const value = watch(visible.ref);
+                return option(visible.test).map(test => test(value)).getOrElse(value)
+              case 'boolean':
+                return visible;
+              default:
+                return true;
+            }
+          })
+          .getOrElse(true)
 
         return (
-          <BasicWrapper key={`${entry}.${idx}`} className={classNames({ [classes.display__none]: isCollapsed})} entry={`${parent}.${entry}`} error={realError} label={step?.label === null ? null : step?.label || entry} help={step.help} render={inputWrapper}>
+          <BasicWrapper key={`${entry}.${idx}`} className={classNames({ [classes.display__none]: isCollapsed || !visibleStep})} entry={`${parent}.${entry}`} error={realError} label={step?.label === null ? null : step?.label || entry} help={step.help} render={inputWrapper}>
             <Step key={`step.${entry}.${idx}`} entry={`${parent}.${entry}`} realEntry={entry} step={schemaAndFlow.schema[entry]} error={realError}
               register={register} schema={schemaAndFlow.schema} control={control} trigger={trigger} getValues={getValues}
               setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient}
