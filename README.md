@@ -92,6 +92,10 @@ export const Example = () => {
 - **help**: the text display hover a help button
 - **className**: you can customize classnames of field,
 - **style**: to styling a field, you can provide a json object with css
+- **onChange**: a callback function to the value change. 
+  ```javascript
+  ({rawValues, value, setValue}) => if (value.length) { setValue('entry', false) }
+  ```
 - **render**: a function to completely custom the rendering of form field 
   ```javascript
   ({rawValues, value, onChange, error}) => <input type="text" className="is-invalid" value={value} onChange={e => onChange(e.target.value)} />
@@ -185,7 +189,7 @@ httpClient = {(url, method) => fetch(url, {
   }
 })} 
 ```
-- **watch**: a boolean to activate the automatic log of form value. A function can be set up to override de default logger.
+- **watch**: a boolean to activate the automatic log of form value. A function can be set up to override the default logger.
 - **autosubmit**: a boolean to activate the automatic run of the `onSubmit` form properties on every change of values.
 - **actions**: an object to parameter footer buttons key. By default just `submit` button is displayed.
 ```javascript
