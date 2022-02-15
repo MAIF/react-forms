@@ -335,13 +335,21 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
     )
   }
 
+  const disabled = () => {
+    if (typeof step.disabled === 'function') {
+      return step.disabled({rawValues: getValues(), value: getValues(entry)});
+    } else {
+      return step.disabled;
+    }
+  };
+
   if (step.array) {
     return (
       <ArrayStep
         entry={entry} step={step} trigger={trigger}
         register={register} control={control} error={error}
         setValue={setValue} values={getValues(entry)} defaultValue={step.defaultValue || defaultVal(step.type)}
-        getValues={getValues}
+        getValues={getValues} disabled={disabled()}
         component={((props, idx) => {
           return (
             <Step entry={`${entry}[${idx}].value`} step={{ ...(schema[realEntry || entry]), onChange: undefined, array: false }} error={error && error[idx]?.value}
@@ -362,7 +370,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
               <textarea
                 type="text" id={entry}
                 className={classNames(classes.input, { [classes.input__invalid]: error })}
-                readOnly={step.disabled ? 'readOnly' : null}
+                readOnly={disabled() ? 'readOnly' : null}
                 {...step.props}
                 defaultValue={defaultValue}
                 placeholder={step.placeholder}
@@ -378,7 +386,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                 <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
                   <CodeInput
                     className={classNames({ [classes.input__invalid]: error })}
-                    readOnly={step.disabled ? true : false}
+                    readOnly={disabled() ? true : false}
                     onChange={(e) => {
                       field.onChange(e)
                       option(step.onChange)
@@ -403,7 +411,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                   <MarkdownInput
                     {...step.props}
                     className={classNames({ [classes.input__invalid]: error })}
-                    readOnly={step.disabled ? 'readOnly' : null}
+                    readOnly={disabled() ? 'readOnly' : null}
                     onChange={(e) => {
                       field.onChange(e)
                       option(step.onChange)
@@ -431,7 +439,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                       {...step.props}
                       {...step}
                       className={classNames({ [classes.input__invalid]: error })}
-                      readOnly={step.disabled ? 'readOnly' : null}
+                      disabled={disabled()}
                       value={field.value}
                       possibleValues={step.options}
                       defaultValue={defaultValue}
@@ -453,7 +461,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
               <input
                 type={step.format || 'text'} id={entry}
                 className={classNames(classes.input, { [classes.input__invalid]: error })}
-                readOnly={step.disabled ? 'readOnly' : null}
+                readOnly={disabled() ? 'readOnly' : null}
                 defaultValue={defaultValue}
                 placeholder={step.placeholder}
                 {...inputProps} />
@@ -476,7 +484,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                       {...step.props}
                       {...step}
                       className={classNames(classes.content, { [classes.input__invalid]: error })}
-                      readOnly={step.disabled ? 'readOnly' : null}
+                      readOnly={disabled() ? 'readOnly' : null}
                       onChange={(e) => {
                         field.onChange(e)
                         option(step.onChange)
@@ -499,7 +507,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                 {...step.props}
                 type={step.format || 'number'} id={entry}
                 className={classNames(classes.input, { [classes.input__invalid]: error })}
-                readOnly={step.disabled ? 'readOnly' : null}
+                readOnly={disabled() ? 'readOnly' : null}
                 name={entry}
                 placeholder={step.placeholder}
                 defaultValue={defaultValue}
@@ -519,7 +527,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                 <BooleanInput
                   {...step.props}
                   className={classNames({ [classes.input__invalid]: error })}
-                  readOnly={step.disabled ? 'readOnly' : null}
+                  readOnly={disabled() ? 'readOnly' : null}
                   onChange={(e) => {
                     field.onChange(e)
                     option(step.onChange)
@@ -549,7 +557,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                       {...step.props}
                       {...step}
                       className={classNames({ [classes.input__invalid]: error })}
-                      readOnly={step.disabled ? 'readOnly' : null}
+                      readOnly={disabled() ? 'readOnly' : null}
                       onChange={(e) => {
                         field.onChange(e)
                         option(step.onChange)
@@ -564,14 +572,14 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
               }}
             />
           )
-        case format.form: //FIXME: onChange
+        case format.form: //todo: disabled ?
           const flow = option(step.flow).getOrElse(option(step.schema).map(s => Object.keys(s)).getOrNull());
           return (
             <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error}>
               <NestedForm
                 schema={step.schema} flow={flow} step={step} parent={entry}
                 inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={getValues(entry) || defaultValue} error={error}
-                index={index} />
+                index={index}/>
             </CustomizableInput>
           )
 
@@ -588,7 +596,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                       {...step.props}
                       {...step}
                       className={classNames({ [classes.input__invalid]: error })}
-                      readOnly={step.disabled ? 'readOnly' : null}
+                      readOnly={disabled() ? 'readOnly' : null}
                       onChange={(e) => {
                         field.onChange(e)
                         option(step.onChange)
@@ -616,7 +624,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                   {...step.props}
                   id="datePicker-1"
                   className={classNames({ [classes.input__invalid]: error })}
-                  readOnly={step.disabled ? 'readOnly' : null}
+                  readOnly={disabled() ? 'readOnly' : null}
                   value={field.value}
                   onChange={(e) => {
                     field.onChange(e)
@@ -664,7 +672,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                     <button
                       type="button"
                       className={`${classes.btn} ${classes.flex} ${classes.ai_center}`}
-                      disabled={uploading}
+                      disabled={uploading || disabled()}
                       onClick={trigger}>
                       {uploading && <Loader />}
                       {!uploading && <Upload />}
@@ -695,7 +703,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
             {...step.props}
             type='file' id={entry}
             className={classNames(classes.input, { [classes.input__invalid]: error })}
-            readOnly={step.disabled ? 'readOnly' : null}
+            readOnly={disabled() ? 'readOnly' : null}
             name={entry}
             placeholder={step.placeholder}
             {...inputProps} />
@@ -708,7 +716,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
 }
 
 
-const ArrayStep = ({ entry, step, control, trigger, register, error, component, values, defaultValue, setValue, getValues }) => {
+const ArrayStep = ({ entry, step, control, trigger, register, error, component, values, defaultValue, setValue, getValues, disabled }) => {
   const classes = useCustomStyle()
   const { fields, append, remove } = useFieldArray({
     control, // control props comes from useForm (optional: if you are using FormContext)
@@ -726,7 +734,7 @@ const ArrayStep = ({ entry, step, control, trigger, register, error, component, 
                 {component({ key: field.id, ...field, defaultValue: values[idx] || defaultValue }, idx)}
               </div>
               <div className="input-group-append">
-                <button className="btn btn-danger btn-sm" onClick={() => {
+                <button className="btn btn-danger btn-sm" disabled={disabled} onClick={() => {
                   remove(idx)
                   trigger(entry);
                 }}>remove</button>
@@ -740,7 +748,7 @@ const ArrayStep = ({ entry, step, control, trigger, register, error, component, 
           trigger(entry);
           option(step.onChange)
             .map(onChange => onChange({ rawValues: getValues(), value: getValues(entry), setValue }))
-        }} value="Add" />
+        }} disabled={disabled} value="Add" />
         {error && <div className="invalid-feedback">{error.message}</div>}
       </div>
     </>

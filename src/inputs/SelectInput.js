@@ -107,6 +107,7 @@ export const SelectInput = (props) => {
             <button
               key={idx}
               type="button"
+              disabled={props.disabled}
               className={classNames(props.className, classes.btn, classes.btn_grey, classes.ml_5, { active })}
               onClick={() => handleSelectButtonClick(v)}>
               {v.label}
@@ -132,6 +133,7 @@ export const SelectInput = (props) => {
         onCreateOption={option => handleCreate(option, props.onCreateOption)}
         classNamePrefix="react-form-select"
         className={props.className}
+        readOnly={props.disabled ? 'readOnly' : null}
       />
     )
   } else {
@@ -147,6 +149,7 @@ export const SelectInput = (props) => {
         onChange={onChange}
         classNamePrefix="react-form-select"
         className={props.className}
+        readOnly={props.disabled ? 'readOnly' : null}
       />
     )
   }
