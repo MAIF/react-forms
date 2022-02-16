@@ -329,15 +329,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
     )
   }
 
-  const registeredInput = register(entry);
-  const inputProps = {
-    ...registeredInput,
-    onChange: (e) => {
-      registeredInput.onChange(e);
-      option(step.onChange)
-        .map(onChange => onChange({ rawValues: getValues(), value: e.target.value, setValue }))
-    }
-  }
+  
 
   const disabled = () => {
     if (typeof step.disabled === 'function') {
@@ -363,6 +355,16 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
           )
         })} />
     )
+  }
+
+  const registeredInput = register(entry);
+  const inputProps = {
+    ...registeredInput,
+    onChange: (e) => {
+      registeredInput.onChange(e);
+      option(step.onChange)
+        .map(onChange => onChange({ rawValues: getValues(), value: e.target.value, setValue }))
+    }
   }
 
   switch (step.type) {
