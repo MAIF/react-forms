@@ -34,7 +34,11 @@ export const style = {
     fontSize: "1rem",
     cursor: "pointer",
     borderWidth: '1px',
-    backgroundColor: '#fff'
+    backgroundColor: '#fff',
+    '&:disabled': {
+      opacity: .6,
+      cursor: 'not-allowed'
+    }
   },
   btn_sm: {
     fontSize: "0.875rem",
