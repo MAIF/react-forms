@@ -82,7 +82,7 @@ const defaultVal = (t, array, defaultValue) => {
 const getDefaultValues = (flow, schema) => {
   return flow.reduce((acc, key) => {
     const entry = schema[key]
-    if (!entry) {return acc}
+    if (!entry) { return acc }
     if (typeof key === 'object') {
       return { ...acc, ...getDefaultValues(key.flow, schema) }
     }
@@ -156,7 +156,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
           return { ...acc, [key]: v.map(({ value }) => value) }
         }
         return { ...acc, [key]: v }
-      } else if (!!v && typeof v === 'object' && !(v instanceof(Date))) {
+      } else if (!!v && typeof v === 'object' && !(v instanceof (Date))) {
         return { ...acc, [key]: cleanOutputArray(v, subSchema[key]?.schema || {}) }
       } else {
         return { ...acc, [key]: v }
@@ -337,7 +337,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
 
   const disabled = () => {
     if (typeof step.disabled === 'function') {
-      return step.disabled({rawValues: getValues(), value: getValues(entry)});
+      return step.disabled({ rawValues: getValues(), value: getValues(entry) });
     } else {
       return step.disabled;
     }
@@ -579,7 +579,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
               <NestedForm
                 schema={step.schema} flow={flow} step={step} parent={entry}
                 inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={getValues(entry) || defaultValue} error={error}
-                index={index}/>
+                index={index} />
             </CustomizableInput>
           )
 
@@ -689,7 +689,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                       field.onChange(e)
                       option(step.onChange)
                         .map(onChange => onChange({ rawValues: getValues(), value: e, setValue }))
-                    }} 
+                    }}
                     error={error} />
                 </CustomizableInput>
               )
@@ -786,31 +786,40 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
     }
   }, [prevSchema, schemaAndFlow.schema])
 
-  return (
-    <div style={{ borderLeft: '2px solid lightGray', paddingLeft: '1rem', marginBottom: '.5rem', position: 'relative' }}>
-      {schemaAndFlow.flow.length > 1 && collapsed && <ArrowDown size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: '5px', left: '-16px' }} stroke-width="3" onClick={() => setCollapsed(!collapsed)} />}
-      {schemaAndFlow.flow.length > 1 && !collapsed && <ArrowUp size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: '5px', left: '-16px' }} stroke-width="3" onClick={() => setCollapsed(!collapsed)} />}
+  //todo: est ce que 1 seul champ visible ? et pas de label...
+  const test = schemaAndFlow.flow.reduce((acc, entry) => {
+    const step = schemaAndFlow.schema[entry]
 
-      {schemaAndFlow.flow.map((entry, idx) => {
-        const step = schemaAndFlow.schema[entry]
+    const visibleStep = option(step)
+      .map(s => s.visible)
+      .map(visible => {
+        switch (typeof visible) {
+          case 'object':
+            const value = watch(visible.ref);
+            return option(visible.test).map(test => test(value)).getOrElse(value)
+          case 'boolean':
+            return visible;
+          default:
+            return true;
+        }
+      })
+      .getOrElse(true)
+
+    return [...acc, { step, visibleStep, entry }]
+  }, [])
+
+  console.debug({ test, first: test.filter(x => x.visibleStep).length, result: test.filter(x => x.visibleStep).length <= 1 && step.label === null })
+  const bordered = test.filter(x => x.visibleStep).length <= 1 && step.label === null;
+
+  return (
+    <div className={classNames({ [classes.nestedform__border]: bordered })}>
+      {!!step.collapsable && schemaAndFlow.flow.length > 1 && collapsed && <ArrowDown size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: '5px', left: '-16px' }} stroke-width="3" onClick={() => setCollapsed(!collapsed)} />}
+      {!!step.collapsable && schemaAndFlow.flow.length > 1 && !collapsed && <ArrowUp size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: '5px', left: '-16px' }} strok-width="3" onClick={() => setCollapsed(!collapsed)} />}
+
+      {test.map(({ step, visibleStep, entry }, idx) => {
         const realError = error && error[entry]
         const oneVisibleSetup = Object.values(schema).some(v => !!v.visibleOnCollapse)
         const isCollapsed = collapsed && (oneVisibleSetup ? !step.visibleOnCollapse : idx > 0)
-
-        const visibleStep = option(step)
-          .map(s => s.visible)
-          .map(visible => {
-            switch (typeof visible) {
-              case 'object':
-                const value = watch(visible.ref);
-                return option(visible.test).map(test => test(value)).getOrElse(value)
-              case 'boolean':
-                return visible;
-              default:
-                return true;
-            }
-          })
-          .getOrElse(true)
 
         return (
           <BasicWrapper key={`${entry}.${idx}`} className={classNames({ [classes.display__none]: isCollapsed || !visibleStep })} entry={`${parent}.${entry}`} error={realError} label={step?.label === null ? null : step?.label || entry} help={step.help} render={inputWrapper}>

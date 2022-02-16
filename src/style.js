@@ -157,8 +157,14 @@ export const style = {
     display: "none"
   },
   collapse__inline: {
-      "& .form-group+.form-group": {
-        marginLeft: '20px'
+    "& .form-group+.form-group": {
+      marginLeft: '20px'
     }
   },
+  nestedform__border: {
+    borderLeft: '2px solid lightGray',
+    paddingLeft: '1rem',
+    marginBottom: '.5rem',
+    position: 'relative'
+  }
 }
