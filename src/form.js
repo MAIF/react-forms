@@ -786,7 +786,6 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
     }
   }, [prevSchema, schemaAndFlow.schema])
 
-  //todo: est ce que 1 seul champ visible ? et pas de label...
   const test = schemaAndFlow.flow.reduce((acc, entry) => {
     const step = schemaAndFlow.schema[entry]
 
@@ -816,7 +815,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
 
       {test.map(({ step, visibleStep, entry }, idx) => {
         const realError = error && error[entry]
-        const oneVisibleSetup = Object.values(schema).some(v => !!v.visibleOnCollapse)
+        const oneVisibleSetup = Object.values(schemaAndFlow.schema).some(v => !!v.visibleOnCollapse)
         const isCollapsed = collapsed && (oneVisibleSetup ? !step.visibleOnCollapse : idx > 0)
 
         return (

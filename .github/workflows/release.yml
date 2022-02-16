@@ -68,6 +68,6 @@ jobs:
       env: 
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         REPO_OWNER: ${{ github.repository_owner }}
-        REPO: daikoku
+        REPO: react-forms
         IGNORE_MILESTONE_NOT_FOUND: true
   
