@@ -221,7 +221,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
         {formFlow.map((entry, idx) => {
           const step = schema[entry]
 
-          if (!step) {
+          if (!step && typeof entry === 'string') {
             console.error(`no step found for the entry "${entry}" in the given schema. Your form might not work properly. Please fix it`)
             return null;
           }
@@ -283,17 +283,6 @@ const Footer = (props) => {
 const Step = ({ entry, realEntry, step, error, errors, register, schema, control, trigger, getValues, setValue, watch, inputWrapper, httpClient, defaultValue, index }) => {
   const classes = useCustomStyle();
 
-  const registeredInput = register(entry);
-  const inputProps = {
-    ...registeredInput,
-    onChange: (e) => {
-      registeredInput.onChange(e);
-      option(step.onChange)
-        .map(onChange => onChange({ rawValues: getValues(), value: e.target.value, setValue }))
-    }
-  }
-
-
   if (entry && typeof entry === 'object') {
     const errored = entry.flow.some(step => !!errors[step])
     return (
@@ -303,6 +292,11 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
           const err = typeof en === 'object' ? undefined : en.split('.').reduce((object, key) => {
             return object && object[key];
           }, errors);
+
+          if (!stp && typeof en === 'string') {
+            console.error(`no step found for the entry "${en}" in the given schema. Your form might not work properly. Please fix it`)
+            return null;
+          }
 
           const visibleStep = option(stp)
             .map(s => s.visible)
@@ -333,6 +327,16 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
         })}
       </Collapse>
     )
+  }
+
+  const registeredInput = register(entry);
+  const inputProps = {
+    ...registeredInput,
+    onChange: (e) => {
+      registeredInput.onChange(e);
+      option(step.onChange)
+        .map(onChange => onChange({ rawValues: getValues(), value: e.target.value, setValue }))
+    }
   }
 
   const disabled = () => {
@@ -786,7 +790,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
     }
   }, [prevSchema, schemaAndFlow.schema])
 
-  const test = schemaAndFlow.flow.reduce((acc, entry) => {
+  const computedSandF = schemaAndFlow.flow.reduce((acc, entry) => {
     const step = schemaAndFlow.schema[entry]
 
     const visibleStep = option(step)
@@ -807,13 +811,19 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
     return [...acc, { step, visibleStep, entry }]
   }, [])
 
-  const bordered = test.filter(x => x.visibleStep).length <= 1 && step.label === null;
+  const bordered = computedSandF.filter(x => x.visibleStep).length <= 1 && step.label === null;
   return (
     <div className={classNames({ [classes.nestedform__border]: bordered })}>
       {!!step.collapsable && schemaAndFlow.flow.length > 1 && collapsed && <ArrowDown size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: '5px', left: '-16px' }} stroke-width="3" onClick={() => setCollapsed(!collapsed)} />}
       {!!step.collapsable && schemaAndFlow.flow.length > 1 && !collapsed && <ArrowUp size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: '5px', left: '-16px' }} strok-width="3" onClick={() => setCollapsed(!collapsed)} />}
 
-      {test.map(({ step, visibleStep, entry }, idx) => {
+      {computedSandF.map(({ step, visibleStep, entry }, idx) => {
+
+        if (!step && typeof entry === 'string') {
+          console.error(`no step found for the entry "${entry}" in the given schema. Your form might not work properly. Please fix it`)
+          return null;
+        }
+
         const realError = error && error[entry]
         const oneVisibleSetup = Object.values(schemaAndFlow.schema).some(v => !!v.visibleOnCollapse)
         const isCollapsed = collapsed && (oneVisibleSetup ? !step.visibleOnCollapse : idx > 0)
