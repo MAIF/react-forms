@@ -808,9 +808,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
     return [...acc, { step, visibleStep, entry }]
   }, [])
 
-  console.debug({ test, first: test.filter(x => x.visibleStep).length, result: test.filter(x => x.visibleStep).length <= 1 && step.label === null })
   const bordered = test.filter(x => x.visibleStep).length <= 1 && step.label === null;
-
   return (
     <div className={classNames({ [classes.nestedform__border]: bordered })}>
       {!!step.collapsable && schemaAndFlow.flow.length > 1 && collapsed && <ArrowDown size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: '5px', left: '-16px' }} stroke-width="3" onClick={() => setCollapsed(!collapsed)} />}
