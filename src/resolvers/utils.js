@@ -13,7 +13,6 @@ const resolvers = {
 }
 
 export const buildSubResolver = (props, key, dependencies, rawData) => {
-  const { type, constraints = [] } = props;
   if (props.array || props.isMulti) {
     let subResolver;
     let arrayResolver = yup.array()
@@ -31,7 +30,7 @@ export const buildSubResolver = (props, key, dependencies, rawData) => {
     }, arrayResolver)
   } else if (props.type === type.object && props.schema) {
     const subResolver = getShapeAndDependencies(props.flow || Object.keys(props.schema), props.schema, dependencies, rawData);
-    return constraints.reduce((resolver, constraint) => {
+    return props.constraints.reduce((resolver, constraint) => {
       return jsonOrFunctionConstraint(constraint, resolver, key, dependencies)
     }, yup.object().shape(subResolver.shape, dependencies))
   } else if (props.type === type.object && props.conditionalSchema) {
@@ -50,14 +49,14 @@ export const buildSubResolver = (props, key, dependencies, rawData) => {
         return option(filterSwitch).getOrElse(condiSchema.switch.find(s => s.default))
       }).getOrElse({})
     const subResolver = getShapeAndDependencies(flow || Object.keys(schema), schema, dependencies, rawData);
-    return constraints.reduce((resolver, constraint) => {
+    return props.constraints.reduce((resolver, constraint) => {
       return jsonOrFunctionConstraint(constraint, resolver, key, dependencies)
     }, yup.object().shape(subResolver.shape, dependencies))
 
   } else {
-    return constraints.reduce((resolver, constraint) => {
+    return props.constraints.reduce((resolver, constraint) => {
       return jsonOrFunctionConstraint(constraint, resolver, key, dependencies)
-    }, resolvers[type]())
+    }, resolvers[props.type]())
   }
 }
 
@@ -77,6 +76,9 @@ export const getShapeAndDependencies = (flow, schema, dependencies = [], rawData
         return { ...resolvers, ...getShapeAndDependencies(key.flow, schema, dependencies, rawData).shape }
       }
 
+      console.group('get resolver')
+      console.debug({schemaBykey: schema[key], key, dependencies, rawData})
+      console.groupEnd()
       const resolver = buildSubResolver(schema[key], key, dependencies, rawData);
       return { ...resolvers, [key]: resolver }
     }, {})
