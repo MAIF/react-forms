@@ -127,7 +127,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
         const isArray = option(subSchema)
           .orElse(schema)
           .map(s => s[key])
-          .map(entry => !!entry.array)
+          .map(entry => !!entry.array && !entry.render)
           .getOrElse(false)
         if (isArray) {
           return { ...acc, [key]: v.map(value => ({ value })) }
@@ -150,7 +150,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
         const isArray = option(subSchema)
           .orElse(schema)
           .map(s => s[key])
-          .map(entry => !!entry.array)
+          .map(entry => !!entry.array && !entry.render)
           .getOrElse(false)
         if (isArray) {
           return { ...acc, [key]: v.map(({ value }) => value) }
@@ -260,7 +260,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
             <BasicWrapper key={`${entry}-${idx}`} entry={entry} error={error} label={functionalProperty(entry, step?.label === null ? null : step?.label || entry)} help={step?.help} render={inputWrapper}>
               <Step key={idx} entry={entry} step={step} error={error} errors={errors}
                 register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-                setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient} functionalProperty={functionalProperty}/>
+                setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient} functionalProperty={functionalProperty} />
             </BasicWrapper>
           )
         })}
@@ -329,7 +329,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
             <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} error={err} label={functionalProperty(en, stp?.label === null ? null : stp?.label || en)} help={stp?.help} render={inputWrapper}>
               <Step entry={en} step={stp} error={err} errors={errors}
                 register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-                setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient} 
+                setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient}
                 defaultValue={stp?.defaultValue} functionalProperty={functionalProperty} />
             </BasicWrapper>
           )
@@ -340,19 +340,22 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
 
   if (step.array) {
     return (
-      <ArrayStep
-        entry={entry} step={step} trigger={trigger}
-        register={register} control={control} error={error}
-        setValue={setValue} values={getValues(entry)} defaultValue={step.defaultValue || defaultVal(step.type)}
-        getValues={getValues} disabled={functionalProperty(entry, step.disabled)}
-        component={((props, idx) => {
-          return (
-            <Step entry={`${entry}[${idx}].value`} step={{ ...(schema[realEntry || entry]), onChange: undefined, array: false }} error={error && error[idx]?.value}
-              register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-              setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient}
-              defaultValue={props.defaultValue} value={props.value} index={idx} functionalProperty={functionalProperty}/>
-          )
-        })} />
+      <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v) }} error={error}>
+        <ArrayStep
+          entry={entry} step={step} trigger={trigger}
+          register={register} control={control} error={error}
+          setValue={setValue} values={getValues(entry)} defaultValue={step.defaultValue || defaultVal(step.type)}
+          getValues={getValues} disabled={functionalProperty(entry, step.disabled)}
+          component={((props, idx) => {
+            return (
+              <Step entry={`${entry}[${idx}].value`} step={{ ...(schema[realEntry || entry]), render: step.itemRender, onChange: undefined, array: false }} error={error && error[idx]?.value}
+                register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
+                setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient}
+                defaultValue={props.defaultValue} value={props.value} index={idx} functionalProperty={functionalProperty} />
+            )
+          })} />
+      </CustomizableInput>
+
     )
   }
 
@@ -584,7 +587,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
               <NestedForm
                 schema={step.schema} flow={flow} step={step} parent={entry}
                 inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={getValues(entry) || defaultValue} error={error}
-                index={index} functionalProperty={functionalProperty}/>
+                index={index} functionalProperty={functionalProperty} />
             </CustomizableInput>
           )
 

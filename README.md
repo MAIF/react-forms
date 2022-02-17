@@ -100,6 +100,10 @@ export const Example = () => {
   ```javascript
   ({rawValues, value, onChange, error}) => <input type="text" className="is-invalid" value={value} onChange={e => onChange(e.target.value)} />
   ```
+- **itemRender**: a function to completely custom the rendering of form field items (Just in case of `array` is true)
+  ```javascript
+  ({rawValues, value, onChange, error}) => <input type="text" className="is-invalid" value={value} onChange={e => onChange(e.target.value)} />
+  ```
 - **props**: a json object merged with default props. For exemple, if format `select` is setup, you can add all [props](https://react-select.com/props) to customize react-select
 - **options**: An array of options for the select field (if format `select` is setup)
 - **optionsFrom**: A url to fetch array of options for the select field (if format `select` is setup)
