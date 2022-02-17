@@ -817,7 +817,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
 
   const bordered = computedSandF.filter(x => x.visibleStep).length > 1 && step.label !== null;
   return (
-    <div className={classNames({ [classes.nestedform__border]: bordered })}>
+    <div className={classNames({ [classes.nestedform__border]: bordered, [classes.border__error]: !!error })}>
       {!!step.collapsable && schemaAndFlow.flow.length > 1 && collapsed && <ArrowDown size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: '5px', left: '-16px' }} stroke-width="3" onClick={() => setCollapsed(!collapsed)} />}
       {!!step.collapsable && schemaAndFlow.flow.length > 1 && !collapsed && <ArrowUp size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: '5px', left: '-16px' }} strok-width="3" onClick={() => setCollapsed(!collapsed)} />}
 
