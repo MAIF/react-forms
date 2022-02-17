@@ -1,7 +1,7 @@
 {
   "name": "@maif/react-forms",
   "description": "Build react safe forms as fast as possible",
-  "version": "1.0.27",
+  "version": "1.0.28",
   "main": "lib/index.js",
   "author": "MAIF team",
   "keywords": [
