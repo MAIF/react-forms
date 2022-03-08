@@ -7,17 +7,17 @@ import { deepEqual, isPromise } from '../utils'
 import { format } from '..';
 import { useCustomStyle } from '../styleContext';
 
-const valueToSelectOption = (value, possibleValues = [], isMulti = false, maybeTransformer) => {
+const valueToSelectOption = (value, possibleValues = [], isMulti = false) => {
   if (value === null) {
     return null;
   }
   if (isMulti) {
-    return option(value).map(v => v.map(x => valueToSelectOption(x, possibleValues, false, maybeTransformer))).getOrElse([]);
+    return option(value).map(v => v.map(x => valueToSelectOption(x, possibleValues, false))).getOrElse([]);
   }
   const maybeValue = option(possibleValues.find(v => deepEqual(v.value, value)))
   return maybeValue
     .getOrElse({
-      label: maybeValue.map(v => v.label).getOrElse(value?.label || value),
+      label: maybeValue.map(v => v.label).getOrElse(value?.label || JSON.stringify(value)),
       value: maybeValue.map(v => v.value).getOrElse(value?.value || value),
     });
 };
@@ -25,18 +25,22 @@ const valueToSelectOption = (value, possibleValues = [], isMulti = false, maybeT
 export const SelectInput = (props) => {
   const classes = useCustomStyle()
   const possibleValues = (props.possibleValues || [])
-    .map(v => props.transformer ? props.transformer(v) : v)
+    .map(v => props.transformer ?
+      (typeof props.transformer === 'function' ?
+        props.transformer(v) :
+        ({ label: v[props.transformer.label], value: v[props.transformer.value] }))
+      : v)
     .map(v => ({
-      label: v?.label || v,
+      label: v?.label || JSON.stringify(v),
       value: v?.value || v
     }))
 
   const [loading, setLoading] = useState(false);
   const [values, setValues] = useState(possibleValues);
-  const [value, setValue] = useState(valueToSelectOption(props.value || props.defaultValue, possibleValues, props.isMulti, props.transformer))
+  const [value, setValue] = useState(valueToSelectOption(props.value || props.defaultValue, possibleValues, props.isMulti))
 
   useEffect(() => {
-    setValue(valueToSelectOption(props.value, values, props.isMulti, props.transformer))
+    setValue(valueToSelectOption(props.value, values, props.isMulti))
   }, [props.value, values])
 
   useEffect(() => {
