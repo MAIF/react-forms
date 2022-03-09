@@ -72,7 +72,7 @@ export const SelectInput = (props) => {
     if (props.isMulti) {
       props.onChange(changes.map(x => x.value))
     } else {
-      props.onChange(changes.value);
+      props.onChange(changes?.value);
     }
   };
 

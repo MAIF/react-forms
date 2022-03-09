@@ -87,7 +87,7 @@ export const maxSize = (ref: number | Reference<number>, message: string = `size
 }
 
 //mixed
-export const nullable  = () => (r: yup.AnySchema) => r.nullable()
+export const nullable  = () => (r: yup.AnySchema) => r.nullable().optional()
 export const test = (name: string, message: string = 'Test failed', test: (val: any) => boolean) => (r: yup.AnySchema) => r.test(name, message, test)
 export const when = (ref: string, test: (val: any) => boolean, then: any = [], otherwise: any = []) => (r: yup.AnySchema, key: string, dependencies: any) => {
   // dependencies.push([key, ref])

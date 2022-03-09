@@ -120,6 +120,9 @@ export const style = {
   cursor_pointer: {
     cursor: "pointer",
   },
+  cursor_not_allowed: {
+    cursor: "not-allowed",
+  },
   collapse: {
     display: "flex",
     justifyContent: "space-between",

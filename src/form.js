@@ -765,7 +765,7 @@ const ArrayStep = ({ entry, step, control, trigger, register, error, component, 
 
 const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, index, error, value, step, functionalProperty }) => {
   const { register, control, getValues, setValue, trigger, watch } = useFormContext(); // retrieve all hook methods
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(!!step.collapsed);
 
   const classes = useCustomStyle();
 
@@ -818,8 +818,8 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
   const bordered = computedSandF.filter(x => x.visibleStep).length > 1 && step.label !== null;
   return (
     <div className={classNames({ [classes.nestedform__border]: bordered, [classes.border__error]: !!error })}>
-      {!!step.collapsable && schemaAndFlow.flow.length > 1 && collapsed && <ArrowDown size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: '5px', left: '-16px' }} stroke-width="3" onClick={() => setCollapsed(!collapsed)} />}
-      {!!step.collapsable && schemaAndFlow.flow.length > 1 && !collapsed && <ArrowUp size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: '5px', left: '-16px' }} strok-width="3" onClick={() => setCollapsed(!collapsed)} />}
+      {!!step.collapsable && schemaAndFlow.flow.length > 1 && collapsed && <ArrowDown size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: '5px', left: '-16px' }} strokeWidth="3" onClick={() => setCollapsed(!collapsed)} />}
+      {!!step.collapsable && schemaAndFlow.flow.length > 1 && !collapsed && <ArrowUp size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: '5px', left: '-16px' }} strokeWidth="3" onClick={() => setCollapsed(!collapsed)} />}
 
       {computedSandF.map(({ step, visibleStep, entry }, idx) => {
 
@@ -829,11 +829,9 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
         }
 
         const realError = error && error[entry]
-        const oneVisibleSetup = Object.values(schemaAndFlow.schema).some(v => !!v.visibleOnCollapse)
-        const isCollapsed = collapsed && (oneVisibleSetup ? !step.visibleOnCollapse : idx > 0)
 
         return (
-          <BasicWrapper key={`${entry}.${idx}`} className={classNames({ [classes.display__none]: isCollapsed || !visibleStep })} entry={`${parent}.${entry}`} error={realError}
+          <BasicWrapper key={`${entry}.${idx}`} className={classNames({ [classes.display__none]: (collapsed && !step.visibleOnCollapse) || !visibleStep })} entry={`${parent}.${entry}`} error={realError}
             label={functionalProperty(entry, step?.label === null ? null : step?.label || entry)} help={step.help} render={inputWrapper}>
             <Step key={`step.${entry}.${idx}`} entry={`${parent}.${entry}`} realEntry={entry} step={schemaAndFlow.schema[entry]} error={realError}
               register={register} schema={schemaAndFlow.schema} control={control} trigger={trigger} getValues={getValues}
