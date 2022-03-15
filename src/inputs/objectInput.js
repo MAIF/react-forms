@@ -1,5 +1,7 @@
 import React from 'react';
 import { PlusCircle, MinusCircle } from 'react-feather';
+import classNames from 'classnames';
+import { useCustomStyle } from '../styleContext';
 
 export const ObjectInput = (props) => {
   const changeValue = (e, name) => {
@@ -34,6 +36,8 @@ export const ObjectInput = (props) => {
   };
 
   const values = Object.keys(props.value || {}).map((k) => [k, props.value[k]]);
+  
+  const classes = useCustomStyle();
 
   return (
     <div className={props.className}>
@@ -41,18 +45,17 @@ export const ObjectInput = (props) => {
         <button
           disabled={props.disabled}
           type="button"
-          className="btn btn-primary"
+          className={classNames(classes.btn, classes.btn_blue, classes.btn_sm)}
           onClick={addFirst}>
           <PlusCircle />
         </button>
       )}
       {values.map((value, idx) => (
-        <div className="d-flex flex-row" key={idx}>
+        <div className={classNames(classes.flex, classes.mt_5)} key={idx}>
           <input
             disabled={props.disabled}
             type="text"
-            className="form-control"
-            style={{ width: '50%' }}
+            className={classNames(classes.w_50)}
             placeholder={props.placeholderKey}
             value={value[0]}
             onChange={(e) => changeKey(e, value[0])}
@@ -60,8 +63,7 @@ export const ObjectInput = (props) => {
           <input
             disabled={props.disabled}
             type="text"
-            className="form-control"
-            style={{ width: '50%' }}
+            className={classNames(classes.w_50)}
             placeholder={props.placeholderValue}
             value={value[1]}
             onChange={(e) => changeValue(e, value[0])}
@@ -69,7 +71,7 @@ export const ObjectInput = (props) => {
           <button
             disabled={props.disabled}
             type="button"
-            className="btn btn-danger"
+            className={classNames(classes.flex, classes.btn, classes.btn_red, classes.btn_sm, classes.ml_10)}
             onClick={(e) => remove(e, value[0])}>
             <MinusCircle />
           </button>
@@ -77,7 +79,7 @@ export const ObjectInput = (props) => {
             <button
               disabled={props.disabled}
               type="button"
-              className="btn btn-primary"
+              className={classNames(classes.flex, classes.btn, classes.btn_blue, classes.btn_sm, classes.ml_5)}
               onClick={addNext}>
               <PlusCircle />
             </button>

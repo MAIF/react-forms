@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import showdown from 'showdown';
 import AceEditor from 'react-ace';
 import classNames from 'classnames';
+import { useCustomStyle } from '../styleContext'
 
 import '@fortawesome/fontawesome-free/css/all.css';
 import 'highlight.js/styles/monokai.css';
@@ -225,6 +226,8 @@ Proin vehicula ligula vel enim euismod, sed congue mi egestas. Nullam varius ut 
   };
 
   const injectButtons = () => {
+    const classes = useCustomStyle()
+
     return commands.map((command, idx) => {
       if (command.component) {
         return command.component(idx);
@@ -232,18 +235,7 @@ Proin vehicula ligula vel enim euismod, sed congue mi egestas. Nullam varius ut 
       return (
         <button
           type="button"
-          className="btn-for-descriptionToolbar"
-          style={{
-            textAlign: "left",
-            cursor: "pointer",
-            height: "22px",
-            padding: "4px",
-            border: "none",
-            background: "none",
-            color: "#242729",
-            marginRight: "5px",
-            marginLeft: "5px"
-          }}
+          className={classNames(classes.btn_for_descriptionToolbar)}
           aria-label={command.name}
           title={command.name}
           key={`toolbar-btn-${idx}`}
@@ -269,13 +261,12 @@ Proin vehicula ligula vel enim euismod, sed congue mi egestas. Nullam varius ut 
   };
 
   return (
-    <div className={classNames("d-flex flex-column", props.className)}>
+    <div className={classNames(props.className)}>
       <div
         style={{
           marginBottom: 10,
-          flexWrap: 'wrap',
         }}
-        className="d-flex flex-sm-row flex-column align-items-center">
+        >
         <div>
           <div className="btn-group">
             <button

@@ -42,12 +42,12 @@ const BasicWrapper = ({ entry, className, label, error, help, children, render }
   }
 
   return (
-    <div className={`form-group mt-3 ${className}`}>
-      {label && <label className="form-label d-flex align-content-center" htmlFor={entry}>
-        <span className="mr-2">{label}</span>
+    <div className={`${classes.mt_10}`}>
+      {label && <label className={`${classes.flex} ${classes.ai_center} ${classes.mb_5}`} htmlFor={entry}>
+        <span>{label}</span>
         {help && <>
           <ReactToolTip html={true} place={'bottom'} id={id} />
-          <span data-html={true} data-tip={help} data-for={id}>
+          <span className={`${classes.flex} ${classes.ai_center}`}  data-html={true} data-tip={help} data-for={id}>
             <HelpCircle style={{ color: 'gray', width: 17, marginLeft: '.5rem', cursor: 'help' }} />
           </span>
         </>}
@@ -222,7 +222,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 
   return (
     <FormProvider {...methods} >
-      <form className={className || `${classes.pr_15} ${classes.full_width}`} onSubmit={handleSubmit(data => {
+      <form className={className || `${classes.pr_15} ${classes.w_100}`} onSubmit={handleSubmit(data => {
         const clean = cleanOutputArray(data, schema)
         onSubmit(clean)
       }, onError)}>
@@ -446,7 +446,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                     <SelectInput
                       {...step.props}
                       {...step}
-                      className={classNames({ [classes.input__invalid]: error })}
+                      className={classNames(classes.flex_grow_1, {[classes.input__invalid]: error })}
                       disabled={functionalProperty(entry, step.disabled)}
                       value={field.value}
                       possibleValues={step.options}
@@ -564,7 +564,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                     <SelectInput
                       {...step.props}
                       {...step}
-                      className={classNames({ [classes.input__invalid]: error })}
+                      className={classNames(classes.flex_grow_1, {[classes.input__invalid]: error })}
                       readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
                       onChange={(e) => {
                         field.onChange(e)
@@ -669,7 +669,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                 };
 
                 return (
-                  <div className={classNames("d-flex flex-row justify-content-start", { [classes.input__invalid]: error })}>
+                  <div className={classNames({ [classes.input__invalid]: error })}>
                     <input
                       ref={(r) => setInput(r)}
                       type="file"
@@ -737,26 +737,24 @@ const ArrayStep = ({ entry, step, control, trigger, register, error, component, 
       {fields
         .map((field, idx) => {
           return (
-            <div key={field.id} className="d-flex flex-row">
-              <div className="flex-grow-1">
+            <div key={field.id}>
+              <div className={classNames(classes.flex, classes.ai_center, classes.mt_5)}>
                 {component({ key: field.id, ...field, defaultValue: values[idx] || defaultValue }, idx)}
-              </div>
-              <div className="input-group-append">
-                <button className="btn btn-danger btn-sm" disabled={disabled} onClick={() => {
+                <button className={classNames(classes.btn, classes.btn_red, classes.btn_sm , classes.ml_5)} disabled={disabled} onClick={() => {
                   remove(idx)
                   trigger(entry);
-                }}>remove</button>
+                }}>Remove</button>
               </div>
             </div>
           )
         })}
-      <div>
-        <input type="button" className={classNames("btn btn-info mt-2", { [classes.input__invalid]: error })} onClick={() => {
+      <div className={classNames(classes.flex, classes.jc_flex_end)}>
+        <button className={classNames(classes.btn, classes.btn_blue, classes.btn_sm, classes.mt_5, { [classes.input__invalid]: error })} onClick={() => {
           append({ value: step.addableDefaultValue || defaultVal(step.type) })
           trigger(entry);
           option(step.onChange)
             .map(onChange => onChange({ rawValues: getValues(), value: getValues(entry), setValue }))
-        }} disabled={disabled} value="Add" />
+        }} disabled={disabled}>Add</button>
         {error && <div className="invalid-feedback">{error.message}</div>}
       </div>
     </>
