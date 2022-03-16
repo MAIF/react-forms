@@ -11,7 +11,7 @@ import * as yup from "yup";
 import { useCustomStyle } from './styleContext';
 import { type } from './type';
 import { format } from './format';
-import { BooleanInput, Collapse, SelectInput, ObjectInput, CodeInput, MarkdownInput } from './inputs/index';
+import { BooleanInput, Collapse, SelectInput, ObjectInput, CodeInput, MarkdownInput, SingleLineCode } from './inputs/index';
 import { getShapeAndDependencies } from './resolvers/index';
 import { option } from './Option'
 
@@ -385,30 +385,33 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                 {...inputProps} />
             </CustomizableInput>
           );
-        case format.code: return (
-          <Controller
-            name={entry}
-            control={control}
-            render={({ field }) => {
-              return (
-                <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
-                  <CodeInput
-                    className={classNames({ [classes.input__invalid]: error })}
-                    readOnly={functionalProperty(entry, step.disabled) ? true : false}
-                    onChange={(e) => {
-                      field.onChange(e)
-                      option(step.onChange)
-                        .map(onChange => onChange({ rawValues: getValues(), value: e, setValue }))
-                    }}
-                    value={field.value}
-                    defaultValue={defaultValue}
-                    {...step.props}
-                  />
-                </CustomizableInput>
-              )
-            }}
-          />
-        )
+        case format.code:
+        case format.singleLineCode:
+          const Component = step.format === format.code ? CodeInput : SingleLineCode
+          return (
+            <Controller
+              name={entry}
+              control={control}
+              render={({ field }) => {
+                return (
+                  <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
+                    <Component
+                      className={classNames({ [classes.input__invalid]: error })}
+                      readOnly={functionalProperty(entry, step.disabled) ? true : false}
+                      onChange={(e) => {
+                        field.onChange(e)
+                        option(step.onChange)
+                          .map(onChange => onChange({ rawValues: getValues(), value: e, setValue }))
+                      }}
+                      value={field.value}
+                      defaultValue={defaultValue}
+                      {...step.props}
+                    />
+                  </CustomizableInput>
+                )
+              }}
+            />
+          )
         case format.markdown: return (
           <Controller
             name={entry}
