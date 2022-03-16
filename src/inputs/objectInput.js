@@ -6,7 +6,7 @@ import { useCustomStyle } from '../styleContext';
 export const ObjectInput = (props) => {
   const [internalState, setInternalState] = useState(Object.fromEntries(
     Object.entries(props.value || {})
-      .map(([key, value]) => [Date.now(), { key, value }])
+      .map(([key, value], idx) => [Date.now() + idx, { key, value }])
   ))
 
   useEffect(() => {
