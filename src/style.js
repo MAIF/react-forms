@@ -87,14 +87,23 @@ export const style = {
   mb_5: {
     marginBottom: 5,
   },
+  mb_10: {
+    marginBottom: 10,
+  },
+  mb_20: {
+    marginBottom: 20,
+  },
   p_15: {
     padding: 15,
   },
   pr_15: {
     paddingRight: 15,
   },
-  full_width: {
+  w_100: {
     width: '100%'
+  },
+  w_50: {
+    width: '50%'
   },
   d_none: {
     display: "none",
@@ -105,11 +114,17 @@ export const style = {
   flexColumn: {
     flexDirection: "column",
   },
-  justifyContentBetween: {
+  flex_grow_1: {
+    flexGrow: 1,
+  },
+  jc_between: {
     justifyContent: "space-between",
   },
   jc_end: {
     justifyContent: "end",
+  },
+  jc_flex_end: {
+    justifyContent: "flex-end",
   },
   ac_center: {
     alignContent: "center",
@@ -176,5 +191,17 @@ export const style = {
   },
   border__error: {
     borderColor: "#dc3545"
+  },
+  btn_for_descriptionToolbar:{
+    textAlign: "left",
+    cursor: "pointer",
+    height: "22px",
+    padding: "4px",
+    border: "none",
+    background: "none",
+    color: "#242729",
+    marginRight: "5px",
+    marginLeft: "5px"
+
   }
 }

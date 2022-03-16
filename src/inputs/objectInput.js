@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { PlusCircle, MinusCircle } from 'react-feather';
+import classNames from 'classnames';
+import { useCustomStyle } from '../styleContext';
 
 export const ObjectInput = (props) => {
-  const [internalState, setInternalState] = useState(Object.keys(props.value || {}).map((k) => [k, props.value[k]]))
+  const [internalState, setInternalState] = useState(Object.fromEntries(
+    Object.entries(props.value || {})
+      .map(([key, value]) => [Date.now(), { key, value }])
+  ))
 
   useEffect(() => {
     props.onChange(Object.values(internalState).reduce((acc, c) => ({
@@ -25,7 +30,7 @@ export const ObjectInput = (props) => {
     })
   };
 
-  const addFirst = (e) => {
+  const addFirst = () => {
     if (!internalState || Object.keys(internalState).length === 0) {
       setInternalState({
         ...internalState,
@@ -34,8 +39,8 @@ export const ObjectInput = (props) => {
     }
   };
 
-  const addNext = (e) => {
-    const newItem = props.defaultKeyValue || { '': '' };
+  const addNext = () => {
+    const newItem = props.defaultKeyValue || { key: '', value: '' };
     setInternalState({
       ...internalState,
       [Date.now()]: newItem
@@ -46,24 +51,25 @@ export const ObjectInput = (props) => {
     setInternalState(Object.fromEntries(Object.entries(internalState).filter(([id, _]) => id !== removedId)))
   };
 
+  const classes = useCustomStyle();
+
   return (
     <div className={props.className}>
       {Object.keys(internalState || {}).length === 0 && (
         <button
           disabled={props.disabled}
           type="button"
-          className="btn btn-primary"
+          className={classNames(classes.btn, classes.btn_blue, classes.btn_sm)}
           onClick={addFirst}>
           <PlusCircle />
         </button>
       )}
       {Object.entries(internalState).map(([id, { key, value }], idx) => (
-        <div className="d-flex flex-row" key={id}>
+        <div className={classNames(classes.flex, classes.mt_5)} key={idx}>
           <input
             disabled={props.disabled}
             type="text"
-            className="form-control"
-            style={{ width: '50%' }}
+            className={classNames(classes.w_50)}
             placeholder={props.placeholderKey}
             value={key}
             onChange={e => changeKey(id, e.target.value)}
@@ -71,8 +77,7 @@ export const ObjectInput = (props) => {
           <input
             disabled={props.disabled}
             type="text"
-            className="form-control"
-            style={{ width: '50%' }}
+            className={classNames(classes.w_50)}
             placeholder={props.placeholderValue}
             value={value}
             onChange={e => changeValue(id, e.target.value)}
@@ -80,7 +85,7 @@ export const ObjectInput = (props) => {
           <button
             disabled={props.disabled}
             type="button"
-            className="btn btn-danger"
+            className={classNames(classes.flex, classes.btn, classes.btn_red, classes.btn_sm, classes.ml_10)}
             onClick={() => remove(id)}>
             <MinusCircle />
           </button>
@@ -88,7 +93,7 @@ export const ObjectInput = (props) => {
             <button
               disabled={props.disabled}
               type="button"
-              className="btn btn-primary"
+              className={classNames(classes.flex, classes.btn, classes.btn_blue, classes.btn_sm, classes.ml_5)}
               onClick={addNext}>
               <PlusCircle />
             </button>

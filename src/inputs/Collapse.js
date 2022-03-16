@@ -15,7 +15,7 @@ export const Collapse = (props) => {
   return (
     <div>
       <hr className={classNames({ [classes.collapse_error]: props.errored })} />
-      <div className={`${classes.cursor_pointer} ${classes.flex} ${classes.justifyContentBetween}`} onClick={toggle}>
+      <div className={`${classes.cursor_pointer} ${classes.flex} ${classes.jc_between}`} onClick={toggle}>
         <span className={classNames(classes.collapse_label, { [classes.collapse_error]: props.errored })}>{props.label}</span>
         <button
           type="button"
