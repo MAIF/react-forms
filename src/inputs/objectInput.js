@@ -1,43 +1,54 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { PlusCircle, MinusCircle } from 'react-feather';
 
 export const ObjectInput = (props) => {
-  const changeValue = (e, name) => {
-    const newValues = { ...props.value, [name]: e.target.value };
-    props.onChange(newValues);
+  const [internalState, setInternalState] = useState(Object.keys(props.value || {}).map((k) => [k, props.value[k]]))
+
+  useEffect(() => {
+    props.onChange(Object.values(internalState).reduce((acc, c) => ({
+      ...acc,
+      [c.key]: c.value
+    }), {}))
+  }, [internalState])
+
+  const changeValue = (id, newValue) => {
+    setInternalState({
+      ...internalState,
+      [id]: { key: internalState[id].key, value: newValue }
+    })
   };
 
-  const changeKey = (e, oldName) => {
-    const newValues = { ...props.value };
-    const oldValue = newValues[oldName];
-    delete newValues[oldName];
-    newValues[e.target.value] = oldValue;
-    props.onChange(newValues);
+  const changeKey = (id, newValue) => {
+    setInternalState({
+      ...internalState,
+      [id]: { key: newValue, value: internalState[id].value }
+    })
   };
 
   const addFirst = (e) => {
-    if (!props.value || Object.keys(props.value).length === 0) {
-      props.onChange(props.defaultKeyValue || { '': '' });
+    if (!internalState || Object.keys(internalState).length === 0) {
+      setInternalState({
+        ...internalState,
+        [Date.now()]: props.defaultKeyValue || { key: '', value: '' }
+      })
     }
   };
 
   const addNext = (e) => {
     const newItem = props.defaultKeyValue || { '': '' };
-    const newValues = { ...props.value, ...newItem };
-    props.onChange(newValues);
+    setInternalState({
+      ...internalState,
+      [Date.now()]: newItem
+    });
   };
 
-  const remove = (e, name) => {
-    const newValues = { ...props.value };
-    delete newValues[name];
-    props.onChange(newValues);
+  const remove = removedId => {
+    setInternalState(Object.fromEntries(Object.entries(internalState).filter(([id, _]) => id !== removedId)))
   };
-
-  const values = Object.keys(props.value || {}).map((k) => [k, props.value[k]]);
 
   return (
     <div className={props.className}>
-      {values.length === 0 && (
+      {Object.keys(internalState || {}).length === 0 && (
         <button
           disabled={props.disabled}
           type="button"
@@ -46,16 +57,16 @@ export const ObjectInput = (props) => {
           <PlusCircle />
         </button>
       )}
-      {values.map((value, idx) => (
-        <div className="d-flex flex-row" key={idx}>
+      {Object.entries(internalState).map(([id, { key, value }], idx) => (
+        <div className="d-flex flex-row" key={id}>
           <input
             disabled={props.disabled}
             type="text"
             className="form-control"
             style={{ width: '50%' }}
             placeholder={props.placeholderKey}
-            value={value[0]}
-            onChange={(e) => changeKey(e, value[0])}
+            value={key}
+            onChange={e => changeKey(id, e.target.value)}
           />
           <input
             disabled={props.disabled}
@@ -63,17 +74,17 @@ export const ObjectInput = (props) => {
             className="form-control"
             style={{ width: '50%' }}
             placeholder={props.placeholderValue}
-            value={value[1]}
-            onChange={(e) => changeValue(e, value[0])}
+            value={value}
+            onChange={e => changeValue(id, e.target.value)}
           />
           <button
             disabled={props.disabled}
             type="button"
             className="btn btn-danger"
-            onClick={(e) => remove(e, value[0])}>
+            onClick={() => remove(id)}>
             <MinusCircle />
           </button>
-          {idx === values.length - 1 && (
+          {idx === Object.keys(internalState).length - 1 && (
             <button
               disabled={props.disabled}
               type="button"
