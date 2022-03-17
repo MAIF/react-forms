@@ -203,5 +203,45 @@ export const style = {
     marginRight: "5px",
     marginLeft: "5px"
 
-  }
+  },
+  content_switch_button_on: {
+    width: "35px",
+    height: "22px",
+    borderRadius: "20px",
+    display: "flex",
+    marginTop: "10px",
+    backgroundColor: "green",
+    border: "1px solid green",
+    justifyContent: "flex-end"
+  },
+  content_switch_button_off: {
+    width: "35px",
+    height: "22px",
+    borderRadius: "20px",
+    display: "flex",
+    marginTop: "10px",
+    backgroundColor: "#fff",
+    border: "1px solid #dfdfdf",
+    justifyContent: "flex-start"
+  },
+  switch_button_on: {
+    backgroundColor: "#fff",
+    borderRadius: "20px",
+    cursor: "pointer",
+    width: "20px",
+    height: "20px",
+    backgroundColor: "#fff",
+    borderRadius: "20px"
+  },
+  switch_button_off: {
+    backgroundColor: "#fff",
+    borderRadius: "20px",
+    cursor: "pointer",
+    width: "22px",
+    height: "22px",
+    marginTop: "-1px",
+    marginLeft: "-1px",
+    border: "1px solid #dfdfdf",
+    boxShadow: "1px 0px 5px 0px rgba(0, 0, 0, 0.3)"
+  }  
 }
