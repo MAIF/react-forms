@@ -34,7 +34,7 @@ export const CodeInput = ({ onChange, value, className = '', readOnly, theme = '
         ));
       }}
       height={props.height}
-      width={props.width}
+      width="-1"
       showGutter={true}
       tabSize={2}
       highlightActiveLine={true}

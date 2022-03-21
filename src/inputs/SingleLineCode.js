@@ -14,7 +14,7 @@ import 'brace/ext/language_tools';
 
 export const SingleLineCode = ({ onChange, value, className = '', readOnly, theme = 'monokai', mode = 'javascript', ...props }) => {
     return (
-        <div style={{ padding: '6px', backgroundColor: theme === 'monokai' ? "#272822" : '#fff' }}>
+        <div style={{ padding: '6px', backgroundColor: theme === 'monokai' ? "#272822" : '#fff', flex: 1 }}>
             <AceEditor
                 commands={Beautify.commands}
                 className={className}

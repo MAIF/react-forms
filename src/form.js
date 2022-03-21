@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useImperativeHandle } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup';
 import classNames from 'classnames';
-import { HelpCircle, Loader, Upload, ArrowDown, ArrowUp } from 'react-feather';
+import { HelpCircle, Loader, Upload, ChevronDown, ChevronUp } from 'react-feather';
 import { useForm, useFormContext, Controller, useFieldArray, FormProvider } from 'react-hook-form';
 import { DatePicker } from 'react-rainbow-components';
 import ReactToolTip from 'react-tooltip';
@@ -42,12 +42,12 @@ const BasicWrapper = ({ entry, className, label, error, help, children, render }
   }
 
   return (
-    <div className={`${classes.mt_10}`}>
+    <div className={`${classes.mt_10} ${className}`} style={{ position: 'relative' }}>
       {label && <label className={`${classes.flex} ${classes.ai_center} ${classes.mb_5}`} htmlFor={entry}>
         <span>{label}</span>
         {help && <>
           <ReactToolTip html={true} place={'bottom'} id={id} />
-          <span className={`${classes.flex} ${classes.ai_center}`}  data-html={true} data-tip={help} data-for={id}>
+          <span className={`${classes.flex} ${classes.ai_center}`} data-html={true} data-tip={help} data-for={id}>
             <HelpCircle style={{ color: 'gray', width: 17, marginLeft: '.5rem', cursor: 'help' }} />
           </span>
         </>}
@@ -109,7 +109,6 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 
   const defaultValues = getDefaultValues(formFlow, schema);
 
-
   //FIXME: get real schema through the switch
 
   const resolver = (rawData) => {
@@ -119,22 +118,14 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
     return resolver;
   }
 
-  const cleanInputArray = (obj, subSchema) => {
-    return Object.entries(obj).reduce((acc, curr) => {
-      const [key, v] = curr;
+  const cleanInputArray = (obj, defaultValues, subSchema) => {
+    return Object.entries(subSchema).reduce((acc, [key, step]) => {
+      const v = obj[key] || defaultValues[key]
 
-      if (Array.isArray(v)) {
-        const isArray = option(subSchema)
-          .orElse(schema)
-          .map(s => s[key])
-          .map(entry => !!entry.array && !entry.render)
-          .getOrElse(false)
-        if (isArray) {
-          return { ...acc, [key]: v.map(value => ({ value })) }
-        }
-        return { ...acc, [key]: v }
+      if (step.array && !step.render) {
+        return { ...acc, [key]: v.map(value => ({ value })) }
       } else if (!!v && typeof v === 'object' && !(v instanceof (Date))) {
-        return { ...acc, [key]: cleanInputArray(v, subSchema[key]?.schema || {}) }
+        return { ...acc, [key]: cleanInputArray(v, defaultValues, subSchema[key]?.schema || {}) }
       } else {
         return { ...acc, [key]: v }
       }
@@ -166,7 +157,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 
   const methods = useForm({
     resolver: (data, context, options) => yupResolver(resolver(data))(data, context, options),
-    defaultValues: cleanInputArray(value || defaultValues, schema),
+    defaultValues: cleanInputArray(value, defaultValues, schema),
     shouldFocusError: !options.autosubmit,
   });
 
@@ -175,12 +166,12 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 
   useEffect(() => {
     if (value) {
-      reset(cleanInputArray(value, schema))
+      reset(cleanInputArray(value, defaultValues, schema))
     }
   }, [value, reset])
 
   useEffect(() => {
-    reset(cleanInputArray(value || defaultValues, schema));
+    reset(cleanInputArray(value, defaultValues, schema));
   }, [schema])
 
   const data = watch();
@@ -351,7 +342,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
               <Step entry={`${entry}[${idx}].value`} step={{ ...(schema[realEntry || entry]), render: step.itemRender, onChange: undefined, array: false }} error={error && error[idx]?.value}
                 register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
                 setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient}
-                defaultValue={props.defaultValue} value={props.value} index={idx} functionalProperty={functionalProperty} />
+                defaultValue={props.defaultValue?.value} value={props.value} index={idx} functionalProperty={functionalProperty} />
             )
           })} />
       </CustomizableInput>
@@ -449,7 +440,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                     <SelectInput
                       {...step.props}
                       {...step}
-                      className={classNames(classes.flex_grow_1, {[classes.input__invalid]: error })}
+                      className={classNames(classes.flex_grow_1, { [classes.input__invalid]: error })}
                       disabled={functionalProperty(entry, step.disabled)}
                       value={field.value}
                       possibleValues={step.options}
@@ -567,7 +558,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                     <SelectInput
                       {...step.props}
                       {...step}
-                      className={classNames(classes.flex_grow_1, {[classes.input__invalid]: error })}
+                      className={classNames(classes.flex_grow_1, { [classes.input__invalid]: error })}
                       readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
                       onChange={(e) => {
                         field.onChange(e)
@@ -634,7 +625,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                 <DatePicker
                   {...step.props}
                   id="datePicker-1"
-                  className={classNames(classes.datepicker,{ [classes.input__invalid]: error })}
+                  className={classNames(classes.datepicker, { [classes.input__invalid]: error })}
                   readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
                   value={field.value}
                   onChange={(e) => {
@@ -729,6 +720,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
 
 const ArrayStep = ({ entry, step, control, trigger, register, error, component, values, defaultValue, setValue, getValues, disabled }) => {
   const classes = useCustomStyle()
+
   const { fields, append, remove } = useFieldArray({
     control, // control props comes from useForm (optional: if you are using FormContext)
     name: entry, // unique name for your Field Array
@@ -742,8 +734,8 @@ const ArrayStep = ({ entry, step, control, trigger, register, error, component, 
           return (
             <div key={field.id}>
               <div className={classNames(classes.flex, classes.ai_center, classes.mt_5)}>
-                {component({ key: field.id, ...field, defaultValue: values[idx] || defaultValue }, idx)}
-                <button className={classNames(classes.btn, classes.btn_red, classes.btn_sm , classes.ml_5)} disabled={disabled} onClick={() => {
+                {component({ key: field.id, ...field, defaultValue: values[idx] }, idx)}
+                <button className={classNames(classes.btn, classes.btn_red, classes.btn_sm, classes.ml_5)} disabled={disabled} onClick={() => {
                   remove(idx)
                   trigger(entry);
                 }}>Remove</button>
@@ -819,8 +811,10 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
   const bordered = computedSandF.filter(x => x.visibleStep).length > 1 && step.label !== null;
   return (
     <div className={classNames({ [classes.nestedform__border]: bordered, [classes.border__error]: !!error })}>
-      {!!step.collapsable && schemaAndFlow.flow.length > 1 && collapsed && <ArrowDown size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: '5px', left: '-16px' }} strokeWidth="3" onClick={() => setCollapsed(!collapsed)} />}
-      {!!step.collapsable && schemaAndFlow.flow.length > 1 && !collapsed && <ArrowUp size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: '5px', left: '-16px' }} strokeWidth="3" onClick={() => setCollapsed(!collapsed)} />}
+      {!!step.collapsable && schemaAndFlow.flow.length > 1 && collapsed &&
+        <ChevronDown size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: 0, right: 0 }} strokeWidth="2" onClick={() => setCollapsed(!collapsed)} />}
+      {!!step.collapsable && schemaAndFlow.flow.length > 1 && !collapsed &&
+        <ChevronUp size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: 0, right: 0 }} strokeWidth="2" onClick={() => setCollapsed(!collapsed)} />}
 
       {computedSandF.map(({ step, visibleStep, entry }, idx) => {
 
@@ -832,7 +826,9 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
         const realError = error && error[entry]
 
         return (
-          <BasicWrapper key={`${entry}.${idx}`} className={classNames({ [classes.display__none]: (collapsed && !step.visibleOnCollapse) || !visibleStep })} entry={`${parent}.${entry}`} error={realError}
+          <BasicWrapper key={`${entry}.${idx}`}
+            className={classNames({ [classes.display__none]: (collapsed && !step.visibleOnCollapse) || !visibleStep })}
+            entry={`${parent}.${entry}`} error={realError}
             label={functionalProperty(entry, step?.label === null ? null : step?.label || entry)} help={step.help} render={inputWrapper}>
             <Step key={`step.${entry}.${idx}`} entry={`${parent}.${entry}`} realEntry={entry} step={schemaAndFlow.schema[entry]} error={realError}
               register={register} schema={schemaAndFlow.schema} control={control} trigger={trigger} getValues={getValues}

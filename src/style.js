@@ -187,7 +187,7 @@ export const style = {
     borderLeft: '2px solid lightGray',
     paddingLeft: '1rem',
     marginBottom: '.5rem',
-    position: 'relative'
+    // position: 'relative'
   },
   border__error: {
     borderColor: "#dc3545"
