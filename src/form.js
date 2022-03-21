@@ -654,13 +654,15 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                 const setFiles = (e) => {
                   const files = e.target.files;
                   setUploading(true);
-                  onChange(files)
+                  onChange([...files])
                   setUploading(false);
                 };
 
                 const trigger = () => {
                   input.click();
                 };
+
+                const files = field.value || []
 
                 return (
                   <div className={classNames({ [classes.input__invalid]: error })}>
@@ -671,6 +673,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                       className={classes.d_none}
                       onChange={setFiles}
                     />
+                    <span>{files.length <= 0 ? 'No files selected' : files.map(r => r.name).join(" , ")}</span>
                     <button
                       type="button"
                       className={`${classes.btn} ${classes.flex} ${classes.ai_center}`}
