@@ -634,7 +634,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                 <DatePicker
                   {...step.props}
                   id="datePicker-1"
-                  className={classNames({ [classes.input__invalid]: error })}
+                  className={classNames(classes.datepicker,{ [classes.input__invalid]: error })}
                   readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
                   value={field.value}
                   onChange={(e) => {

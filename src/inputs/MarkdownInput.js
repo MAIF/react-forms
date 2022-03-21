@@ -260,6 +260,8 @@ Proin vehicula ligula vel enim euismod, sed congue mi egestas. Nullam varius ut 
     });
   };
 
+  const classes = useCustomStyle()
+  
   return (
     <div className={classNames(props.className)}>
       <div
@@ -268,24 +270,24 @@ Proin vehicula ligula vel enim euismod, sed congue mi egestas. Nullam varius ut 
         }}
         >
         <div>
-          <div className="btn-group">
+          <div>
             <button
               type="button"
-              className="btn btn-secondary"
-              style={{ color: !preview ? '#7f96af' : 'white' }}
+              className={classNames(classes.btn, classes.btn_sm)}
+              style={{ color: !preview ? '#7f96af' : 'white' ,  backgroundColor: preview ? '#7f96af' : 'white' }}
               onClick={() => setPreview(false)}>
               Write
             </button>
             <button
               type="button"
-              className="btn btn-secondary"
-              style={{ color: preview ? '#7f96af' : 'white' }}
+              className={classNames(classes.btn, classes.btn_sm,classes.ml_5)}
+              style={{ color: preview ? '#7f96af' : 'white' ,  backgroundColor: preview ? 'white' : '#7f96af' }}
               onClick={() => setPreview(true)}>
               Preview
             </button>
           </div>
         </div>
-        <div className="d-flex flex-row">{injectButtons()}</div>
+        <div className={classNames(classes.flex)}>{injectButtons()}</div>
       </div>
       {!preview && (
         <AceEditor
