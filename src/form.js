@@ -120,10 +120,14 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 
   const cleanInputArray = (obj, defaultValues, subSchema) => {
     return Object.entries(subSchema).reduce((acc, [key, step]) => {
-      const v = obj[key] || defaultValues[key]
+      let v
+      if (obj)
+        v = obj[key]
+      if (!v && defaultValues)
+        v = defaultValues[key]
 
       if (step.array && !step.render) {
-        return { ...acc, [key]: v.map(value => ({ value })) }
+        return { ...acc, [key]: (v || []).map(value => ({ value })) }
       } else if (!!v && typeof v === 'object' && !(v instanceof (Date))) {
         return { ...acc, [key]: cleanInputArray(v, defaultValues, subSchema[key]?.schema || {}) }
       } else {
