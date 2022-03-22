@@ -668,7 +668,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
               const files = field.value || []
 
               return (
-                <div className={classNames({ [classes.input__invalid]: error })}>
+                <div className={classNames(classes.flex, classes.ai_center, { [classes.input__invalid]: error })}>
                   <input
                     ref={(r) => setInput(r)}
                     type="file"
@@ -676,16 +676,17 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                     className={classes.d_none}
                     onChange={setFiles}
                   />
-                  <span>{files.length <= 0 ? 'No files selected' : files.map(r => r.name).join(" , ")}</span>
                   <button
                     type="button"
-                    className={`${classes.btn} ${classes.flex} ${classes.ai_center}`}
+                    className={`${classes.btn} ${classes.btn_sm} ${classes.flex} ${classes.ai_center}`}
                     disabled={uploading || functionalProperty(entry, step.disabled)}
                     onClick={trigger}>
                     {uploading && <Loader />}
                     {!uploading && <Upload />}
                     <span className={`${classes.ml_5}`}>Select file(s)</span>
                   </button>
+
+                  <span className={`${classes.ml_5}`}>{files.length <= 0 ? 'No files selected' : files.map(r => r.name).join(" , ")}</span>
                 </div>
               );
             };
