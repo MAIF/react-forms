@@ -169,11 +169,10 @@ export const style = {
   input__invalid: {
     borderColor: '#dc3545 !important',
   },
-  invalid_feedback: {
+  feedback: {
     width: "100%",
     marginTop: ".25rem",
-    fontSize: "80%",
-    color: "#dc3545"
+    fontSize: "80%"
   },
   display__none: {
     display: "none"
