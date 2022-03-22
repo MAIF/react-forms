@@ -23,7 +23,7 @@ You must define a form flow (this is just a javascript array which that represen
 ## example
 
 ```javascript
-import { Form, type, format, constraints } from 'react-form'
+import { Form, type, format, constraints } from 'react-forms'
 
 export const Example = () => { 
   const schema = {
