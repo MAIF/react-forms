@@ -59,7 +59,7 @@ export const ObjectInput = (props) => {
         <button
           disabled={props.disabled}
           type="button"
-          className={classNames(classes.btn, classes.btn_blue, classes.btn_sm)}
+          className={classNames(classes.flex, classes.btn, classes.btn_blue, classes.btn_sm)}
           onClick={addFirst}>
           <PlusCircle />
         </button>
