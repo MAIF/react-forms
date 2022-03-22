@@ -12,7 +12,17 @@ const valueToSelectOption = (value, possibleValues = [], isMulti = false) => {
     return null;
   }
   if (isMulti) {
-    return option(value).map(v => v.map(x => valueToSelectOption(x, possibleValues, false))).getOrElse([]);
+    console.log(value)
+    return option(value)
+      .map(v => {
+        (() => {
+          if (Array.isArray(v))
+            return (v || [])
+          else if (typeof v === 'object')
+            return Object.values(v)
+          return v
+        })().map(x => valueToSelectOption(x, possibleValues, false))
+      }).getOrElse([]);
   }
   const maybeValue = option(possibleValues.find(v => deepEqual(v.value, value)))
   return maybeValue
