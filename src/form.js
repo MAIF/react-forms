@@ -806,9 +806,9 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
   return (
     <div className={classNames({ [classes.nestedform__border]: bordered, [classes.border__error]: !!error })} style={{ position: 'relative' }}>
       {!!step.collapsable && schemaAndFlow.flow.length > 1 && collapsed &&
-        <ChevronDown size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: 0, right: 0, zIndex: 100 }} strokeWidth="2" onClick={() => setCollapsed(!collapsed)} />}
+        <ChevronDown size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: -35, right: 0, zIndex: 100 }} strokeWidth="2" onClick={() => setCollapsed(!collapsed)} />}
       {!!step.collapsable && schemaAndFlow.flow.length > 1 && !collapsed &&
-        <ChevronUp size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: 0, right: 0, zIndex: 100 }} strokeWidth="2" onClick={() => setCollapsed(!collapsed)} />}
+        <ChevronUp size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: -35, right: 0, zIndex: 100 }} strokeWidth="2" onClick={() => setCollapsed(!collapsed)} />}
 
       {computedSandF.map(({ step, visibleStep, entry }, idx) => {
 
