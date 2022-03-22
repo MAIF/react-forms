@@ -684,7 +684,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                     onClick={trigger}>
                     {uploading && <Loader />}
                     {!uploading && <Upload />}
-                    <span className={`${classes.ml_5}`}>Select file</span>
+                    <span className={`${classes.ml_5}`}>Select file(s)</span>
                   </button>
                 </div>
               );
