@@ -641,79 +641,65 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
         />
       )
     case type.file:
-      if (step.format === format.hidden) {
-        return (
-          <Controller
-            name={entry}
-            control={control}
-            render={({ field }) => {
-              const FileInput = ({ onChange }) => {
-                const [uploading, setUploading] = useState(false);
-                const [input, setInput] = useState(undefined);
+      return (
+        <Controller
+          name={entry}
+          control={control}
+          render={({ field }) => {
+            const FileInput = ({ onChange }) => {
+              const [uploading, setUploading] = useState(false);
+              const [input, setInput] = useState(undefined);
 
-                const setFiles = (e) => {
-                  const files = e.target.files;
-                  setUploading(true);
-                  onChange([...files])
-                  setUploading(false);
-                };
-
-                const trigger = () => {
-                  input.click();
-                };
-
-                const files = field.value || []
-
-                return (
-                  <div className={classNames({ [classes.input__invalid]: error })}>
-                    <input
-                      ref={(r) => setInput(r)}
-                      type="file"
-                      multiple
-                      className={classes.d_none}
-                      onChange={setFiles}
-                    />
-                    <span>{files.length <= 0 ? 'No files selected' : files.map(r => r.name).join(" , ")}</span>
-                    <button
-                      type="button"
-                      className={`${classes.btn} ${classes.flex} ${classes.ai_center}`}
-                      disabled={uploading || functionalProperty(entry, step.disabled)}
-                      onClick={trigger}>
-                      {uploading && <Loader />}
-                      {!uploading && <Upload />}
-                      <span className={`${classes.ml_5}`}>Select file</span>
-                    </button>
-                  </div>
-                );
+              const setFiles = (e) => {
+                const files = e.target.files;
+                setUploading(true);
+                onChange([...files])
+                setUploading(false);
               };
 
+              const trigger = () => {
+                input.click();
+              };
+
+              const files = field.value || []
+
               return (
-                <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
-                  <FileInput
-                    onChange={(e) => {
-                      field.onChange(e)
-                      option(step.onChange)
-                        .map(onChange => onChange({ rawValues: getValues(), value: e, setValue }))
-                    }}
-                    error={error} />
-                </CustomizableInput>
-              )
-            }}
-          />
-        )
-      }
-      return (
-        <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error}>
-          <input
-            {...step.props}
-            type='file' id={entry}
-            className={classNames(classes.input, { [classes.input__invalid]: error })}
-            readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
-            name={entry}
-            placeholder={step.placeholder}
-            {...inputProps} />
-        </CustomizableInput>
-      );
+                <div className={classNames({ [classes.input__invalid]: error })}>
+                  <input
+                    ref={(r) => setInput(r)}
+                    type="file"
+                    multiple
+                    className={classes.d_none}
+                    onChange={setFiles}
+                  />
+                  <span>{files.length <= 0 ? 'No files selected' : files.map(r => r.name).join(" , ")}</span>
+                  <button
+                    type="button"
+                    className={`${classes.btn} ${classes.flex} ${classes.ai_center}`}
+                    disabled={uploading || functionalProperty(entry, step.disabled)}
+                    onClick={trigger}>
+                    {uploading && <Loader />}
+                    {!uploading && <Upload />}
+                    <span className={`${classes.ml_5}`}>Select file</span>
+                  </button>
+                </div>
+              );
+            };
+
+            return (
+              <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
+                <FileInput
+                  onChange={(e) => {
+                    field.onChange(e)
+                    option(step.onChange)
+                      .map(onChange => onChange({ rawValues: getValues(), value: e, setValue }))
+                  }}
+                  error={error} />
+              </CustomizableInput>
+            )
+          }}
+        />
+      )
     default:
       return null;
   }
@@ -813,11 +799,11 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
 
   const bordered = computedSandF.filter(x => x.visibleStep).length > 1 && step.label !== null;
   return (
-    <div className={classNames({ [classes.nestedform__border]: bordered, [classes.border__error]: !!error })}>
+    <div className={classNames({ [classes.nestedform__border]: bordered, [classes.border__error]: !!error })} style={{ position: 'relative' }}>
       {!!step.collapsable && schemaAndFlow.flow.length > 1 && collapsed &&
-        <ChevronDown size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: 0, right: 0 }} strokeWidth="2" onClick={() => setCollapsed(!collapsed)} />}
+        <ChevronDown size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: 0, right: 0, zIndex: 100 }} strokeWidth="2" onClick={() => setCollapsed(!collapsed)} />}
       {!!step.collapsable && schemaAndFlow.flow.length > 1 && !collapsed &&
-        <ChevronUp size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: 0, right: 0 }} strokeWidth="2" onClick={() => setCollapsed(!collapsed)} />}
+        <ChevronUp size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: 0, right: 0, zIndex: 100 }} strokeWidth="2" onClick={() => setCollapsed(!collapsed)} />}
 
       {computedSandF.map(({ step, visibleStep, entry }, idx) => {
 
