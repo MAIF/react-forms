@@ -1,48 +1,27 @@
-import React from 'react';
-import AceEditor from 'react-ace';
+import React, { useEffect, useRef } from 'react';
+import Editor from './__generated/editor'
 
-import Beautify from 'brace/ext/beautify'
-import 'brace/mode/html'
-import 'brace/mode/javascript'
-import 'brace/mode/json'
-import 'brace/mode/css'
-import 'brace/mode/markdown'
-import 'brace/theme/monokai'
-import 'brace/theme/tomorrow'
-import 'brace/ext/searchbox'
-import 'brace/ext/language_tools';
+export function CodeInput({
+  onChange,
+  value,
+  mode = 'javascript',
+  readOnly = false,
+  showLinesNumber = true,
+  highlightLine = false,
+  themeStyle = {
+    height: '-1',
+    minHeight: '300px',
+    maxHeight: '-1',
+    width: '-1',
+    minWidth: '-1',
+    maxWidth: '-1',
+  }
+}) {
+  const ref = useRef()
 
-export const CodeInput = ({ onChange, value, className = '', readOnly, theme = 'monokai', mode = 'javascript', ...props }) => {
-  return (
-    <AceEditor
-      commands={Beautify.commands}
-      className={className}
-      readOnly={readOnly}
-      style={{zIndex: 0, isolation: 'isolate'}}
-      mode={mode}
-      theme={theme}
-      onChange={onChange}
-      value={value}
-      name="scriptParam"
-      editorProps={{ $blockScrolling: true }}
-      onLoad={editorInstance => { 
+  useEffect(() => {
+    Editor(ref.current, mode, onChange, value, readOnly, showLinesNumber, highlightLine, themeStyle)
+  }, [])
 
-        editorInstance.container.style.resize = "both";
-        // mouseup = css resize end
-        document.addEventListener("mouseup", e => (
-          editorInstance.resize()
-        ));
-      }}
-      height={props.height}
-      width="-1"
-      showGutter={true}
-      tabSize={2}
-      highlightActiveLine={true}
-      enableBasicAutocompletion={true}
-      enableLiveAutocompletion={true}
-      {...props}
-      ref={props.setRef}
-    />
-  );
-
+  return <div ref={ref} />
 }

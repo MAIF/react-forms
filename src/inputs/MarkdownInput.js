@@ -1,28 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import showdown from 'showdown';
-import AceEditor from 'react-ace';
 import classNames from 'classnames';
 import { useCustomStyle } from '../styleContext'
 
 import '@fortawesome/fontawesome-free/css/all.css';
 import 'highlight.js/styles/monokai.css';
 
-import Beautify from 'brace/ext/beautify'
-import 'brace/mode/html'
-import 'brace/mode/javascript'
-import 'brace/mode/json'
-import 'brace/mode/css'
-import 'brace/mode/markdown'
-import 'brace/theme/monokai'
-import 'brace/theme/tomorrow'
-import 'brace/ext/searchbox'
-import 'brace/ext/language_tools';
-
 import hljs from 'highlight.js';
+
+import { CodeInput } from './CodeInput';
+
 window.hljs = window.hljs || hljs;
 
 const DaikokuExtension = () => {
-  // @ref:[]()
+  // @ref: []()
   const refextension = {
     type: 'lang',
     regex: /@ref:\[(.*)\]\((.*)\)/g,
@@ -42,11 +33,11 @@ const DaikokuExtension = () => {
     type: 'lang',
     regex: /@@@/g,
     replace: () => {
-      // console.log('@@@');
+      console.log('@@@');
       return '</div>';
     },
   };
-  // @@@ warning
+  // @@@warning
   const warningExtension = {
     type: 'lang',
     regex: /@@@ warning/g,
@@ -54,7 +45,7 @@ const DaikokuExtension = () => {
       return '<div class="note note-warning">';
     },
   };
-  // @@@ warning { title= }
+  // @@@warning { title = }
   const warningTitleExtension = {
     type: 'lang',
     regex: /@@@ warning \{ title='(.*)' \}/g,
@@ -62,7 +53,7 @@ const DaikokuExtension = () => {
       return `<div class="note note-warning"><div class="note-title">${title}</div>`;
     },
   };
-  // @@@ note
+  // @@@note
   const noteExtension = {
     type: 'lang',
     regex: /@@@ note/g,
@@ -70,7 +61,7 @@ const DaikokuExtension = () => {
       return '<div class="note">';
     },
   };
-  // @@@ note { title= }
+  // @@@note { title = }
   const noteTitleExtension = {
     type: 'lang',
     regex: /@@@ note \{ title='(.*)' \}/g,
@@ -261,73 +252,42 @@ Proin vehicula ligula vel enim euismod, sed congue mi egestas. Nullam varius ut 
   };
 
   const classes = useCustomStyle()
-  
-  return (
-    <div className={classNames(props.className)}>
-      <div
-        style={{
-          marginBottom: 10,
-        }}
-        >
-        <div>
-          <div>
-            <button
-              type="button"
-              className={classNames(classes.btn, classes.btn_sm)}
-              style={{ color: !preview ? '#7f96af' : 'white' ,  backgroundColor: preview ? '#7f96af' : 'white' }}
-              onClick={() => setPreview(false)}>
-              Write
-            </button>
-            <button
-              type="button"
-              className={classNames(classes.btn, classes.btn_sm,classes.ml_5)}
-              style={{ color: preview ? '#7f96af' : 'white' ,  backgroundColor: preview ? 'white' : '#7f96af' }}
-              onClick={() => setPreview(true)}>
-              Preview
-            </button>
-          </div>
-        </div>
-        <div className={classNames(classes.flex)}>{injectButtons()}</div>
-      </div>
-      {!preview && (
-        <AceEditor
-          commands={Beautify.commands}
-          ref={(r) => {
-            if (r && r.editor) {
-              setEditor(r.editor);
-            }
-          }}
-          mode="markdown"
-          theme={props.theme || 'monokai'}
-          style={{ zIndex: 0, isolation: 'isolate' }}
-          onChange={props.onChange}
-          onLoad={editorInstance => {
 
-            editorInstance.container.style.resize = "both";
-            // mouseup = css resize end
-            document.addEventListener("mouseup", e => (
-              editorInstance.resize()
-            ));
-          }}
-          value={props.value}
-          name="scriptParam"
-          editorProps={{ $blockScrolling: true }}
-          height={props.height || '300px'}
-          width={props.width || '100%'}
-          showGutter={true}
-          tabSize={2}
-          highlightActiveLine={true}
-          enableBasicAutocompletion={true}
-          enableLiveAutocompletion={true}
-        />
-      )}
-      {preview && (
-        <div
-          className="api-description"
-          dangerouslySetInnerHTML={{ __html: converter.makeHtml(props.value) }}
-        />
-      )}
+  return <div className={classNames(props.className)}>
+    <div
+      style={{
+        marginBottom: 10,
+      }}
+    >
+      <div>
+        <div>
+          <button
+            type="button"
+            className={classNames(classes.btn, classes.btn_sm)}
+            style={{ color: !preview ? '#7f96af' : 'white', backgroundColor: preview ? '#7f96af' : 'white' }}
+            onClick={() => setPreview(false)}>
+            Write
+          </button>
+          <button
+            type="button"
+            className={classNames(classes.btn, classes.btn_sm, classes.ml_5)}
+            style={{ color: preview ? '#7f96af' : 'white', backgroundColor: preview ? 'white' : '#7f96af' }}
+            onClick={() => setPreview(true)}>
+            Preview
+          </button>
+        </div>
+      </div>
+      <div className={classNames(classes.flex)}>{injectButtons()}</div>
     </div>
-  );
+    {!preview && (
+      <CodeInput {...props} />
+    )}
+    {preview && (
+      <div
+        className="api-description"
+        dangerouslySetInnerHTML={{ __html: converter.makeHtml(props.value) }}
+      />
+    )}
+  </div>
 };
 

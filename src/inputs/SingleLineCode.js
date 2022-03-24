@@ -1,49 +1,31 @@
-import React from 'react';
-import AceEditor from 'react-ace';
+import React, { useEffect, useRef } from 'react';
+import Editor from './__generated/editor'
 
-import Beautify from 'brace/ext/beautify'
-import 'brace/mode/html'
-import 'brace/mode/javascript'
-import 'brace/mode/json'
-import 'brace/mode/css'
-import 'brace/mode/markdown'
-import 'brace/theme/monokai'
-import 'brace/theme/tomorrow'
-import 'brace/ext/searchbox'
-import 'brace/ext/language_tools';
+export function SingleLineCode({
+    onChange,
+    value,
+    mode = 'javascript',
+    readOnly = false,
+    showLinesNumber = true,
+    highlightLine = false,
+    themeStyle = {
+        height: '-1',
+        minHeight: '-1',
+        maxHeight: '-1',
+        width: '-1',
+        minWidth: '-1',
+        maxWidth: '-1',
+    }
+}) {
+    const ref = useRef()
 
-export const SingleLineCode = ({ onChange, value, className = '', readOnly, theme = 'monokai', mode = 'javascript', ...props }) => {
-    return (
-        <div style={{ padding: '6px', backgroundColor: theme === 'monokai' ? "#272822" : '#fff', flex: 1 }}>
-            <AceEditor
-                commands={Beautify.commands}
-                className={className}
-                readOnly={readOnly}
-                style={{
-                    zIndex: 0,
-                    isolation: 'isolate'
-                }}
-                width="-1"
-                mode={mode}
-                theme={theme}
-                onChange={onChange}
-                value={value}
-                name="scriptParam"
-                setOptions={{
-                    maxLines: 1,
-                    fontSize: '15px'
-                }}
-                editorProps={{
-                    $blockScrolling: true
-                }}
-                showGutter={false}
-                highlightActiveLine={false}
-                enableBasicAutocompletion={true}
-                enableLiveAutocompletion={true}
-                ref={props.setRef}
-                {...props}
-            />
-        </div>
-    );
+    useEffect(() => {
+        Editor(ref.current, mode, v => {
+            onChange(v.replace(/\n/g, ""))
+        }, value, readOnly, showLinesNumber, highlightLine, themeStyle)
+    }, [])
 
+    return <div ref={ref} style={{
+        flex: 1, overflow: 'hidden'
+    }} />
 }

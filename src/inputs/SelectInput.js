@@ -4,7 +4,7 @@ import CreatableSelect from 'react-select/creatable';
 import Select from 'react-select';
 import { option } from '../Option';
 import { deepEqual, isPromise } from '../utils'
-import { format } from '..';
+import { format } from '../format';
 import { useCustomStyle } from '../styleContext';
 
 const valueToSelectOption = (value, possibleValues = [], isMulti = false) => {
