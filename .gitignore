@@ -31,3 +31,5 @@ yarn-error.log*
 /react-form/dist
 .yalc/
 yalc.lock
+
+src/inputs/__generated/
