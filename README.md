@@ -84,7 +84,7 @@ export const Example = () => {
   }
   ```
 - **isMulti**: if `select` format is choosen, `isMulti` property is to render a multiselect component
-- **defaultKeyValue**: if the format is setup to object, this default key/value is set for all added entries
+- **defaultKeyValue**: if `object` format is choosen, this default key/value is set for all added entries
 - **visible**: a boolean option to hide/display form field. It can be an object with `ref` property to get a value by reference an a key `test` as a function to test it. if there is no `test` key, it's base just on boolean value of the reference.
 - **disabled**: A boolean option to enable/disable form field
 - **label**: The label of form field (you can pass `null` to not render a label)
