@@ -12,22 +12,22 @@ const valueToSelectOption = (value, possibleValues = [], isMulti = false) => {
     return null;
   }
   if (isMulti) {
-    console.log(value)
     return option(value)
       .map(v => {
-        (() => {
+        return (() => {
           if (Array.isArray(v))
             return (v || [])
           else if (typeof v === 'object')
             return Object.values(v)
           return v
         })().map(x => valueToSelectOption(x, possibleValues, false))
-      }).getOrElse([]);
+      })
+      .getOrElse([]);
   }
   const maybeValue = option(possibleValues.find(v => deepEqual(v.value, value)))
   return maybeValue
     .getOrElse({
-      label: maybeValue.map(v => v.label).getOrElse(value?.label || JSON.stringify(value)),
+      label: maybeValue.map(v => v.label).getOrElse(value?.label || (typeof value === 'object' ? JSON.stringify(value) : value)),
       value: maybeValue.map(v => v.value).getOrElse(value?.value || value),
     });
 };

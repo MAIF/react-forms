@@ -16,7 +16,7 @@ import {
 import { history, historyKeymap } from '@codemirror/history'
 import { foldGutter, foldKeymap } from '@codemirror/fold'
 import { indentWithTab } from '@codemirror/commands'
-import { indentOnInput } from '@codemirror/language'
+import { indentUnit } from '@codemirror/language'
 import { lineNumbers, highlightActiveLineGutter } from '@codemirror/gutter'
 import { defaultKeymap } from '@codemirror/commands'
 import { bracketMatching } from '@codemirror/matchbrackets'
@@ -42,6 +42,7 @@ export default function Editor(
     mode,
     onChange,
     value,
+    tabSize = 1,
     readOnly = false,
     showLinesNumber = true,
     highlightLine = false,
@@ -70,7 +71,6 @@ export default function Editor(
         drawSelection(),
         dropCursor(),
         EditorState.allowMultipleSelections.of(true),
-        indentOnInput(),
         defaultHighlightStyle.fallback,
         bracketMatching(),
         closeBrackets(),
@@ -91,22 +91,29 @@ export default function Editor(
         ]),
         oneDark,
         theme,
+        EditorState.tabSize.of(tabSize), indentUnit.of(" ".repeat(tabSize))
     ].filter(f => f)
 
-    return new EditorView({
-        state: EditorState.create({
-            extensions: [
-                ...setup,
-                EditorView.updateListener.of(vu => {
+    const state = EditorState.create({
+        extensions: [
+            ...setup,
+            EditorView.updateListener.of(vu => {
+                try {
                     if (vu.docChanged) {
                         const doc = vu.state.doc.toString();
                         onChange(doc)
                     }
-                }),
-                EditorView.editable.of(!readOnly)
-            ],
-            doc: value,
-        }),
+                } catch (_) {
+
+                }
+            }),
+            EditorView.editable.of(!readOnly)
+        ],
+        doc: (typeof value === 'object' ? value.value : value),
+    })
+
+    return new EditorView({
+        state,
         parent
     })
 }

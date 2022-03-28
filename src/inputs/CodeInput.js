@@ -1,10 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Editor from './__generated/editor'
 
 export function CodeInput({
   onChange,
   value,
   mode = 'javascript',
+  tabSize = 2,
   readOnly = false,
   showLinesNumber = true,
   highlightLine = false,
@@ -20,7 +21,11 @@ export function CodeInput({
   const ref = useRef()
 
   useEffect(() => {
-    Editor(ref.current, mode, onChange, value, readOnly, showLinesNumber, highlightLine, themeStyle)
+    Editor(ref.current, mode, onChange, value, tabSize, readOnly, showLinesNumber, highlightLine, themeStyle)
+
+    ref.current.addEventListener("keydown", e => {
+      e.stopImmediatePropagation()
+    })
   }, [])
 
   return <div ref={ref} />

@@ -128,12 +128,12 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 
       if (step.array && !step.render) {
         return { ...acc, [key]: (v || []).map(value => ({ value })) }
-      } else if (!!v && typeof v === 'object' && !(v instanceof (Date))) {
+      } else if (!!v && typeof v === 'object' && !(v instanceof Date) && !Array.isArray(v)) {
         return { ...acc, [key]: cleanInputArray(v, defaultValues, subSchema[key]?.schema || {}) }
       } else {
         return { ...acc, [key]: v }
       }
-    }, {})
+    }, obj)
   }
 
   const cleanOutputArray = (obj, subSchema) => {
@@ -165,8 +165,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
     shouldFocusError: !options.autosubmit,
   });
 
-  const { register, handleSubmit, formState: { errors }, control, reset, watch, trigger, getValues, setValue } = methods
-
+  const { register, handleSubmit, formState: { errors }, control, reset, watch, trigger, getValues, setValue, setError } = methods
 
   useEffect(() => {
     if (value) {
@@ -204,7 +203,8 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
     handleSubmit: () => handleSubmit(data => {
       const clean = cleanOutputArray(data, schema)
       onSubmit(clean)
-    }, onError)()
+    }, onError)(),
+    rawData: () => cleanOutputArray(data, schema)
   }));
 
   const functionalProperty = (entry, prop) => {
@@ -238,7 +238,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
               switch (typeof visible) {
                 case 'object':
                   const value = watch(step.visible.ref);
-                  return option(step.visible.test).map(test => test(value)).getOrElse(value)
+                  return option(step.visible.test).map(test => test(value, idx)).getOrElse(value)
                 case 'boolean':
                   return visible;
                 default:
@@ -255,7 +255,8 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
             <BasicWrapper key={`${entry}-${idx}`} entry={entry} error={error} label={functionalProperty(entry, step?.label === null ? null : step?.label || entry)} help={step?.help} render={inputWrapper}>
               <Step key={idx} entry={entry} step={step} error={error} errors={errors}
                 register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-                setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient} functionalProperty={functionalProperty} />
+                setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient} functionalProperty={functionalProperty}
+                setError={setError} />
             </BasicWrapper>
           )
         })}
@@ -283,7 +284,7 @@ const Footer = (props) => {
   )
 }
 
-const Step = ({ entry, realEntry, step, error, errors, register, schema, control, trigger, getValues, setValue, watch, inputWrapper, httpClient, defaultValue, index, functionalProperty }) => {
+const Step = ({ entry, realEntry, step, error, errors, register, schema, control, trigger, getValues, setValue, watch, inputWrapper, httpClient, defaultValue, index, functionalProperty, setError }) => {
   const classes = useCustomStyle();
 
   if (entry && typeof entry === 'object') {
@@ -307,7 +308,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
               switch (typeof visible) {
                 case 'object':
                   const value = watch(visible.ref);
-                  return option(visible.test).map(test => test(value)).getOrElse(value)
+                  return option(visible.test).map(test => test(value, index)).getOrElse(value)
                 case 'boolean':
                   return visible;
                 default:
@@ -325,7 +326,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
               <Step entry={en} step={stp} error={err} errors={errors}
                 register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
                 setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient}
-                defaultValue={stp?.defaultValue} functionalProperty={functionalProperty} />
+                defaultValue={stp?.defaultValue} functionalProperty={functionalProperty} setError={setError} />
             </BasicWrapper>
           )
         })}
@@ -346,7 +347,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
               <Step entry={`${entry}[${idx}].value`} step={{ ...(schema[realEntry || entry]), render: step.itemRender, onChange: undefined, array: false }} error={error && error[idx]?.value}
                 register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
                 setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient}
-                defaultValue={props.defaultValue?.value} value={props.value} index={idx} functionalProperty={functionalProperty} />
+                defaultValue={props.defaultValue?.value} value={props.value} index={idx} functionalProperty={functionalProperty} setError={setError} />
             )
           })} />
       </CustomizableInput>
@@ -585,10 +586,53 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
               <NestedForm
                 schema={step.schema} flow={flow} step={step} parent={entry}
                 inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={getValues(entry) || defaultValue} error={error}
-                index={index} functionalProperty={functionalProperty} />
+                index={index} functionalProperty={functionalProperty} setError={setError} />
             </CustomizableInput>
           )
 
+        // TODO - FIX à faire, la value n'est pas relue
+        case format.code:
+          return (
+            <Controller
+              name={entry}
+              control={control}
+              render={({ field }) => {
+                console.log(field)
+                console.log(step)
+                console.log(getValues())
+                return (
+                  <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
+                    <CodeInput
+                      {...step.props}
+                      {...step}
+                      className={classNames({ [classes.input__invalid]: error })}
+                      readOnly={functionalProperty(entry, step.disabled) ? true : false}
+                      onChange={(e) => {
+                        let v
+                        try {
+                          v = JSON.parse(e)
+                        } catch (err) {
+                          console.log(step.label)
+                          console.log(err)
+
+                          setError(step.label, {
+                            type: 'manual',
+                            message: err
+                          })
+                          v = {}
+                        }
+                        field.onChange(v)
+                        option(step.onChange)
+                          .map(onChange => onChange({ rawValues: getValues(), value: v, setValue }))
+                      }}
+                      value={(typeof field.value === 'object') ? JSON.stringify(field.value, null, 4) : field.value}
+                      defaultValue={defaultValue}
+                    />
+                  </CustomizableInput>
+                )
+              }}
+            />
+          )
         default:
           return (
             <Controller
@@ -749,7 +793,7 @@ const ArrayStep = ({ entry, step, control, trigger, register, error, component, 
   )
 }
 
-const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, index, error, value, step, functionalProperty }) => {
+const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, index, error, value, step, functionalProperty, setError }) => {
   const { register, control, getValues, setValue, trigger, watch } = useFormContext(); // retrieve all hook methods
   const [collapsed, setCollapsed] = useState(!!step.collapsed);
 
@@ -789,7 +833,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
         switch (typeof visible) {
           case 'object':
             const value = watch(visible.ref);
-            return option(visible.test).map(test => test(value)).getOrElse(value)
+            return option(visible.test).map(test => test(value, index)).getOrElse(value)
           case 'boolean':
             return visible;
           default:
@@ -826,7 +870,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
             <Step key={`step.${entry}.${idx}`} entry={`${parent}.${entry}`} realEntry={entry} step={schemaAndFlow.schema[entry]} error={realError}
               register={register} schema={schemaAndFlow.schema} control={control} trigger={trigger} getValues={getValues}
               setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient}
-              defaultValue={value && value[entry]} functionalProperty={functionalProperty}
+              defaultValue={value && value[entry]} functionalProperty={functionalProperty} setError={setError}
             />
           </BasicWrapper>
         )

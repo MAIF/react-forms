@@ -2,53 +2,87 @@ import React, { useEffect, useState } from 'react';
 import { PlusCircle, MinusCircle } from 'react-feather';
 import classNames from 'classnames';
 import { useCustomStyle } from '../styleContext';
+import { deepEqual } from '../utils';
 
 export const ObjectInput = (props) => {
-  const [internalState, setInternalState] = useState(Object.fromEntries(
-    Object.entries(props.value || {})
-      .map(([key, value], idx) => [Date.now() + idx, { key, value }])
-  ))
+  const [internalState, setInternalState] = useState()
 
   useEffect(() => {
-    props.onChange(Object.values(internalState).reduce((acc, c) => ({
+    setInternalState(Object.fromEntries(
+      Object.entries(props.value || {})
+        .map(([key, value], idx) => [Date.now() + idx, { key, value }])
+    ))
+  }, [])
+
+  useEffect(() => {
+    if (props.value) {
+      const newState = props.value || {}
+
+      const previousState = Object.entries(internalState || {})
+        .reduce((acc, [_, item]) => {
+          if (item.key)
+            return ({ ...acc, [item.key]: item.value })
+          return acc
+        }, {})
+
+      if (!deepEqual(newState, previousState))
+        setInternalState(Object.fromEntries(
+          Object.entries(props.value || {})
+            .map(([key, value], idx) => [Date.now() + idx, { key, value }])
+        ))
+    }
+  }, [props.value])
+
+  const onChange = state => {
+    props.onChange(Object.values(state).reduce((acc, c) => ({
       ...acc,
       [c.key]: c.value
     }), {}))
-  }, [internalState])
+  }
 
   const changeValue = (id, newValue) => {
-    setInternalState({
+    const newState = {
       ...internalState,
       [id]: { key: internalState[id].key, value: newValue }
-    })
+    }
+    setInternalState(newState)
+    onChange(newState)
   };
 
   const changeKey = (id, newValue) => {
-    setInternalState({
+    const newState = {
       ...internalState,
       [id]: { key: newValue, value: internalState[id].value }
-    })
+    }
+    setInternalState(newState)
+    onChange(newState)
   };
 
   const addFirst = () => {
     if (!internalState || Object.keys(internalState).length === 0) {
-      setInternalState({
+      const newState = {
         ...internalState,
         [Date.now()]: props.defaultKeyValue || { key: '', value: '' }
-      })
+      }
+      setInternalState(newState)
+      onChange(newState)
     }
   };
 
   const addNext = () => {
     const newItem = props.defaultKeyValue || { key: '', value: '' };
-    setInternalState({
+    const newState = {
       ...internalState,
       [Date.now()]: newItem
-    });
+    }
+    setInternalState(newState);
+    onChange(newState)
   };
 
   const remove = removedId => {
-    setInternalState(Object.fromEntries(Object.entries(internalState).filter(([id, _]) => id !== removedId)))
+    const newState = Object.fromEntries(Object.entries(internalState).filter(([id, _]) => id !== removedId))
+    setInternalState(newState)
+    onChange(newState)
   };
 
   const classes = useCustomStyle();
@@ -64,7 +98,7 @@ export const ObjectInput = (props) => {
           <PlusCircle />
         </button>
       )}
-      {Object.entries(internalState).map(([id, { key, value }], idx) => (
+      {Object.entries(internalState || {}).map(([id, { key, value }], idx) => (
         <div className={classNames(classes.flex, classes.mt_5)} key={idx}>
           <input
             disabled={props.disabled}

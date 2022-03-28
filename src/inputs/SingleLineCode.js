@@ -1,10 +1,11 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Editor from './__generated/editor'
 
 export function SingleLineCode({
     onChange,
     value,
     mode = 'javascript',
+    tabSize = 2,
     readOnly = false,
     showLinesNumber = true,
     highlightLine = false,
@@ -22,7 +23,11 @@ export function SingleLineCode({
     useEffect(() => {
         Editor(ref.current, mode, v => {
             onChange(v.replace(/\n/g, ""))
-        }, value, readOnly, showLinesNumber, highlightLine, themeStyle)
+        }, value, tabSize, readOnly, showLinesNumber, highlightLine, themeStyle)
+
+        ref.current.addEventListener("keydown", e => {
+            e.stopImmediatePropagation()
+        })
     }, [])
 
     return <div ref={ref} style={{
