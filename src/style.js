@@ -169,11 +169,10 @@ export const style = {
   input__invalid: {
     borderColor: '#dc3545 !important',
   },
-  invalid_feedback: {
+  feedback: {
     width: "100%",
     marginTop: ".25rem",
-    fontSize: "80%",
-    color: "#dc3545"
+    fontSize: "80%"
   },
   display__none: {
     display: "none"
@@ -184,11 +183,14 @@ export const style = {
     }
   },
   nestedform__border: {
+    backgroundColor:'ghostWhite',
     borderLeft: '2px solid lightGray',
-    paddingLeft: '1rem',
+    paddingLeft: '0.5rem',
+    marginLeft:'0.5rem',
     marginBottom: '.5rem',
-    flex: 1
-    // position: 'relative'
+    paddingBottom: '1rem',
+    marginRight: '.5rem',
+    paddingRight:'2.5rem',
   },
   border__error: {
     borderColor: "#dc3545"

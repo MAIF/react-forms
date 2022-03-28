@@ -22,20 +22,27 @@ const usePrevious = (value) => {
 
   // Store current value in ref
   useEffect(() => {
-    ref.current = JSON.parse(JSON.stringify(value));
+    ref.current = value && JSON.parse(JSON.stringify(value));
   }, [value]); // Only re-run if value changes
 
   // Return previous value (happens before update in useEffect above)
   return ref.current;
 }
 
-const BasicWrapper = ({ entry, className, label, error, help, children, render }) => {
-  const classes = useCustomStyle()
-  const id = uuid();
-
+const BasicWrapper = ({ entry, className, label, help, children, render }) => {
   if (typeof entry === 'object') {
     return children
   }
+
+  const classes = useCustomStyle()
+  const id = uuid();
+
+  const { formState } = useFormContext(); 
+  const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.errors)
+  const isDirty = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.dirtyFields)
+  const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.touchedFields)
+  const errorDisplayed = formState.isSubmitted || isDirty || isTouched
+  
 
   if (render) {
     return render({ entry, label, error, help, children })
@@ -54,7 +61,7 @@ const BasicWrapper = ({ entry, className, label, error, help, children, render }
       </label>}
 
       {children}
-      {error && <div className={classes.invalid_feedback}>{error.message}</div>}
+      {error && <div className={classNames(classes.feedback, {[classes.txt_red]: errorDisplayed})}>{error.message}</div>}
     </div>
   )
 }
@@ -162,10 +169,15 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
   const methods = useForm({
     resolver: (data, context, options) => yupResolver(resolver(data))(data, context, options),
     defaultValues: cleanInputArray(value, defaultValues, schema),
-    shouldFocusError: !options.autosubmit,
+    shouldFocusError: false,
+    mode: 'onChange'
   });
 
-  const { register, handleSubmit, formState: { errors }, control, reset, watch, trigger, getValues, setValue, setError } = methods
+  const { handleSubmit, formState: { errors, dirtyFields }, reset, watch, trigger, getValues } = methods
+
+  useEffect(() => {
+    trigger()
+  }, [trigger])
 
   useEffect(() => {
     if (value) {
@@ -252,11 +264,10 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
           }
 
           return (
-            <BasicWrapper key={`${entry}-${idx}`} entry={entry} error={error} label={functionalProperty(entry, step?.label === null ? null : step?.label || entry)} help={step?.help} render={inputWrapper}>
-              <Step key={idx} entry={entry} step={step} error={error} errors={errors}
-                register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-                setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient} functionalProperty={functionalProperty}
-                setError={setError} />
+            <BasicWrapper key={`${entry}-${idx}`} entry={entry} dirtyFields={dirtyFields} label={functionalProperty(entry, step?.label === null ? null : step?.label || entry)} help={step?.help} render={inputWrapper}>
+              <Step key={idx} entry={entry} step={step}
+                schema={schema} inputWrapper={inputWrapper} 
+                httpClient={maybeCustomHttpClient} functionalProperty={functionalProperty} />
             </BasicWrapper>
           )
         })}
@@ -284,11 +295,12 @@ const Footer = (props) => {
   )
 }
 
-const Step = ({ entry, realEntry, step, error, errors, register, schema, control, trigger, getValues, setValue, watch, inputWrapper, httpClient, defaultValue, index, functionalProperty, setError }) => {
+const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaultValue, index, functionalProperty }) => {
   const classes = useCustomStyle();
-
+  const { formState: { errors, dirtyFields, touchedFields, isSubmitted }, control, trigger, getValues, setValue, watch, register } = useFormContext();
+  
   if (entry && typeof entry === 'object') {
-    const errored = entry.flow.some(step => !!errors[step])
+    const errored = entry.flow.some(step => !!errors[step] && (dirtyFields[step] || touchedFields[step]))
     return (
       <Collapse {...entry} errored={errored}>
         {entry.flow.map((en, entryIdx) => {
@@ -322,11 +334,10 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
           }
 
           return (
-            <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} error={err} label={functionalProperty(en, stp?.label === null ? null : stp?.label || en)} help={stp?.help} render={inputWrapper}>
-              <Step entry={en} step={stp} error={err} errors={errors}
-                register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-                setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient}
-                defaultValue={stp?.defaultValue} functionalProperty={functionalProperty} setError={setError} />
+            <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} label={functionalProperty(en, stp?.label === null ? null : stp?.label || en)} help={stp?.help} render={inputWrapper}>
+              <Step entry={en} step={stp} schema={schema}
+                inputWrapper={inputWrapper} httpClient={httpClient}
+                defaultValue={stp?.defaultValue} functionalProperty={functionalProperty} />
             </BasicWrapper>
           )
         })}
@@ -334,26 +345,30 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
     )
   }
 
+
+  const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], errors)
+  const isDirty = entry.split('.').reduce((acc, curr) => acc && acc[curr], dirtyFields)
+  const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], touchedFields)
+  const errorDisplayed = !!error && ( isSubmitted || isDirty || isTouched)
+
   if (step.array) {
     return (
       <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v) }} error={error}>
         <ArrayStep
-          entry={entry} step={step} trigger={trigger}
-          register={register} control={control} error={error}
-          setValue={setValue} values={getValues(entry)} defaultValue={step.defaultValue || defaultVal(step.type)}
-          getValues={getValues} disabled={functionalProperty(entry, step.disabled)}
+          entry={entry} step={step} 
+          defaultValue={step.defaultValue || defaultVal(step.type)}
+          disabled={functionalProperty(entry, step.disabled)}
           component={((props, idx) => {
             return (
-              <Step entry={`${entry}[${idx}].value`} step={{ ...(schema[realEntry || entry]), render: step.itemRender, onChange: undefined, array: false }} error={error && error[idx]?.value}
-                register={register} schema={schema} control={control} trigger={trigger} getValues={getValues}
-                setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={httpClient}
-                defaultValue={props.defaultValue?.value} value={props.value} index={idx} functionalProperty={functionalProperty} setError={setError} />
+              <Step entry={`${entry}[${idx}].value`} step={{ ...(schema[realEntry || entry]), render: step.itemRender, onChange: undefined, array: false }}
+                schema={schema} inputWrapper={inputWrapper} httpClient={httpClient}
+                defaultValue={props.defaultValue?.value} value={props.value} index={idx} functionalProperty={functionalProperty} />
             )
           })} />
       </CustomizableInput>
-
     )
   }
+
 
   const registeredInput = register(entry);
   const inputProps = {
@@ -373,7 +388,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
             <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v) }} error={error}>
               <textarea
                 type="text" id={entry}
-                className={classNames(classes.input, { [classes.input__invalid]: error })}
+                className={classNames(classes.input, { [classes.input__invalid]: errorDisplayed })}
                 readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
                 {...step.props}
                 defaultValue={defaultValue}
@@ -392,7 +407,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                 return (
                   <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
                     <Component
-                      className={classNames({ [classes.input__invalid]: error })}
+                      className={classNames({ [classes.input__invalid]: errorDisplayed })}
                       readOnly={functionalProperty(entry, step.disabled) ? true : false}
                       onChange={(e) => {
                         field.onChange(e)
@@ -417,7 +432,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                 <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
                   <MarkdownInput
                     {...step.props}
-                    className={classNames({ [classes.input__invalid]: error })}
+                    className={classNames({ [classes.input__invalid]: errorDisplayed })}
                     readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
                     onChange={(e) => {
                       field.onChange(e)
@@ -445,7 +460,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                     <SelectInput
                       {...step.props}
                       {...step}
-                      className={classNames(classes.flex_grow_1, { [classes.input__invalid]: error })}
+                      className={classNames(classes.flex_grow_1, { [classes.input__invalid]: errorDisplayed })}
                       disabled={functionalProperty(entry, step.disabled)}
                       value={field.value}
                       possibleValues={step.options}
@@ -467,7 +482,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
             <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error}>
               <input
                 type={step.format || 'text'} id={entry}
-                className={classNames(classes.input, { [classes.input__invalid]: error })}
+                className={classNames(classes.input, { [classes.input__invalid]: errorDisplayed })}
                 readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
                 defaultValue={defaultValue}
                 placeholder={step.placeholder}
@@ -490,7 +505,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                     <SelectInput
                       {...step.props}
                       {...step}
-                      className={classNames(classes.content, { [classes.input__invalid]: error })}
+                      className={classNames(classes.content, { [classes.input__invalid]: errorDisplayed })}
                       readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
                       onChange={(e) => {
                         field.onChange(e)
@@ -513,7 +528,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
               <input
                 {...step.props}
                 type={step.format || 'number'} id={entry}
-                className={classNames(classes.input, { [classes.input__invalid]: error })}
+                className={classNames(classes.input, { [classes.input__invalid]: errorDisplayed })}
                 readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
                 name={entry}
                 placeholder={step.placeholder}
@@ -533,7 +548,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
               <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
                 <BooleanInput
                   {...step.props}
-                  className={classNames({ [classes.input__invalid]: error })}
+                  className={classNames({ [classes.input__invalid]: errorDisplayed })}
                   readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
                   onChange={(e) => {
                     field.onChange(e)
@@ -563,7 +578,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                     <SelectInput
                       {...step.props}
                       {...step}
-                      className={classNames(classes.flex_grow_1, { [classes.input__invalid]: error })}
+                      className={classNames(classes.flex_grow_1, { [classes.input__invalid]: errorDisplayed })}
                       readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
                       onChange={(e) => {
                         field.onChange(e)
@@ -582,11 +597,11 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
         case format.form: //todo: disabled ?
           const flow = option(step.flow).getOrElse(option(step.schema).map(s => Object.keys(s)).getOrNull());
           return (
-            <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error}>
+            <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }}>
               <NestedForm
                 schema={step.schema} flow={flow} step={step} parent={entry}
-                inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={getValues(entry) || defaultValue} error={error}
-                index={index} functionalProperty={functionalProperty} setError={setError} />
+                inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={getValues(entry) || defaultValue}
+                index={index} functionalProperty={functionalProperty} errorDisplayed={errorDisplayed}/>
             </CustomizableInput>
           )
 
@@ -645,7 +660,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                     <ObjectInput
                       {...step.props}
                       {...step}
-                      className={classNames({ [classes.input__invalid]: error })}
+                      className={classNames({ [classes.input__invalid]: errorDisplayed })}
                       readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
                       onChange={(e) => {
                         field.onChange(e)
@@ -673,7 +688,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                 <DatePicker
                   {...step.props}
                   id="datePicker-1"
-                  className={classNames(classes.datepicker, { [classes.input__invalid]: error })}
+                  className={classNames(classes.datepicker, { [classes.input__invalid]: errorDisplayed })}
                   readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
                   value={field.value}
                   onChange={(e) => {
@@ -712,7 +727,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
               const files = field.value || []
 
               return (
-                <div className={classNames({ [classes.input__invalid]: error })}>
+                <div className={classNames(classes.flex, classes.ai_center, { [classes.input__invalid]: error })}>
                   <input
                     ref={(r) => setInput(r)}
                     type="file"
@@ -720,16 +735,17 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                     className={classes.d_none}
                     onChange={setFiles}
                   />
-                  <span>{files.length <= 0 ? 'No files selected' : files.map(r => r.name).join(" , ")}</span>
                   <button
                     type="button"
-                    className={`${classes.btn} ${classes.flex} ${classes.ai_center}`}
+                    className={`${classes.btn} ${classes.btn_sm} ${classes.flex} ${classes.ai_center}`}
                     disabled={uploading || functionalProperty(entry, step.disabled)}
                     onClick={trigger}>
                     {uploading && <Loader />}
                     {!uploading && <Upload />}
-                    <span className={`${classes.ml_5}`}>Select file</span>
+                    <span className={`${classes.ml_5}`}>Select file(s)</span>
                   </button>
+
+                  <span className={`${classes.ml_5}`}>{files.length <= 0 ? 'No files selected' : files.map(r => r.name).join(" , ")}</span>
                 </div>
               );
             };
@@ -741,8 +757,7 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
                     field.onChange(e)
                     option(step.onChange)
                       .map(onChange => onChange({ rawValues: getValues(), value: e, setValue }))
-                  }}
-                  error={error} />
+                  }} />
               </CustomizableInput>
             )
           }}
@@ -755,8 +770,15 @@ const Step = ({ entry, realEntry, step, error, errors, register, schema, control
 }
 
 
-const ArrayStep = ({ entry, step, control, trigger, register, error, component, values, defaultValue, setValue, getValues, disabled }) => {
+const ArrayStep = ({ entry, step, component, disabled }) => {
   const classes = useCustomStyle()
+  const { getValues, setValue, watch, control, trigger, formState } = useFormContext();
+
+  const values = getValues(entry);
+  const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.errors)
+  const isDirty = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.dirtyFields)
+  const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.touchedFields)
+  const errorDisplayed = !!error && (formState.isSubmitted || isDirty || isTouched)
 
   const { fields, append, remove } = useFieldArray({
     control, // control props comes from useForm (optional: if you are using FormContext)
@@ -772,7 +794,7 @@ const ArrayStep = ({ entry, step, control, trigger, register, error, component, 
             <div key={field.id}>
               <div className={classNames(classes.flex, classes.ai_center, classes.mt_5)}>
                 {component({ key: field.id, ...field, defaultValue: values[idx] }, idx)}
-                <button className={classNames(classes.btn, classes.btn_red, classes.btn_sm, classes.ml_5)} disabled={disabled} onClick={() => {
+                <button type="button" className={classNames(classes.btn, classes.btn_red, classes.btn_sm, classes.ml_5)} disabled={disabled} onClick={() => {
                   remove(idx)
                   trigger(entry);
                 }}>Remove</button>
@@ -781,7 +803,7 @@ const ArrayStep = ({ entry, step, control, trigger, register, error, component, 
           )
         })}
       <div className={classNames(classes.flex, classes.jc_flex_end)}>
-        <button className={classNames(classes.btn, classes.btn_blue, classes.btn_sm, classes.mt_5, { [classes.input__invalid]: error })} onClick={() => {
+        <button type="button" className={classNames(classes.btn, classes.btn_blue, classes.btn_sm, classes.mt_5, { [classes.input__invalid]: errorDisplayed })} onClick={() => {
           append({ value: step.addableDefaultValue || defaultVal(step.type) })
           trigger(entry);
           option(step.onChange)
@@ -793,11 +815,17 @@ const ArrayStep = ({ entry, step, control, trigger, register, error, component, 
   )
 }
 
-const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, index, error, value, step, functionalProperty, setError }) => {
-  const { register, control, getValues, setValue, trigger, watch } = useFormContext(); // retrieve all hook methods
+const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, errorDisplayed, value, step, functionalProperty, index }) => {
+  const { getValues, setValue, watch, trigger, formState } = useFormContext();
   const [collapsed, setCollapsed] = useState(!!step.collapsed);
 
   const classes = useCustomStyle();
+  const v = getValues(parent);
+
+  useEffect(() => {
+      trigger(parent)
+  }, [JSON.stringify(v)])
+  
 
   const schemaAndFlow = option(step.conditionalSchema)
     .map(condiSchema => {
@@ -847,11 +875,11 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
 
   const bordered = computedSandF.filter(x => x.visibleStep).length > 1 && step.label !== null;
   return (
-    <div className={classNames({ [classes.nestedform__border]: bordered, [classes.border__error]: !!error })} style={{ position: 'relative' }}>
+    <div className={classNames({ [classes.nestedform__border]: bordered, [classes.border__error]: !!errorDisplayed })} style={{ position: 'relative' }}>
       {!!step.collapsable && schemaAndFlow.flow.length > 1 && collapsed &&
-        <ChevronDown size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: 0, right: 0, zIndex: 100 }} strokeWidth="2" onClick={() => setCollapsed(!collapsed)} />}
+        <ChevronDown size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: -35, right: 0, zIndex: 100 }} strokeWidth="2" onClick={() => setCollapsed(!collapsed)} />}
       {!!step.collapsable && schemaAndFlow.flow.length > 1 && !collapsed &&
-        <ChevronUp size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: 0, right: 0, zIndex: 100 }} strokeWidth="2" onClick={() => setCollapsed(!collapsed)} />}
+        <ChevronUp size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: -35, right: 0, zIndex: 100 }} strokeWidth="2" onClick={() => setCollapsed(!collapsed)} />}
 
       {computedSandF.map(({ step, visibleStep, entry }, idx) => {
 
@@ -860,18 +888,14 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
           return null;
         }
 
-        const realError = error && error[entry]
-
         return (
           <BasicWrapper key={`${entry}.${idx}`}
             className={classNames({ [classes.display__none]: (collapsed && !step.visibleOnCollapse) || !visibleStep })}
-            entry={`${parent}.${entry}`} error={realError}
+            entry={`${parent}.${entry}`}
             label={functionalProperty(entry, step?.label === null ? null : step?.label || entry)} help={step.help} render={inputWrapper}>
-            <Step key={`step.${entry}.${idx}`} entry={`${parent}.${entry}`} realEntry={entry} step={schemaAndFlow.schema[entry]} error={realError}
-              register={register} schema={schemaAndFlow.schema} control={control} trigger={trigger} getValues={getValues}
-              setValue={setValue} watch={watch} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient}
-              defaultValue={value && value[entry]} functionalProperty={functionalProperty} setError={setError}
-            />
+            <Step key={`step.${entry}.${idx}`} entry={`${parent}.${entry}`} realEntry={entry} step={schemaAndFlow.schema[entry]}
+              schema={schemaAndFlow.schema} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient}
+              defaultValue={value && value[entry]} functionalProperty={functionalProperty} />
           </BasicWrapper>
         )
       })}
