@@ -5,6 +5,7 @@ import pkg from './package.json'
 import commonjs from '@rollup/plugin-commonjs'
 import resolve from "@rollup/plugin-node-resolve"
 import { terser } from 'rollup-plugin-terser'
+import copy from 'rollup-plugin-copy'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -45,8 +46,18 @@ export default [
         ],
         babelHelpers: 'bundled'
       }),
-      del({ targets: ['dist/*'] }),
-      isDev ? undefined : terser()
+      del({ targets: ['dist/*', 'lib/*'], verbose: true }),
+      isDev ? undefined : terser(),
+      copy({
+        targets: [
+          {
+            src: 'lib/index.js',
+            dest: 'examples/playground/node_modules/@maif/react-forms/lib'
+          }
+        ],
+        verbose: true,
+        hook: 'closeBundle'
+      })
     ].filter(f => f),
     external: Object.keys(pkg.peerDependencies || {})
   }

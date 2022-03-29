@@ -157,6 +157,7 @@ export const SelectInput = (props) => {
         name={`${props.label}-search`}
         isLoading={loading}
         value={value}
+        defaultValue={value}
         isDisabled={props.disabled}
         placeholder={props.placeholder}
         options={values}

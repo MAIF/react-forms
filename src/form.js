@@ -37,12 +37,12 @@ const BasicWrapper = ({ entry, className, label, help, children, render }) => {
   const classes = useCustomStyle()
   const id = uuid();
 
-  const { formState } = useFormContext(); 
+  const { formState } = useFormContext();
   const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.errors)
   const isDirty = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.dirtyFields)
   const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.touchedFields)
   const errorDisplayed = formState.isSubmitted || isDirty || isTouched
-  
+
 
   if (render) {
     return render({ entry, label, error, help, children })
@@ -61,7 +61,7 @@ const BasicWrapper = ({ entry, className, label, help, children, render }) => {
       </label>}
 
       {children}
-      {error && <div className={classNames(classes.feedback, {[classes.txt_red]: errorDisplayed})}>{error.message}</div>}
+      {error && <div className={classNames(classes.feedback, { [classes.txt_red]: errorDisplayed })}>{error.message}</div>}
     </div>
   )
 }
@@ -216,7 +216,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
       const clean = cleanOutputArray(data, schema)
       onSubmit(clean)
     }, onError)(),
-    rawData: () => cleanOutputArray(data, schema)
+    rawData: () => cleanOutputArray(data, schema),
   }));
 
   const functionalProperty = (entry, prop) => {
@@ -266,7 +266,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
           return (
             <BasicWrapper key={`${entry}-${idx}`} entry={entry} dirtyFields={dirtyFields} label={functionalProperty(entry, step?.label === null ? null : step?.label || entry)} help={step?.help} render={inputWrapper}>
               <Step key={idx} entry={entry} step={step}
-                schema={schema} inputWrapper={inputWrapper} 
+                schema={schema} inputWrapper={inputWrapper}
                 httpClient={maybeCustomHttpClient} functionalProperty={functionalProperty} />
             </BasicWrapper>
           )
@@ -298,7 +298,7 @@ const Footer = (props) => {
 const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaultValue, index, functionalProperty }) => {
   const classes = useCustomStyle();
   const { formState: { errors, dirtyFields, touchedFields, isSubmitted }, control, trigger, getValues, setValue, watch, register } = useFormContext();
-  
+
   if (entry && typeof entry === 'object') {
     const errored = entry.flow.some(step => !!errors[step] && (dirtyFields[step] || touchedFields[step]))
     return (
@@ -349,13 +349,13 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
   const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], errors)
   const isDirty = entry.split('.').reduce((acc, curr) => acc && acc[curr], dirtyFields)
   const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], touchedFields)
-  const errorDisplayed = !!error && ( isSubmitted || isDirty || isTouched)
+  const errorDisplayed = !!error && (isSubmitted || isDirty || isTouched)
 
   if (step.array) {
     return (
       <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v) }} error={error}>
         <ArrayStep
-          entry={entry} step={step} 
+          entry={entry} step={step}
           defaultValue={step.defaultValue || defaultVal(step.type)}
           disabled={functionalProperty(entry, step.disabled)}
           component={((props, idx) => {
@@ -601,20 +601,16 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
               <NestedForm
                 schema={step.schema} flow={flow} step={step} parent={entry}
                 inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={getValues(entry) || defaultValue}
-                index={index} functionalProperty={functionalProperty} errorDisplayed={errorDisplayed}/>
+                index={index} functionalProperty={functionalProperty} errorDisplayed={errorDisplayed} />
             </CustomizableInput>
           )
 
-        // TODO - FIX à faire, la value n'est pas relue
         case format.code:
           return (
             <Controller
               name={entry}
               control={control}
               render={({ field }) => {
-                console.log(field)
-                console.log(step)
-                console.log(getValues())
                 return (
                   <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
                     <CodeInput
@@ -627,9 +623,6 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
                         try {
                           v = JSON.parse(e)
                         } catch (err) {
-                          console.log(step.label)
-                          console.log(err)
-
                           setError(step.label, {
                             type: 'manual',
                             message: err
@@ -823,9 +816,9 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
   const v = getValues(parent);
 
   useEffect(() => {
-      trigger(parent)
+    trigger(parent)
   }, [JSON.stringify(v)])
-  
+
 
   const schemaAndFlow = option(step.conditionalSchema)
     .map(condiSchema => {

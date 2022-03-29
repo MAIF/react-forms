@@ -16,17 +16,35 @@ export function CodeInput({
     width: '-1',
     minWidth: '-1',
     maxWidth: '-1',
-  }
+  },
+  setRef
 }) {
   const ref = useRef()
+  const [editor, setEditor] = useState()
 
   useEffect(() => {
-    Editor(ref.current, mode, onChange, value, tabSize, readOnly, showLinesNumber, highlightLine, themeStyle)
+    const e = Editor(ref.current, mode, onChange, value, tabSize, readOnly, showLinesNumber, highlightLine, themeStyle)
 
     ref.current.addEventListener("keydown", e => {
       e.stopImmediatePropagation()
     })
+
+    if (setRef)
+      setRef(e)
+
+    setEditor(e)
   }, [])
+
+  useEffect(() => {
+    if (editor && value !== editor.state.doc.toString())
+      editor.dispatch({
+        changes: {
+          from: 0,
+          to: editor.state.doc.length,
+          insert: typeof value === 'object' ? JSON.stringify(value, null, 4) : value
+        }
+      })
+  }, [value])
 
   return <div ref={ref} />
 }

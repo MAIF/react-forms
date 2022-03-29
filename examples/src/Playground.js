@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Form } from '@maif/react-forms'
+import React, { useState, useEffect, useRef } from 'react';
+import { Form, CodeInput, SelectInput } from '@maif/react-forms'
 import Select from 'react-select';
 import AceEditor from 'react-ace';
 
@@ -32,7 +32,11 @@ export const Playground = () => {
   const [schema, setSchema] = useState(JSON.stringify(basic, 0, 4))
   const [realSchema, setRealSchema] = useState(basic)
   const [error, setError] = useState(undefined)
-  
+  const [value, setValue] = useState({
+    name: "foo"
+  })
+  const ref = useRef()
+
   useEffect(() => {
     try {
       setRealSchema(JSON.parse(schema))
@@ -40,13 +44,13 @@ export const Playground = () => {
       setError(error.message)
     }
   }, [schema])
-  
+
   useEffect(() => {
-      setError(undefined)
-    }, [realSchema])
-    
+    setError(undefined)
+  }, [realSchema])
+
   return (
-    <div className="container-xxl my-md-4 bd-layout">
+    <div className="my-md-4 bd-layout">
       <nav className="navbar navbar-expand-lg navbar-light bg-light fixed-top">
         <div className="container-fluid">
           <span className="navbar-brand">react-forms playground</span>
@@ -65,40 +69,49 @@ export const Playground = () => {
           </div>
         </div>
       </nav>
-      <div className="container" style={{marginTop: '70px'}}>
-        <em className='tagline'>Choose a JSON schema below and check the generated form. Check the <a href='https://github.com/MAIF/react-forms'>documentation</a> for more details.</em>
+      <div className="container" style={{ marginTop: '70px' }}>
+        <em className='tagline px-0 py-2'>Choose a JSON schema below and check the generated form. Check the <a href='https://github.com/MAIF/react-forms'>documentation</a> for more details.</em>
         <div className="d-flex">
-          <div className='col-6' style={{marginRight: '10px'}}>
-            <label htmlFor="selector">try with a schema</label>
-            <Select
-              options={Object.keys(examples).map(value => ({ label: value, value }))}
+          <div className='col-8' style={{ marginRight: '10px' }}>
+            <label htmlFor="selector">Try with a schema</label>
+            <SelectInput
+              className="py-2"
+              possibleValues={Object.keys(examples).map(value => ({ label: value, value }))}
               defaultValue={{ value: basic, label: "basic" }}
-              onChange={e => setSchema(JSON.stringify(examples[e.value], null, 4))} />
-            <AceEditor
-              commands={Beautify.commands}
-              style={{ marginTop: '15px', zIndex: 0, isolation: 'isolate', width: '100%' }}
+              onChange={e => setSchema(JSON.stringify(examples[e], null, 4))} />
+            <CodeInput
               mode="json"
-              theme="monokai"
               onChange={setSchema}
               value={schema}
-              name="scriptParam"
-              editorProps={{ $blockScrolling: true }}
-              showGutter={true}
-              tabSize={2}
-              highlightActiveLine={true}
-              enableBasicAutocompletion={false}
-              enableLiveAutocompletion={false}
+            />
+            <label>Default value</label>
+            <CodeInput
+              mode="json"
+              onChange={e => {
+                try {
+                  setValue(JSON.parse(e))
+                } catch (_) { }
+              }}
+              value={typeof value === 'object' ? JSON.stringify(value, null, 2) : value}
             />
           </div>
-          <div className='col-4'>
-            <h2>Generated form</h2>
+          <div className='col-4 px-2'>
+            <label>Generated form</label>
             {error && <span style={{ color: 'tomato' }}>{error}</span>}
-            <div style={{backgroundColor: '#ececec', padding: '10px 15px'}}>
+            <div style={{ backgroundColor: '#ececec', padding: '10px 15px' }}>
               <Form
                 schema={realSchema}
+                value={value}
                 flow={Object.keys(realSchema)}
                 onSubmit={d => alert(JSON.stringify(d, null, 4))}
                 options={{
+                  watch: unsaved => ref?.current?.dispatch({
+                    changes: {
+                      from: 0,
+                      to: ref.current.state.doc.length,
+                      insert: JSON.stringify(unsaved, null, 4)
+                    }
+                  }),
                   actions: {
                     submit: {
                       label: 'Try it'
@@ -107,10 +120,17 @@ export const Playground = () => {
                 }}
               />
             </div>
+            <div className='py-2'>
+              <label>Form state</label>
+              <CodeInput
+                setRef={r => ref.current = r}
+                showGutter={false}
+                mode="json"
+              />
+            </div>
           </div>
         </div>
       </div>
-      
     </div>
   )
 }
