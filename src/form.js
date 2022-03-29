@@ -158,7 +158,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
           return { ...acc, [key]: v.map(({ value }) => value) }
         }
         return { ...acc, [key]: v }
-      } else if (!!v && typeof v === 'object' && !(v instanceof (Date))) {
+      } else if (!!v && typeof v === 'object' && !(v instanceof (Date) && !Array.isArray(v))) {
         return { ...acc, [key]: cleanOutputArray(v, subSchema[key]?.schema || {}) }
       } else {
         return { ...acc, [key]: v }
