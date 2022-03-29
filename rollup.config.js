@@ -46,13 +46,13 @@ export default [
         ],
         babelHelpers: 'bundled'
       }),
-      del({ targets: ['dist/*', 'lib/*'], verbose: true }),
+      del({ targets: ['dist/*', 'lib/*', 'examples/node_modules/@maif/react-forms/lib'], verbose: true }),
       isDev ? undefined : terser(),
       copy({
         targets: [
           {
             src: 'lib/index.js',
-            dest: 'examples/playground/node_modules/@maif/react-forms/lib'
+            dest: 'examples/node_modules/@maif/react-forms/lib'
           }
         ],
         verbose: true,

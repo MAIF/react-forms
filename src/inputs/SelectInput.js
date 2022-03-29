@@ -41,7 +41,7 @@ export const SelectInput = (props) => {
         ({ label: v[props.transformer.label], value: v[props.transformer.value] }))
       : v)
     .map(v => ({
-      label: v?.label || JSON.stringify(v),
+      label: v?.label || (typeof v === 'object' ? JSON.stringify(v) : v),
       value: v?.value || v
     }))
 
