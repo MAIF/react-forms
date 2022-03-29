@@ -1,7 +1,7 @@
 {
   "name": "@maif/react-forms",
   "description": "Build react safe forms as fast as possible",
-  "version": "1.0.31",
+  "version": "1.0.32",
   "main": "lib/index.js",
   "module": "lib/esm/index.js",
   "types": "lib/index.js",
@@ -27,7 +27,7 @@
     }
   ],
   "scripts": {
-    "build": "rollup -c", 
+    "build": "rollup -c",
     "dev": "rollup -c -w",
     "test": "jest",
     "tdd": "jest --watch"
