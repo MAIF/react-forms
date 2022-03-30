@@ -1,5 +1,3 @@
-/*jslint evil: true */
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Form, CodeInput, SelectInput } from '@maif/react-forms'
 

@@ -19,6 +19,8 @@ jobs:
           cd examples
           yarn
           yarn build
+        env:
+          CI: ""
       - name: Commit files
         run: |
           git config --local user.email "github-actions@users.noreply.github.com"
