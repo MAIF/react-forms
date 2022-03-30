@@ -1,6 +1,4 @@
-import React from 'react'
-
-export default `{
+const schema = `{
     "users": {
         type: "object",
         format: "form",
@@ -28,3 +26,5 @@ export default `{
         }
     }
 }`
+
+export default schema
