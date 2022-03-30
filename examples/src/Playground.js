@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Form, CodeInput, SelectInput } from '@maif/react-forms'
+import { Form, CodeInput, SelectInput, validate, constraints } from '@maif/react-forms'
 
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css'
@@ -13,6 +13,7 @@ import formInForm from './schema/formInForm.json';
 import dynamicForm from './schema/dynamicForm.json';
 import * as babel from 'babel-standalone'
 import WrapperError from './WrapperError';
+import { ValidationError } from 'yup';
 
 const examples = {
   basic,
@@ -29,9 +30,43 @@ export const Playground = () => {
   const [realSchema, setRealSchema] = useState(basic)
   const [error, setError] = useState(undefined)
   const [value, setValue] = useState()
-  const ref = useRef()
 
+  const ref = useRef()
   const childRef = useRef()
+
+  // const v = useValidator(['name'], {
+  //   name: {
+  //     type: 'string',
+  //     constraints: [
+  //       constraints.required('toto')
+  //     ]
+  //   }
+  // },
+  //   { name: 'coucou' }
+  // )
+
+  useEffect(() => {
+    // try {
+    validate(['name'], {
+      name: {
+        type: 'string',
+        constraints: [
+          constraints.required('name requis')
+        ]
+      }
+    })
+      .then(r => console.log(r))
+      .catch(r => r.inner.forEach(e => console.log(e.path, e.message)))
+    // } catch (err) {
+
+    // if (err.name === 'ValidationError')
+    //   console.log(new ValidationError(err).path)
+    // }
+    // v.handleSubmit(console.log, e => {
+    //   console.log("error")
+    //   console.log(e)
+    // })()
+  }, [])
 
   useEffect(() => {
     if (childRef.current)

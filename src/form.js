@@ -97,6 +97,59 @@ const getDefaultValues = (flow, schema) => {
   }, {})
 }
 
+
+const cleanInputArray = (obj, defaultValues, subSchema) => {
+  return Object.entries(subSchema).reduce((acc, [key, step]) => {
+    let v
+    if (obj)
+      v = obj[key]
+    if (!v && defaultValues)
+      v = defaultValues[key]
+
+    if (step.array && !step.render) {
+      return { ...acc, [key]: (v || []).map(value => ({ value })) }
+    } else if (!!v && typeof v === 'object' && !(v instanceof Date) && !Array.isArray(v)) {
+      return { ...acc, [key]: cleanInputArray(v, defaultValues, subSchema[key]?.schema || {}) }
+    } else {
+      return { ...acc, [key]: v }
+    }
+  }, obj)
+}
+
+const cleanOutputArray = (obj, subSchema) => {
+  return Object.entries(obj).reduce((acc, curr) => {
+
+    const [key, v] = curr;
+
+    if (Array.isArray(v)) {
+      const isArray = option(subSchema)
+        .orElse(schema)
+        .map(s => s[key])
+        .map(entry => !!entry.array && !entry.render)
+        .getOrElse(false)
+      if (isArray) {
+        return { ...acc, [key]: v.map(({ value }) => value) }
+      }
+      return { ...acc, [key]: v }
+    } else if (!!v && typeof v === 'object' && !(v instanceof (Date) && !Array.isArray(v))) {
+      return { ...acc, [key]: cleanOutputArray(v, subSchema[key]?.schema || {}) }
+    } else {
+      return { ...acc, [key]: v }
+    }
+  }, {})
+}
+
+export const validate = (flow, schema, value) => {
+  const formFlow = flow || Object.keys(schema)
+
+  const { shape, dependencies } = getShapeAndDependencies(formFlow, schema);
+  return yup.object()
+    .shape(shape, dependencies)
+    .validate(value, {
+      abortEarly: false
+    })
+}
+
 export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSubmit, onError = () => { }, footer, style = {}, className, options = {} }, ref) => {
   const classes = useCustomStyle(style)
   const formFlow = flow || Object.keys(schema)
@@ -125,47 +178,6 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
     return resolver;
   }
 
-  const cleanInputArray = (obj, defaultValues, subSchema) => {
-    return Object.entries(subSchema).reduce((acc, [key, step]) => {
-      let v
-      if (obj)
-        v = obj[key]
-      if (!v && defaultValues)
-        v = defaultValues[key]
-
-      if (step.array && !step.render) {
-        return { ...acc, [key]: (v || []).map(value => ({ value })) }
-      } else if (!!v && typeof v === 'object' && !(v instanceof Date) && !Array.isArray(v)) {
-        return { ...acc, [key]: cleanInputArray(v, defaultValues, subSchema[key]?.schema || {}) }
-      } else {
-        return { ...acc, [key]: v }
-      }
-    }, obj)
-  }
-
-  const cleanOutputArray = (obj, subSchema) => {
-    return Object.entries(obj).reduce((acc, curr) => {
-
-      const [key, v] = curr;
-
-      if (Array.isArray(v)) {
-        const isArray = option(subSchema)
-          .orElse(schema)
-          .map(s => s[key])
-          .map(entry => !!entry.array && !entry.render)
-          .getOrElse(false)
-        if (isArray) {
-          return { ...acc, [key]: v.map(({ value }) => value) }
-        }
-        return { ...acc, [key]: v }
-      } else if (!!v && typeof v === 'object' && !(v instanceof (Date) && !Array.isArray(v))) {
-        return { ...acc, [key]: cleanOutputArray(v, subSchema[key]?.schema || {}) }
-      } else {
-        return { ...acc, [key]: v }
-      }
-    }, {})
-  }
-
   const methods = useForm({
     resolver: (data, context, options) => yupResolver(resolver(data))(data, context, options),
     defaultValues: cleanInputArray(value, defaultValues, schema),
@@ -186,7 +198,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
   }, [value, reset])
 
   useEffect(() => {
-    reset(cleanInputArray(value, defaultValues, schema));
+    reset(cleanInputArray(value, defaultValues, schema))
   }, [schema])
 
   const data = watch();
@@ -217,7 +229,8 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
       onSubmit(clean)
     }, onError)(),
     rawData: () => cleanOutputArray(data, schema),
-    trigger
+    trigger,
+    methods
   }));
 
   const functionalProperty = (entry, prop) => {
@@ -426,31 +439,32 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
               }}
             />
           )
-        case format.markdown: return (
-          <Controller
-            name={entry}
-            control={control}
-            render={({ field }) => {
-              return (
-                <CustomizableInput render={step.render} field={{ parent, setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
-                  <MarkdownInput
-                    {...step.props}
-                    className={classNames({ [classes.input__invalid]: errorDisplayed })}
-                    readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
-                    onChange={(e) => {
-                      field.onChange(e)
-                      option(step.onChange)
-                        .map(onChange => onChange({ rawValues: getValues(), value: e, setValue }))
-                    }}
-                    value={field.value}
-                    defaultValue={defaultValue}
-                    {...step}
-                  />
-                </CustomizableInput>
-              )
-            }}
-          />
-        )
+        case format.markdown:
+          return (
+            <Controller
+              name={entry}
+              control={control}
+              render={({ field }) => {
+                return (
+                  <CustomizableInput render={step.render} field={{ parent, setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
+                    <MarkdownInput
+                      {...step.props}
+                      className={classNames({ [classes.input__invalid]: errorDisplayed })}
+                      readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
+                      onChange={(e) => {
+                        field.onChange(e)
+                        option(step.onChange)
+                          .map(onChange => onChange({ rawValues: getValues(), value: e, setValue }))
+                      }}
+                      value={field.value}
+                      defaultValue={defaultValue}
+                      {...step}
+                    />
+                  </CustomizableInput>
+                )
+              }}
+            />
+          )
         case format.buttonsSelect:
         case format.select:
           return (
