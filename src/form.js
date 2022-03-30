@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useImperativeHandle } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup';
 import classNames from 'classnames';
-import { HelpCircle, Loader, Upload, ChevronDown, ChevronUp } from 'react-feather';
+import { HelpCircle, Loader, Upload, ChevronDown, ChevronUp, Trash2 } from 'react-feather';
 import { useForm, useFormContext, Controller, useFieldArray, FormProvider } from 'react-hook-form';
 import { DatePicker } from 'react-rainbow-components';
 import ReactToolTip from 'react-tooltip';
@@ -478,6 +478,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
             />
           )
         default:
+          // console.log(step)
           return (
             <CustomizableInput render={step.render} field={{ setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error}>
               <input
@@ -633,7 +634,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
                         option(step.onChange)
                           .map(onChange => onChange({ rawValues: getValues(), value: v, setValue }))
                       }}
-                      value={(typeof field.value === 'object') ? JSON.stringify(field.value, null, 4) : field.value}
+                      value={(typeof field.value === 'object') ? JSON.stringify(field.value, null, 2) : field.value}
                       defaultValue={defaultValue}
                     />
                   </CustomizableInput>
@@ -785,12 +786,16 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
         .map((field, idx) => {
           return (
             <div key={field.id}>
-              <div className={classNames(classes.flex, classes.ai_center, classes.mt_5)}>
+              <div className={classNames(classes.ai_center, classes.mt_5)} style={{ position: 'relative' }}>
                 {component({ key: field.id, ...field, defaultValue: values[idx] }, idx)}
-                <button type="button" className={classNames(classes.btn, classes.btn_red, classes.btn_sm, classes.ml_5)} disabled={disabled} onClick={() => {
-                  remove(idx)
-                  trigger(entry);
-                }}>Remove</button>
+                <button type="button"
+                  style={{ position: 'absolute', top: '-8px', right: 0 }}
+                  className={classNames(classes.btn, classes.btn_red, classes.btn_sm, classes.ml_5)} disabled={disabled} onClick={() => {
+                    remove(idx)
+                    trigger(entry);
+                  }}>
+                  <Trash2 size={16} />
+                </button>
               </div>
             </div>
           )

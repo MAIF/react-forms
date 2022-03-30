@@ -93,6 +93,9 @@ export const style = {
   mb_20: {
     marginBottom: 20,
   },
+  pt_15: {
+    paddingTop: 15,
+  },
   p_15: {
     padding: 15,
   },
