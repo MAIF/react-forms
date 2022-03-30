@@ -95,8 +95,8 @@ export const Playground = () => {
               onChange={e => {
                 try {
                   setSchema(e)
-                } catch (err) {
-                  console.log(err)
+                } catch (error) {
+                  console.log(error)
                 }
               }}
               value={typeof schema === 'object' ? JSON.stringify(schema, null, 2) : schema}
