@@ -99,8 +99,14 @@ export const Example = () => {
   ```
 - **render**: a function to completely custom the rendering of form field 
   ```javascript
-  ({rawValues, value, onChange, error}) => <input type="text" className="is-invalid" value={value} onChange={e => onChange(e.target.value)} />
+  ({rawValues, value, onChange, error, setValue, parent}) => <input type="text" className="is-invalid" value={value} onChange={e => onChange(e.target.value)} />
   ```
+  You can use the `parent` field, to change a field of the current element (very useful when you have a list of forms, and you want to change a field different from your current element)
+
+  ```javascript
+  ({ setValue, parent }) => <input onChange={e => setValue(`${parent}.anotherField`, e.target.value)}>
+  ```
+
 - **itemRender**: a function to completely custom the rendering of form field items (Just in case of `array` is true)
   ```javascript
   ({rawValues, value, onChange, error}) => <input type="text" className="is-invalid" value={value} onChange={e => onChange(e.target.value)} />
