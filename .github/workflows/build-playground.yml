@@ -20,7 +20,7 @@ jobs:
           yarn
           yarn build
         env:
-          CI: ""
+          CI: "false"
       - name: Commit files
         run: |
           git config --local user.email "github-actions@users.noreply.github.com"

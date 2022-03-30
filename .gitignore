@@ -34,3 +34,4 @@ yalc.lock
 
 src/inputs/__generated/
 examples/node_modules
+docs/static
