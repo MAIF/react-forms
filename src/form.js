@@ -217,6 +217,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
       onSubmit(clean)
     }, onError)(),
     rawData: () => cleanOutputArray(data, schema),
+    trigger
   }));
 
   const functionalProperty = (entry, prop) => {
