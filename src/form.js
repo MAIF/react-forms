@@ -123,7 +123,7 @@ const cleanOutputArray = (obj, subSchema) => {
 
     if (Array.isArray(v)) {
       const isArray = option(subSchema)
-        .orElse(schema)
+//        .orElse(schema) TODO : schema is undefined
         .map(s => s[key])
         .map(entry => !!entry.array && !entry.render)
         .getOrElse(false)
