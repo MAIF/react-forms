@@ -186,7 +186,6 @@ export const style = {
     }
   },
   nestedform__border: {
-    backgroundColor:'ghostWhite',
     borderLeft: '2px solid lightGray',
     paddingLeft: '0.5rem',
     marginLeft:'0.5rem',
