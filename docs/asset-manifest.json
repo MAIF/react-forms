@@ -1,24 +1,24 @@
 {
   "files": {
     "main.css": "/react-forms/static/css/main.8693c9f3.chunk.css",
-    "main.js": "/react-forms/static/js/main.88803e76.chunk.js",
-    "main.js.map": "/react-forms/static/js/main.88803e76.chunk.js.map",
+    "main.js": "/react-forms/static/js/main.a5abf7f1.chunk.js",
+    "main.js.map": "/react-forms/static/js/main.a5abf7f1.chunk.js.map",
     "runtime-main.js": "/react-forms/static/js/runtime-main.368a22f5.js",
     "runtime-main.js.map": "/react-forms/static/js/runtime-main.368a22f5.js.map",
     "static/css/2.6902daba.chunk.css": "/react-forms/static/css/2.6902daba.chunk.css",
-    "static/js/2.ff0eab5d.chunk.js": "/react-forms/static/js/2.ff0eab5d.chunk.js",
-    "static/js/2.ff0eab5d.chunk.js.map": "/react-forms/static/js/2.ff0eab5d.chunk.js.map",
+    "static/js/2.bc3a307f.chunk.js": "/react-forms/static/js/2.bc3a307f.chunk.js",
+    "static/js/2.bc3a307f.chunk.js.map": "/react-forms/static/js/2.bc3a307f.chunk.js.map",
     "index.html": "/react-forms/index.html",
     "static/css/2.6902daba.chunk.css.map": "/react-forms/static/css/2.6902daba.chunk.css.map",
     "static/css/main.8693c9f3.chunk.css.map": "/react-forms/static/css/main.8693c9f3.chunk.css.map",
-    "static/js/2.ff0eab5d.chunk.js.LICENSE.txt": "/react-forms/static/js/2.ff0eab5d.chunk.js.LICENSE.txt",
+    "static/js/2.bc3a307f.chunk.js.LICENSE.txt": "/react-forms/static/js/2.bc3a307f.chunk.js.LICENSE.txt",
     "static/media/all.css": "/react-forms/static/media/fa-solid-900.eeccf4f6.woff"
   },
   "entrypoints": [
     "static/js/runtime-main.368a22f5.js",
     "static/css/2.6902daba.chunk.css",
-    "static/js/2.ff0eab5d.chunk.js",
+    "static/js/2.bc3a307f.chunk.js",
     "static/css/main.8693c9f3.chunk.css",
-    "static/js/main.88803e76.chunk.js"
+    "static/js/main.a5abf7f1.chunk.js"
   ]
 }
