@@ -805,7 +805,7 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
               <div className={classNames(classes.ai_center, classes.mt_5)} style={{ position: 'relative' }}>
                 {component({ key: field.id, ...field, defaultValue: values[idx] }, idx)}
                 <button type="button"
-                  style={{ position: 'absolute', top: '-8px', right: 0 }}
+                  style={{ position: 'absolute', top: '2px', right: 0 }}
                   className={classNames(classes.btn, classes.btn_red, classes.btn_sm, classes.ml_5)} disabled={disabled} onClick={() => {
                     remove(idx)
                     trigger(entry);
