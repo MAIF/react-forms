@@ -21,6 +21,7 @@ export default [
     plugins: [
       babel({
         exclude: [
+          'docs/**',
           'node_modules/**',
           'src/inputs/editor.js'
         ],
@@ -41,6 +42,7 @@ export default [
       external(),
       babel({
         exclude: [
+          'docs/**',
           'node_modules/**',
           'src/inputs/__generated/editor.js'
         ],
