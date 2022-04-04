@@ -109,7 +109,7 @@ export default function Editor(
             }),
             EditorView.editable.of(!readOnly)
         ],
-        doc: (typeof value === 'object' ? value.value : value),
+        doc: !value ? '' : (typeof value === 'object' ? value.value : value),
     })
 
     return new EditorView({
