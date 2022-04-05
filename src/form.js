@@ -796,6 +796,7 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
     // keyName: "id", default to "id", you can change the key name
   });
 
+  console.log("fields", fields)
   return (
     <>
       {fields
@@ -803,7 +804,9 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
           return (
             <div key={field.id}>
               <div className={classNames(classes.ai_center, classes.mt_5)} style={{ position: 'relative' }}>
+                <div style={{width:'95%'}}>
                 {component({ key: field.id, ...field, defaultValue: values[idx] }, idx)}
+                </div>
                 <button type="button"
                   style={{ position: 'absolute', top: '2px', right: 0 }}
                   className={classNames(classes.btn, classes.btn_red, classes.btn_sm, classes.ml_5)} disabled={disabled} onClick={() => {
@@ -816,15 +819,16 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
             </div>
           )
         })}
-      <div className={classNames(classes.flex, classes.jc_flex_end)}>
-        <button type="button" className={classNames(classes.btn, classes.btn_blue, classes.btn_sm, classes.mt_5, { [classes.input__invalid]: errorDisplayed })} onClick={() => {
-          append({ value: step.addableDefaultValue || defaultVal(step.type) })
-          trigger(entry);
-          option(step.onChange)
-            .map(onChange => onChange({ rawValues: getValues(), value: getValues(entry), setValue }))
-        }} disabled={disabled}>Add</button>
-        {error && <div className="invalid-feedback">{error.message}</div>}
-      </div>
+
+          <div className={classNames((fields.length === 0 ? `${classes.jc_flex_start}` : `${classes.jc_flex_end}`), classes.flex)}>
+            <button type="button" className={classNames(classes.btn, classes.btn_blue, classes.btn_sm, classes.mt_5, { [classes.input__invalid]: errorDisplayed })} onClick={() => {
+              append({ value: step.addableDefaultValue || defaultVal(step.type) })
+              trigger(entry);
+              option(step.onChange)
+                .map(onChange => onChange({ rawValues: getValues(), value: getValues(entry), setValue }))
+            }} disabled={disabled}>Add</button>
+            {error && <div className="invalid-feedback">{error.message}</div>}
+          </div>
     </>
   )
 }
