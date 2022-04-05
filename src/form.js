@@ -796,7 +796,6 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
     // keyName: "id", default to "id", you can change the key name
   });
 
-  console.log("fields", fields)
   return (
     <>
       {fields
