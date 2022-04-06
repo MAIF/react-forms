@@ -4,8 +4,11 @@ import { option } from '../Option'
 import { jsonConstraints } from '../constraints';
 
 const resolvers = {
-  [type.string]: () => yup.string(),
-  [type.number]: (typeErrorMessage) => yup.number().typeError(typeErrorMessage || 'Value must be a number'),
+  [type.string]: (typeErrorMessage) => yup.string().typeError(typeErrorMessage || 'Value must be a string'),
+  [type.number]: (typeErrorMessage) => yup.number().transform(v => {
+    return isNaN(v) ? null : v
+  })
+    .typeError(typeErrorMessage || 'Value must be a number'),
   [type.bool]: () => yup.bool(),
   [type.object]: () => yup.object(),
   [type.date]: (typeErrorMessage) => yup.date().typeError(typeErrorMessage || 'Value must be a date'),

@@ -58,7 +58,20 @@ export const maxSize = (ref, message = `size is excedeed ${ref}`) => (r) => {
 }
 
 //mixed
-export const nullable = () => (r) => r.nullable().optional()
+export const nullable = () => (r) => r.nullable().optional().transform(v => {
+  const { type } = r.describe()
+  switch (type) {
+    case 'string':
+    case 'number':
+      return (v || '').toString().length <= 0 ? null : v
+    case 'object':
+      return Object.keys(v || {}).length === 0 ? null : v
+    default:
+      return v
+  }
+
+  return v
+})
 export const test = (name, message = 'Test failed', test) => (r) => r.test(name, message, test)
 export const when = (ref, test, then = [], otherwise = []) => (r, key, dependencies) => {
   // dependencies.push([key, ref])

@@ -14,6 +14,7 @@ import { format } from './format';
 import { BooleanInput, Collapse, SelectInput, ObjectInput, CodeInput, MarkdownInput, SingleLineCode } from './inputs/index';
 import { getShapeAndDependencies } from './resolvers/index';
 import { option } from './Option'
+import { ControlledInput } from './controlledInput';
 
 const usePrevious = (value) => {
   // The ref object is a generic container whose current property is mutable ...
@@ -75,25 +76,20 @@ const CustomizableInput = props => {
   return props.children
 }
 
-const defaultVal = (t, array, defaultValue) => {
+const defaultVal = (value, t, array, defaultValue) => {
   if (!!defaultValue) return defaultValue
   if (!!array) return []
-  switch (t) {
-    case type.bool: return false;
-    case type.number: return 0;
-    case type.object: return undefined; //todo: passur de moi
-    case type.string: return "";
-    default: return undefined;
-  }
+  return value
 }
-const getDefaultValues = (flow, schema) => {
+
+const getDefaultValues = (flow, schema, value) => {
   return flow.reduce((acc, key) => {
     if (typeof key === 'object') {
-      return { ...acc, ...getDefaultValues(key.flow, schema) }
+      return { ...acc, ...getDefaultValues(key.flow, schema, value) }
     }
     const entry = schema[key]
     if (!entry) { return acc }
-    return { ...acc, [key]: defaultVal(entry.type, entry.array || entry.isMulti, entry.defaultValue) }
+    return { ...acc, [key]: defaultVal(value ? value[key] : null, entry.type, entry.array || entry.isMulti, entry.defaultValue) }
   }, {})
 }
 
@@ -123,7 +119,7 @@ const cleanOutputArray = (obj, subSchema) => {
 
     if (Array.isArray(v)) {
       const isArray = option(subSchema)
-//        .orElse(schema) TODO : schema is undefined
+        //        .orElse(schema) TODO : schema is undefined
         .map(s => s[key])
         .map(entry => !!entry.array && !entry.render)
         .getOrElse(false)
@@ -134,7 +130,7 @@ const cleanOutputArray = (obj, subSchema) => {
     } else if (!!v && typeof v === 'object' && !(v instanceof (Date) && !Array.isArray(v))) {
       return { ...acc, [key]: cleanOutputArray(v, subSchema[key]?.schema || {}) }
     } else {
-      return { ...acc, [key]: v }
+      return { ...acc, [key]: v === undefined ? null : v }
     }
   }, {})
 }
@@ -167,7 +163,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
     })
   }
 
-  const defaultValues = getDefaultValues(formFlow, schema);
+  const defaultValues = getDefaultValues(formFlow, schema, value);
 
   //FIXME: get real schema through the switch
 
@@ -215,11 +211,19 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 
   if (options.watch) {
     if (typeof options.watch === 'function') {
-      options.watch(watch())
+      options.watch(cleanOutputArray(data, schema))
     } else {
       console.group('react-form watch')
-      console.log(watch())
+      console.log(cleanOutputArray(data, schema))
       console.groupEnd()
+    }
+  }
+
+  const functionalProperty = (entry, prop) => {
+    if (typeof prop === 'function') {
+      return prop({ rawValues: getValues(), value: getValues(entry) });
+    } else {
+      return prop;
     }
   }
 
@@ -232,14 +236,6 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
     trigger,
     methods
   }));
-
-  const functionalProperty = (entry, prop) => {
-    if (typeof prop === 'function') {
-      return prop({ rawValues: getValues(), value: getValues(entry) });
-    } else {
-      return prop;
-    }
-  }
 
   return (
     <FormProvider {...methods} >
@@ -372,28 +368,24 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
       }} error={error} >
         <ArrayStep
           entry={entry} step={step}
-          defaultValue={step.defaultValue || defaultVal(step.type)}
+          defaultValue={step.defaultValue || defaultVal(null, step.type)}
           disabled={functionalProperty(entry, step.disabled)}
           component={((props, idx) => {
             return (
-              <Step entry={`${entry}[${idx}].value`} step={{ ...(schema[realEntry || entry]), render: step.itemRender, onChange: undefined, array: false }}
-                schema={schema} inputWrapper={inputWrapper} httpClient={httpClient}
-                defaultValue={props.defaultValue?.value} value={props.value} index={idx} functionalProperty={functionalProperty} />
+              <Step
+                entry={`${entry}[${idx}].value`}
+                step={{ ...(schema[realEntry || entry]), render: step.itemRender, onChange: undefined, array: false }}
+                schema={schema}
+                inputWrapper={inputWrapper}
+                httpClient={httpClient}
+                defaultValue={props.defaultValue?.value}
+                value={props.value}
+                index={idx}
+                functionalProperty={functionalProperty} />
             )
           })} />
       </CustomizableInput >
     )
-  }
-
-
-  const registeredInput = register(entry);
-  const inputProps = {
-    ...registeredInput,
-    onChange: (e) => {
-      registeredInput.onChange(e);
-      option(step.onChange)
-        .map(onChange => onChange({ rawValues: getValues(), value: e.target.value, setValue }))
-    }
   }
 
   switch (step.type) {
@@ -401,111 +393,47 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
       switch (step.format) {
         case format.text:
           return (
-            <CustomizableInput render={step.render} field={{ parent, setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v) }} error={error}>
+            <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
               <textarea
-                type="text" id={entry}
-                className={classNames(classes.input, { [classes.input__invalid]: errorDisplayed })}
-                readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
-                {...step.props}
-                defaultValue={defaultValue}
-                placeholder={step.placeholder}
-                {...inputProps} />
-            </CustomizableInput>
+                type="text"
+                className={classNames(classes.input, { [classes.input__invalid]: errorDisplayed })} />
+            </ControlledInput>
           );
         case format.code:
         case format.singleLineCode:
           const Component = step.format === format.code ? CodeInput : SingleLineCode
           return (
-            <Controller
-              name={entry}
-              control={control}
-              render={({ field }) => {
-                return (
-                  <CustomizableInput render={step.render} field={{ parent, setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
-                    <Component
-                      className={classNames({ [classes.input__invalid]: errorDisplayed })}
-                      readOnly={functionalProperty(entry, step.disabled) ? true : false}
-                      onChange={(e) => {
-                        field.onChange(e)
-                        option(step.onChange)
-                          .map(onChange => onChange({ rawValues: getValues(), value: e, setValue }))
-                      }}
-                      value={field.value}
-                      defaultValue={defaultValue}
-                      {...step.props}
-                    />
-                  </CustomizableInput>
-                )
-              }}
-            />
+            <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
+              <Component className={classNames({ [classes.input__invalid]: errorDisplayed })} />
+            </ControlledInput>
           )
         case format.markdown:
           return (
-            <Controller
-              name={entry}
-              control={control}
-              render={({ field }) => {
-                return (
-                  <CustomizableInput render={step.render} field={{ parent, setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
-                    <MarkdownInput
-                      {...step.props}
-                      className={classNames({ [classes.input__invalid]: errorDisplayed })}
-                      readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
-                      onChange={(e) => {
-                        field.onChange(e)
-                        option(step.onChange)
-                          .map(onChange => onChange({ rawValues: getValues(), value: e, setValue }))
-                      }}
-                      value={field.value}
-                      defaultValue={defaultValue}
-                      {...step}
-                    />
-                  </CustomizableInput>
-                )
-              }}
-            />
+            <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
+              <MarkdownInput className={classNames({ [classes.input__invalid]: errorDisplayed })} />
+            </ControlledInput>
           )
         case format.buttonsSelect:
         case format.select:
           return (
-            <Controller
-              name={entry}
-              control={control}
-              render={({ field }) => {
-                return (
-                  <CustomizableInput render={step.render} field={{ parent, setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
-                    <SelectInput
-                      {...step.props}
-                      {...step}
-                      className={classNames(classes.flex_grow_1, { [classes.input__invalid]: errorDisplayed })}
-                      disabled={functionalProperty(entry, step.disabled)}
-                      value={field.value}
-                      possibleValues={step.options}
-                      defaultValue={defaultValue}
-                      httpClient={httpClient}
-                      onChange={(value) => {
-                        field.onChange(value)
-                        option(step.onChange)
-                          .map(onChange => onChange({ rawValues: getValues(), value, setValue }))
-                      }}
-                    />
-                  </CustomizableInput>
-                )
-              }}
-            />
+            <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
+              <SelectInput
+                className={classNames(classes.flex_grow_1, { [classes.input__invalid]: errorDisplayed })}
+                disabled={functionalProperty(entry, step.disabled)}
+                possibleValues={step.options}
+                httpClient={httpClient}
+              />
+            </ControlledInput>
           )
         default:
           return (
-            <CustomizableInput render={step.render} field={{ parent, setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }} error={error}>
+            <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
               <input
-                type={step.format || 'text'} id={entry}
+                type={step.format || 'text'}
                 className={classNames(classes.input, { [classes.input__invalid]: errorDisplayed })}
-                readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
-                defaultValue={defaultValue}
-                placeholder={step.placeholder}
-                {...inputProps} />
-            </CustomizableInput>
-          );
+              />
+            </ControlledInput>
+          )
       }
 
     case type.number:
@@ -513,71 +441,31 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
         case format.buttonsSelect:
         case format.select:
           return (
-            <Controller
-              name={entry}
-              control={control}
-              render={({ field }) => {
-                return (
-                  <CustomizableInput render={step.render} field={{ parent, setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
-                    <SelectInput
-                      {...step.props}
-                      {...step}
-                      className={classNames(classes.content, { [classes.input__invalid]: errorDisplayed })}
-                      readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
-                      onChange={(e) => {
-                        field.onChange(e)
-                        option(step.onChange)
-                          .map(onChange => onChange({ rawValues: getValues(), value: e, setValue }))
-                      }}
-                      value={field.value}
-                      possibleValues={step.options}
-                      defaultValue={defaultValue}
-                      httpClient={httpClient}
-                    />
-                  </CustomizableInput>
-                )
-              }}
-            />
+            <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
+              <SelectInput
+                className={classNames(classes.content, { [classes.input__invalid]: errorDisplayed })}
+                possibleValues={step.options}
+                httpClient={httpClient}
+              />
+            </ControlledInput>
           )
         default:
-          return (
-            <CustomizableInput render={step.render} field={{ parent, setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v) }} error={error}>
-              <input
-                {...step.props}
-                type={step.format || 'number'} id={entry}
-                className={classNames(classes.input, { [classes.input__invalid]: errorDisplayed })}
-                readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
-                name={entry}
-                placeholder={step.placeholder}
-                defaultValue={defaultValue}
-                {...inputProps} />
-            </CustomizableInput>
-          );
+          return <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
+            <input
+              type={step.format || 'number'}
+              className={classNames(classes.input, { [classes.input__invalid]: errorDisplayed })}
+            />
+          </ControlledInput>
       }
 
     case type.bool:
       return (
-        <Controller
-          name={entry}
-          control={control}
-          render={({ field }) => {
-            return (
-              <CustomizableInput render={step.render} field={{ parent, setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
-                <BooleanInput
-                  {...step.props}
-                  className={classNames({ [classes.input__invalid]: errorDisplayed })}
-                  readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
-                  onChange={(e) => {
-                    field.onChange(e)
-                    option(step.onChange)
-                      .map(onChange => onChange({ rawValues: getValues(), value: e, setValue }))
-                  }}
-                  value={field.value}
-                />
-              </CustomizableInput>
-            )
-          }}
-        />
+        <ControlledInput
+          defaultValue={defaultValue}
+          step={step}
+          entry={entry}>
+          <BooleanInput className={classNames({ [classes.input__invalid]: errorDisplayed })} />
+        </ControlledInput>
       )
 
     case type.object:
@@ -585,31 +473,13 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
         case format.buttonsSelect:
         case format.select:
           return (
-            <Controller
-              name={entry}
-              control={control}
-              defaultValue={step.defaultValue}
-              render={({ field }) => {
-                return (
-                  <CustomizableInput render={step.render} field={{ parent, setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
-                    <SelectInput
-                      {...step.props}
-                      {...step}
-                      className={classNames(classes.flex_grow_1, { [classes.input__invalid]: errorDisplayed })}
-                      readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
-                      onChange={(e) => {
-                        field.onChange(e)
-                        option(step.onChange)
-                          .map(onChange => onChange({ rawValues: getValues(), value: e, setValue }))
-                      }}
-                      value={field.value}
-                      possibleValues={step.options}
-                      httpClient={httpClient}
-                    />
-                  </CustomizableInput>
-                )
-              }}
-            />
+            <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
+              <SelectInput
+                className={classNames(classes.flex_grow_1, { [classes.input__invalid]: errorDisplayed })}
+                possibleValues={step.options}
+                httpClient={httpClient}
+              />
+            </ControlledInput>
           )
         case format.form: //todo: disabled ?
           const flow = option(step.flow).getOrElse(option(step.schema).map(s => Object.keys(s)).getOrNull());
@@ -624,94 +494,44 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
 
         case format.code:
           return (
-            <Controller
-              name={entry}
-              control={control}
-              render={({ field }) => {
-                return (
-                  <CustomizableInput render={step.render} field={{ parent, setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
-                    <CodeInput
-                      {...step.props}
-                      {...step}
-                      className={classNames({ [classes.input__invalid]: error })}
-                      readOnly={functionalProperty(entry, step.disabled) ? true : false}
-                      onChange={(e) => {
-                        let v
-                        try {
-                          v = JSON.parse(e)
-                        } catch (err) {
-                          setError(step.label, {
-                            type: 'manual',
-                            message: err
-                          })
-                          v = {}
-                        }
-                        field.onChange(v)
-                        option(step.onChange)
-                          .map(onChange => onChange({ rawValues: getValues(), value: v, setValue }))
-                      }}
-                      value={(typeof field.value === 'object') ? JSON.stringify(field.value, null, 2) : field.value}
-                      defaultValue={defaultValue}
-                    />
-                  </CustomizableInput>
-                )
-              }}
-            />
+            <ControlledInput defaultValue={defaultValue} step={step} entry={entry} component={(field, props) => (
+              <CodeInput
+                {...props}
+                className={classNames({ [classes.input__invalid]: error })}
+                onChange={(e) => {
+                  let v
+                  try {
+                    v = JSON.parse(e)
+                  } catch (err) {
+                    v = {}
+                  }
+                  field.onChange(v)
+                  option(step.onChange)
+                    .map(onChange => onChange({ rawValues: getValues(), value: v, setValue }))
+                }}
+                value={field.value === null ? null : ((typeof field.value === 'object') ? JSON.stringify(field.value, null, 2) : field.value)}
+              />
+            )}>
+            </ControlledInput>
           )
         default:
           return (
-            <Controller
-              name={entry}
-              control={control}
-              defaultValue={step.defaultValue}
-              render={({ field }) => {
-                return (
-                  <CustomizableInput render={step.render} field={{ parent, setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
-                    <ObjectInput
-                      {...step.props}
-                      {...step}
-                      className={classNames({ [classes.input__invalid]: errorDisplayed })}
-                      readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
-                      onChange={(e) => {
-                        field.onChange(e)
-                        option(step.onChange)
-                          .map(onChange => onChange({ rawValues: getValues(), value: e, setValue }))
-                      }}
-                      value={field.value}
-                      possibleValues={step.options}
-                    />
-                  </CustomizableInput>
-                )
-              }}
-            />
+            <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
+              <ObjectInput
+                className={classNames({ [classes.input__invalid]: errorDisplayed })}
+                possibleValues={step.options}
+              />
+            </ControlledInput>
           )
       }
     case type.date:
       return (
-        <Controller
-          name={entry}
-          control={control}
-          defaultValue={step.defaultValue}
-          render={({ field }) => {
-            return (
-              <CustomizableInput render={step.render} field={{ parent, setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
-                <DatePicker
-                  {...step.props}
-                  id="datePicker-1"
-                  className={classNames(classes.datepicker, { [classes.input__invalid]: errorDisplayed })}
-                  readOnly={functionalProperty(entry, step.disabled) ? 'readOnly' : null}
-                  value={field.value}
-                  onChange={(e) => {
-                    field.onChange(e)
-                    option(step.onChange)
-                      .map(onChange => onChange({ rawValues: getValues(), value: e, setValue }))
-                  }}
-                  formatStyle="large"
-                />
-              </CustomizableInput>
-            )
-          }}
-        />
+        <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
+          <DatePicker
+            className={classNames(classes.datepicker, { [classes.input__invalid]: errorDisplayed })}
+            formatStyle="large"
+          />
+        </ControlledInput>
       )
     case type.file:
       return (
@@ -761,14 +581,9 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
             };
 
             return (
-              <CustomizableInput render={step.render} field={{ parent, setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }} error={error}>
-                <FileInput
-                  onChange={(e) => {
-                    field.onChange(e)
-                    option(step.onChange)
-                      .map(onChange => onChange({ rawValues: getValues(), value: e, setValue }))
-                  }} />
-              </CustomizableInput>
+              <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
+                <FileInput />
+              </ControlledInput>
             )
           }}
         />
@@ -818,7 +633,7 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
         })}
       <div className={classNames(classes.flex, classes.jc_flex_end)}>
         <button type="button" className={classNames(classes.btn, classes.btn_blue, classes.btn_sm, classes.mt_5, { [classes.input__invalid]: errorDisplayed })} onClick={() => {
-          append({ value: step.addableDefaultValue || defaultVal(step.type) })
+          append({ value: step.addableDefaultValue || defaultVal(null, step.type) })
           trigger(entry);
           option(step.onChange)
             .map(onChange => onChange({ rawValues: getValues(), value: getValues(entry), setValue }))

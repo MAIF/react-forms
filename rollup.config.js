@@ -53,7 +53,7 @@ export default [
       copy({
         targets: [
           {
-            src: 'lib/index.js',
+            src: 'lib',
             dest: 'examples/node_modules/@maif/react-forms/lib'
           }
         ],

@@ -30,9 +30,11 @@ export const Playground = () => {
   const [realSchema, setRealSchema] = useState(basic)
   const [error, setError] = useState(undefined)
   const [value, setValue] = useState()
+  const [selectedSchema, setSelectedSchema] = useState({ value: basic, label: "basic" })
 
   const ref = useRef()
   const childRef = useRef()
+  const formRef = useRef()
 
   useEffect(() => {
     if (childRef.current)
@@ -88,8 +90,11 @@ export const Playground = () => {
               className="py-2"
               possibleValues={Object.entries(examples)}
               transformer={([key, value]) => ({ label: key, value })}
-              defaultValue={{ value: basic, label: "basic" }}
-              onChange={setSchema}
+              value={selectedSchema}
+              onChange={e => {
+                setSelectedSchema(e)
+                setSchema(e)
+              }}
             />
             <CodeInput
               mode="javascript"
@@ -119,18 +124,22 @@ export const Playground = () => {
             <div style={{ backgroundColor: '#ececec', padding: '10px 15px' }}>
               <WrapperError ref={childRef}>
                 <Form
+                  ref={formRef}
                   schema={realSchema}
                   value={value}
                   flow={Object.keys(realSchema)}
                   onSubmit={d => alert(JSON.stringify(d, null, 2))}
                   options={{
-                    watch: unsaved => ref?.current?.dispatch({
-                      changes: {
-                        from: 0,
-                        to: ref.current.state.doc.length,
-                        insert: JSON.stringify(unsaved, null, 2)
-                      }
-                    }),
+                    watch: unsaved => {
+                      console.log(unsaved)
+                      ref?.current?.dispatch({
+                        changes: {
+                          from: 0,
+                          to: ref.current.state.doc.length,
+                          insert: JSON.stringify(unsaved, null, 2)
+                        }
+                      })
+                    },
                     actions: {
                       submit: {
                         label: 'Try it'
