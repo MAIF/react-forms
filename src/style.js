@@ -129,6 +129,9 @@ export const style = {
   jc_flex_end: {
     justifyContent: "flex-end",
   },
+  jc_flex_start: {
+    justifyContent: "flex-start",
+  },
   ac_center: {
     alignContent: "center",
   },
