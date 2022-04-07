@@ -29,7 +29,7 @@
         ],
         "format": "form",
         "collapsable": true,
-        "initCollapsed": true,
+        "collapsed": true,
         "schema": {
             "custom_timeouts": {
                 "label": "custom_timeouts",
@@ -152,7 +152,7 @@
                 ],
                 "format": "form",
                 "collapsable": true,
-                "initCollapsed": true,
+                "collapsed": true,
                 "schema": {
                     "queue_size": {
                         "label": "queue_size",
@@ -205,6 +205,20 @@
                     }
                 ]
             },
+            "proxy": {
+                "label": "proxy",
+                "type": "object",
+                "constraints": [
+                    {
+                        "type": "nullable"
+                    }
+                ],
+                "format": "form",
+                "collapsable": true,
+                "collapsed": true,
+                "schema": {},
+                "flow": []
+            },
             "call_timeout": {
                 "label": "call_timeout",
                 "type": "number",
@@ -231,20 +245,6 @@
                         "type": "nullable"
                     }
                 ]
-            },
-            "proxy": {
-                "label": "proxy",
-                "type": "object",
-                "constraints": [
-                    {
-                        "type": "nullable"
-                    }
-                ],
-                "format": "form",
-                "collapsable": true,
-                "initCollapsed": true,
-                "schema": {},
-                "flow": []
             }
         },
         "flow": [
@@ -257,6 +257,7 @@
             "sample_interval",
             "call_and_stream_timeout",
             "retries",
+            "proxy",
             "call_timeout",
             "idle_timeout",
             "connection_timeout"
@@ -272,7 +273,7 @@
         ],
         "format": "form",
         "collapsable": true,
-        "initCollapsed": true,
+        "collapsed": true,
         "schema": {
             "enabled": {
                 "label": "enabled",
@@ -319,7 +320,7 @@
                 ],
                 "format": "form",
                 "collapsable": true,
-                "initCollapsed": true,
+                "collapsed": true,
                 "schema": {
                     "rack": {
                         "label": "rack",
@@ -502,7 +503,7 @@
                 ],
                 "format": "form",
                 "collapsable": true,
-                "initCollapsed": true,
+                "collapsed": true,
                 "schema": {
                     "enabled": {
                         "label": "enabled",
@@ -612,7 +613,7 @@
         ],
         "format": "form",
         "collapsable": true,
-        "initCollapsed": true,
+        "collapsed": true,
         "schema": {
             "type": {
                 "label": "type",

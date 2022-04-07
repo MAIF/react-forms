@@ -1,24 +1,45 @@
-export const deepEqual = (a, b) => {
-  if (a === b) return true;
+export const deepEqual = (obj1, obj2) => {
+  if (obj1 === obj2) return true;
 
-  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) return false;
-
-  let keysA = Object.keys(a), keysB = Object.keys(b);
-
-  if (keysA.length !== keysB.length) return false;
-
-  for (let key of keysA) {
-    if (!keysB.includes(key)) return false;
-
-    if (typeof a[key] === 'function' || typeof b[key] === 'function') {
-      if (a[key].toString() !== b[key].toString()) return false;
-    } else {
-      if (!deepEqual(a[key], b[key])) return false;
-    }
+  if (
+    typeof obj1 !== 'object' ||
+    typeof obj2 !== 'object' ||
+    obj1 == null ||
+    obj2 == null
+  ) {
+    return false;
   }
 
-  return true;
-};
+  const keysA = Object.keys(obj1);
+  const keysB = Object.keys(obj2);
+
+  if (keysA.length !== keysB.length) {
+    return false;
+  }
+
+  let result = true;
+
+  keysA.forEach((key) => {
+    if (!keysB.includes(key)) {
+      result = false;
+    }
+
+    if (
+      typeof obj1[key] === 'function' ||
+      typeof obj2[key] === 'function'
+    ) {
+      if (obj1[key].toString() !== obj2[key].toString()) {
+        result = false;
+      }
+    }
+
+    if (!deepEqual(obj1[key], obj2[key])) {
+      result = false;
+    }
+  });
+
+  return result;
+}
 
 export const isPromise = (value) => {
   return Boolean(value && typeof value.then === 'function');

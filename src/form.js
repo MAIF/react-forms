@@ -15,6 +15,7 @@ import { BooleanInput, Collapse, SelectInput, ObjectInput, CodeInput, MarkdownIn
 import { getShapeAndDependencies } from './resolvers/index';
 import { option } from './Option'
 import { ControlledInput } from './controlledInput';
+import { deepEqual } from './utils';
 
 const usePrevious = (value) => {
   // The ref object is a generic container whose current property is mutable ...
@@ -197,10 +198,12 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
   }, [schema])
 
   const data = watch();
-  const prevData = usePrevious(data)
+  const [currentData, setCurrentData] = useState()
+  // const prevData = usePrevious(data)
   useEffect(() => {
     //todo: with debounce
-    if (!!options.autosubmit && JSON.stringify(data) !== JSON.stringify(prevData)) {
+    if (!!options.autosubmit && !isEqual(cleanOutputArray(data, schema), currentData)) {
+      setCurrentDate(cleanOutputArray(data, schema))
       handleSubmit(data => {
         const clean = cleanOutputArray(data, schema)
         onSubmit(clean)
@@ -358,6 +361,23 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
   const isDirty = entry.split('.').reduce((acc, curr) => acc && acc[curr], dirtyFields)
   const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], touchedFields)
   const errorDisplayed = !!error && (isSubmitted || isDirty || isTouched)
+
+  const data = watch()
+  const [currentData, setCurrentData] = useState()
+
+  useEffect(() => {
+    const newData = cleanOutputArray(data, schema)
+    if (step.onAfterChange && typeof step.onAfterChange === 'function' && !deepEqual(newData, currentData)) {
+      setCurrentData(newData)
+      step.onAfterChange({
+        entry,
+        value: newData,
+        setValue,
+        rawValues: getValues(),
+        onChange: v => setValue(entry, v)
+      })
+    }
+  }, [data])
 
   if (step.array) {
     return (
@@ -675,7 +695,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
 
   const prevSchema = usePrevious(schemaAndFlow.schema);
   useEffect(() => {
-    if (!!prevSchema && JSON.stringify(prevSchema) !== JSON.stringify(schemaAndFlow.schema)) {
+    if (!!prevSchema && !deepEqual(prevSchema, schemaAndFlow.schema)) {
       const def = getDefaultValues(schemaAndFlow.flow, schemaAndFlow.schema);
       setValue(parent, def, { shouldValidate: false })
     }

@@ -132,7 +132,6 @@ export const Playground = () => {
                   onSubmit={d => alert(JSON.stringify(d, null, 2))}
                   options={{
                     watch: unsaved => {
-                      console.log(unsaved)
                       ref?.current?.dispatch({
                         changes: {
                           from: 0,
