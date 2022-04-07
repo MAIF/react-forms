@@ -26,6 +26,11 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     }
   ],
+  "files": [
+    "LICENCE",
+    "/lib",
+    "README.md"
+  ],
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
