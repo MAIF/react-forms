@@ -1,0 +1,243 @@
+{
+    "client": {
+        "label": "client",
+        "type": "object",
+        "constraints": [
+            {
+                "type": "nullable"
+            }
+        ],
+        "format": "form",
+        "schema": {
+            "custom_timeouts": {
+                "label": "custom_timeouts",
+                "type": "object",
+                "constraints": [
+                    {
+                        "type": "nullable"
+                    }
+                ],
+                "array": true,
+                "format": "form",
+                "schema": {
+                    "connection_timeout": {
+                        "label": "connection_timeout",
+                        "type": "number",
+                        "constraints": [
+                            {
+                                "type": "nullable"
+                            }
+                        ]
+                    },
+                    "call_and_stream_timeout": {
+                        "label": "call_and_stream_timeout",
+                        "type": "number",
+                        "constraints": [
+                            {
+                                "type": "nullable"
+                            }
+                        ]
+                    },
+                    "path": {
+                        "label": "path",
+                        "type": "string",
+                        "constraints": [
+                            {
+                                "type": "nullable"
+                            }
+                        ]
+                    },
+                    "call_timeout": {
+                        "label": "call_timeout",
+                        "type": "number",
+                        "constraints": [
+                            {
+                                "type": "nullable"
+                            }
+                        ]
+                    },
+                    "idle_timeout": {
+                        "label": "idle_timeout",
+                        "type": "number",
+                        "constraints": [
+                            {
+                                "type": "nullable"
+                            }
+                        ]
+                    },
+                    "global_timeout": {
+                        "label": "global_timeout",
+                        "type": "number",
+                        "constraints": [
+                            {
+                                "type": "nullable"
+                            }
+                        ]
+                    }
+                },
+                "flow": [
+                    "connection_timeout",
+                    "call_and_stream_timeout",
+                    "path",
+                    "call_timeout",
+                    "idle_timeout",
+                    "global_timeout"
+                ]
+            },
+            "global_timeout": {
+                "label": "global_timeout",
+                "type": "number",
+                "constraints": [
+                    {
+                        "type": "nullable"
+                    }
+                ]
+            },
+            "max_errors": {
+                "label": "max_errors",
+                "type": "number",
+                "constraints": [
+                    {
+                        "type": "nullable"
+                    }
+                ]
+            },
+            "retry_initial_delay": {
+                "label": "retry_initial_delay",
+                "type": "number",
+                "constraints": [
+                    {
+                        "type": "nullable"
+                    }
+                ]
+            },
+            "backoff_factor": {
+                "label": "backoff_factor",
+                "type": "number",
+                "constraints": [
+                    {
+                        "type": "nullable"
+                    }
+                ]
+            },
+            "cache_connection_settings": {
+                "label": "cache_connection_settings",
+                "type": "object",
+                "constraints": [
+                    {
+                        "type": "nullable"
+                    }
+                ],
+                "format": "form",
+                "collapsable": true,
+                "initCollapsed": true,
+                "schema": {
+                    "queue_size": {
+                        "label": "queue_size",
+                        "type": "number",
+                        "constraints": [
+                            {
+                                "type": "nullable"
+                            }
+                        ]
+                    },
+                    "enabled": {
+                        "label": "enabled",
+                        "type": "bool",
+                        "constraints": [
+                            {
+                                "type": "nullable"
+                            }
+                        ]
+                    }
+                },
+                "flow": [
+                    "queue_size",
+                    "enabled"
+                ]
+            },
+            "sample_interval": {
+                "label": "sample_interval",
+                "type": "number",
+                "constraints": [
+                    {
+                        "type": "nullable"
+                    }
+                ]
+            },
+            "call_and_stream_timeout": {
+                "label": "call_and_stream_timeout",
+                "type": "number",
+                "constraints": [
+                    {
+                        "type": "nullable"
+                    }
+                ]
+            },
+            "retries": {
+                "label": "retries",
+                "type": "number",
+                "constraints": [
+                    {
+                        "type": "nullable"
+                    }
+                ]
+            },
+            "call_timeout": {
+                "label": "call_timeout",
+                "type": "number",
+                "constraints": [
+                    {
+                        "type": "nullable"
+                    }
+                ]
+            },
+            "idle_timeout": {
+                "label": "idle_timeout",
+                "type": "number",
+                "constraints": [
+                    {
+                        "type": "nullable"
+                    }
+                ]
+            },
+            "connection_timeout": {
+                "label": "connection_timeout",
+                "type": "number",
+                "constraints": [
+                    {
+                        "type": "nullable"
+                    }
+                ]
+            },
+            "proxy": {
+                "label": "proxy",
+                "type": "object",
+                "constraints": [
+                    {
+                        "type": "nullable"
+                    }
+                ],
+                "format": "form",
+                "collapsable": true,
+                "initCollapsed": true,
+                "schema": {},
+                "flow": []
+            }
+        },
+        "flow": [
+            "custom_timeouts",
+            "global_timeout",
+            "max_errors",
+            "retry_initial_delay",
+            "backoff_factor",
+            "cache_connection_settings",
+            "sample_interval",
+            "call_and_stream_timeout",
+            "retries",
+            "call_timeout",
+            "idle_timeout",
+            "connection_timeout"
+        ]
+    }
+}

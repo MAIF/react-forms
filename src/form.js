@@ -44,7 +44,6 @@ const BasicWrapper = ({ entry, className, label, help, children, render }) => {
   const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.touchedFields)
   const errorDisplayed = formState.isSubmitted || isDirty || isTouched
 
-
   if (render) {
     return render({ entry, label, error, help, children })
   }
@@ -194,6 +193,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
   }, [value, reset])
 
   useEffect(() => {
+    console.log(cleanInputArray(value, defaultValues, schema))
     reset(cleanInputArray(value, defaultValues, schema))
   }, [schema])
 
@@ -355,7 +355,6 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
     )
   }
 
-
   const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], errors)
   const isDirty = entry.split('.').reduce((acc, curr) => acc && acc[curr], dirtyFields)
   const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], touchedFields)
@@ -365,15 +364,15 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
     return (
       <CustomizableInput render={step.render} field={{
         setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v)
-      }} error={error} >
+      }} error={error}>
         <ArrayStep
           entry={entry} step={step}
-          defaultValue={step.defaultValue || defaultVal(null, step.type)}
+          defaultValue={step.defaultValue || null}
           disabled={functionalProperty(entry, step.disabled)}
           component={((props, idx) => {
             return (
               <Step
-                entry={`${entry}[${idx}].value`}
+                entry={`${entry}.${idx}.value`}
                 step={{ ...(schema[realEntry || entry]), render: step.itemRender, onChange: undefined, array: false }}
                 schema={schema}
                 inputWrapper={inputWrapper}
@@ -605,7 +604,8 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
   const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.touchedFields)
   const errorDisplayed = !!error && (formState.isSubmitted || isDirty || isTouched)
 
-  const { fields, append, remove, update } = useFieldArray({
+  console.log(control, entry)
+  const { fields, append, remove } = useFieldArray({
     control, // control props comes from useForm (optional: if you are using FormContext)
     name: entry, // unique name for your Field Array
     // keyName: "id", default to "id", you can change the key name
@@ -618,8 +618,8 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
           return (
             <div key={field.id}>
               <div className={classNames(classes.ai_center, classes.mt_5)} style={{ position: 'relative' }}>
-                <div style={{width:'95%'}}>
-                {component({ key: field.id, ...field, defaultValue: values[idx] }, idx)}
+                <div style={{ width: '95%' }}>
+                  {component({ key: field.id, ...field, defaultValue: values[idx] }, idx)}
                 </div>
                 <button type="button"
                   style={{ position: 'absolute', top: '2px', right: 0 }}
@@ -651,12 +651,12 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
   const [collapsed, setCollapsed] = useState(!!step.collapsed);
 
   const classes = useCustomStyle();
-  const v = getValues(parent);
 
-  useEffect(() => {
-    trigger(parent)
-  }, [JSON.stringify(v)])
-
+  // TODO - voir ce qui se passe et à quoi ça sert
+  // const v = getValues(parent);
+  // useEffect(() => {
+  //   trigger(parent)
+  // }, [JSON.stringify(v)])
 
   const schemaAndFlow = option(step.conditionalSchema)
     .map(condiSchema => {
@@ -724,9 +724,17 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
             className={classNames({ [classes.display__none]: (collapsed && !step.visibleOnCollapse) || !visibleStep })}
             entry={`${parent}.${entry}`}
             label={functionalProperty(entry, step?.label === null ? null : step?.label || entry)} help={step.help} render={inputWrapper}>
-            <Step key={`step.${entry}.${idx}`} entry={`${parent}.${entry}`} realEntry={entry} step={schemaAndFlow.schema[entry]} parent={parent}
-              schema={schemaAndFlow.schema} inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient}
-              defaultValue={value && value[entry]} functionalProperty={functionalProperty} />
+            <Step
+              key={`step.${entry}.${idx}`}
+              entry={`${parent}.${entry}`}
+              realEntry={entry}
+              step={schemaAndFlow.schema[entry]}
+              parent={parent}
+              schema={schemaAndFlow.schema}
+              inputWrapper={inputWrapper}
+              httpClient={maybeCustomHttpClient}
+              defaultValue={value && value[entry]}
+              functionalProperty={functionalProperty} />
           </BasicWrapper>
         )
       })}

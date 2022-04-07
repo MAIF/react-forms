@@ -35,7 +35,7 @@ export const ControlledInput = ({ defaultValue, step, entry, children, component
         readOnly: functionalProperty(entry, step.disabled) ? 'readOnly' : null,
         placeholder: step.placeholder,
         onChange: e => {
-            field.onChange(!e ? null : e.target ? e.target.value : e)
+            field.onChange(!e ? null : e.target ? e.target.value || null : e)
             option(step.onChange)
                 .map(onChange => onChange({ rawValues: getValues(), value: e.target.value, setValue }))
         },

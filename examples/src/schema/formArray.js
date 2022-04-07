@@ -8,7 +8,6 @@ const schema = `{
                 type: "string",
                 render: (props) => {
                     const { setValues, setValue, value, onChange } = props
-                    console.log("coucou")
                     return <input
                         type="text"
                         onChange={e => onChange(e.target.value)}

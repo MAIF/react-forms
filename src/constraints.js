@@ -60,7 +60,7 @@ export const maxSize = (ref, message = `size is excedeed ${ref}`) => (r) => {
 //mixed
 export const nullable = () => (r) => r.nullable().optional().transform(v => {
   const { type } = r.describe()
-  switch (type) {
+  switch (type) { 
     case 'string':
     case 'number':
       return (v || '').toString().length <= 0 ? null : v

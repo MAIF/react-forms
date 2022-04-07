@@ -33,7 +33,6 @@ const DaikokuExtension = () => {
     type: 'lang',
     regex: /@@@/g,
     replace: () => {
-      console.log('@@@');
       return '</div>';
     },
   };
