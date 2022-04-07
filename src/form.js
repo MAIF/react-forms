@@ -198,12 +198,10 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
   }, [schema])
 
   const data = watch();
-  const [currentData, setCurrentData] = useState()
-  // const prevData = usePrevious(data)
+  const prevData = usePrevious(cleanOutputArray(data, schema))
   useEffect(() => {
     //todo: with debounce
-    if (!!options.autosubmit && !isEqual(cleanOutputArray(data, schema), currentData)) {
-      setCurrentDate(cleanOutputArray(data, schema))
+    if (!!options.autosubmit && !isEqual(cleanOutputArray(data, schema), prevData)) {
       handleSubmit(data => {
         const clean = cleanOutputArray(data, schema)
         onSubmit(clean)
@@ -307,7 +305,7 @@ const Footer = (props) => {
   )
 }
 
-const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaultValue, index, functionalProperty, parent }) => {
+const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaultValue, index, functionalProperty, parent, onAfterChange }) => {
   const classes = useCustomStyle();
   const { formState: { errors, dirtyFields, touchedFields, isSubmitted }, control, trigger, getValues, setValue, watch, register } = useFormContext();
 
@@ -363,17 +361,19 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
   const errorDisplayed = !!error && (isSubmitted || isDirty || isTouched)
 
   const data = watch()
-  const [currentData, setCurrentData] = useState()
+  const currentData = usePrevious(cleanOutputArray(data, schema))
 
   useEffect(() => {
     const newData = cleanOutputArray(data, schema)
-    if (step.onAfterChange && typeof step.onAfterChange === 'function' && !deepEqual(newData, currentData)) {
-      setCurrentData(newData)
-      step.onAfterChange({
+    const onAfterChange = onAfterChange || step.onAfterChange || step.on_after_change
+
+    if (onAfterChange && !deepEqual(newData, currentData)) {
+      onAfterChange({
         entry,
-        value: newData,
+        value: getValues(entry),
+        getValue: e => getValues(e),
+        rawValues: newData,
         setValue,
-        rawValues: getValues(),
         onChange: v => setValue(entry, v)
       })
     }
@@ -385,14 +385,16 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
         setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v)
       }} error={error}>
         <ArrayStep
-          entry={entry} step={step}
+          entry={entry} 
+          step={step}
           defaultValue={step.defaultValue || null}
           disabled={functionalProperty(entry, step.disabled)}
           component={((props, idx) => {
             return (
               <Step
                 entry={`${entry}.${idx}.value`}
-                step={{ ...(schema[realEntry || entry]), render: step.itemRender, onChange: undefined, array: false }}
+                onAfterChange={step.onAfterChange || step.on_after_change}
+                step={{  ...(schema[realEntry || entry]), render: step.itemRender, onChange: undefined, array: false }}
                 schema={schema}
                 inputWrapper={inputWrapper}
                 httpClient={httpClient}

@@ -5,7 +5,7 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css'
 
 import basic from './schema/basic.json';
-import largeForm from './schema/largeForm.json';
+import largeForm from './schema/largeForm';
 import formArray from './schema/formArray';
 import constrainedBasic from './schema/constrainedBasic.json';
 import constraintsWithRef from './schema/constraintsWithRef.json';
@@ -27,11 +27,11 @@ const examples = {
 }
 
 export const Playground = () => {
-  const [schema, setSchema] = useState(JSON.stringify(largeForm, 0, 2))
-  const [realSchema, setRealSchema] = useState(largeForm)
+  const [schema, setSchema] = useState(JSON.stringify(basic, 0, 2))
+  const [realSchema, setRealSchema] = useState(basic)
   const [error, setError] = useState(undefined)
   const [value, setValue] = useState()
-  const [selectedSchema, setSelectedSchema] = useState({ value: largeForm, label: "largeForm" })
+  const [selectedSchema, setSelectedSchema] = useState({ value: basic, label: "basic" })
 
   const ref = useRef()
   const childRef = useRef()
