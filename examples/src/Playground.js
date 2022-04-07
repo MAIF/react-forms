@@ -32,7 +32,6 @@ export const Playground = () => {
   const [error, setError] = useState(undefined)
   const [value, setValue] = useState()
   const [selectedSchema, setSelectedSchema] = useState({ value: basic, label: "basic" })
-
   const ref = useRef()
   const childRef = useRef()
   const formRef = useRef()
@@ -63,25 +62,6 @@ export const Playground = () => {
   }
 
   return (
-    <div className="my-md-4 bd-layout">
-      <nav className="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-        <div className="container-fluid">
-          <span className="navbar-brand">react-forms playground</span>
-          <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div className="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-              <li className="nav-item">
-                <a className="nav-link" href="https://github.com/MAIF/react-forms#readme">Documentation</a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="https://github.com/MAIF/react-forms">Project</a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </nav>
       <div className="container" style={{ marginTop: '70px' }}>
         <em className='tagline px-0 py-2'>Choose a JSON schema below and check the generated form. Check the <a href='https://github.com/MAIF/react-forms'>documentation</a> for more details.</em>
         <div className="d-flex">
@@ -90,7 +70,7 @@ export const Playground = () => {
             <SelectInput
               className="py-2"
               possibleValues={Object.entries(examples)}
-              transformer={([key, value]) => ({ label: key, value })}
+              transformer={([k, v]) => ({ label: k, value:v })}
               value={selectedSchema}
               onChange={e => {
                 setSelectedSchema(e)
@@ -102,8 +82,8 @@ export const Playground = () => {
               onChange={e => {
                 try {
                   setSchema(e)
-                } catch (error) {
-                  console.log(error)
+                } catch (err) {
+                  console.log(err)
                 }
               }}
               value={typeof schema === 'object' ? JSON.stringify(schema, null, 2) : schema}
@@ -160,7 +140,6 @@ export const Playground = () => {
           </div>
         </div>
       </div>
-    </div>
   )
 }
 
