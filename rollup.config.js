@@ -54,7 +54,7 @@ export default [
         targets: [
           {
             src: 'lib',
-            dest: 'examples/node_modules/@maif/react-forms/lib'
+            dest: 'examples/node_modules/@maif/react-forms'
           }
         ],
         verbose: true,

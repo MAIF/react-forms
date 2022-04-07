@@ -596,7 +596,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
 
 const ArrayStep = ({ entry, step, component, disabled }) => {
   const classes = useCustomStyle()
-  const { getValues, setValue, watch, control, trigger, formState } = useFormContext();
+  const { getValues, setValue, control, trigger, formState } = useFormContext();
 
   const values = getValues(entry);
   const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.errors)
@@ -604,7 +604,7 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
   const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.touchedFields)
   const errorDisplayed = !!error && (formState.isSubmitted || isDirty || isTouched)
 
-  console.log(control, entry)
+  console.log(control, entry, getValues())
   const { fields, append, remove } = useFieldArray({
     control, // control props comes from useForm (optional: if you are using FormContext)
     name: entry, // unique name for your Field Array
