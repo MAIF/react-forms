@@ -70,7 +70,7 @@ export const Example = () => {
   - `code`: if the type is `string`, display a code input (draw with [react-ace](https://github.com/securingsincity/react-ace)) (add a props.setRef to get ace editor ref)
   - `singleLineCode`: renders text input with syntax highlighting (draw with [react-ace](https://github.com/securingsincity/react-ace)) (add a props.setRef to get ace editor ref)
   - `markdown`: if the type is `string`, display a markdown input
-  - `text`: if the type is `string`, display a textarea
+  - `textarea`: if the type is `string`, display a textarea
   - `email`: if the type is `string`, display an email input
   - `password`: if the type is `string`, display a password input
   - `hidden`: if the type is `string`, add an hidden input in your form
