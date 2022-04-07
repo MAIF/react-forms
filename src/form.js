@@ -432,7 +432,8 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
             </ControlledInput>
           )
         case format.buttonsSelect:
-        case format.select:
+        case format.select: {
+          console.log({step})
           return (
             <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
               <SelectInput
@@ -440,9 +441,13 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
                 disabled={functionalProperty(entry, step.disabled)}
                 possibleValues={step.options}
                 httpClient={httpClient}
+                isMulti={step.isMulti}
+                createOption={step.createOption}
+                transformer={step.transformer}
               />
             </ControlledInput>
           )
+        }
         default:
           return (
             <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
@@ -464,6 +469,10 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
                 className={classNames(classes.content, { [classes.input__invalid]: errorDisplayed })}
                 possibleValues={step.options}
                 httpClient={httpClient}
+                isMulti={step.isMulti}
+                createOption={step.createOption}
+                onCreateOption={step.onCreateOption}
+                transformer={step.transformer}
               />
             </ControlledInput>
           )
@@ -496,6 +505,10 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
                 className={classNames(classes.flex_grow_1, { [classes.input__invalid]: errorDisplayed })}
                 possibleValues={step.options}
                 httpClient={httpClient}
+                isMulti={step.isMulti}
+                createOption={step.createOption}
+                onCreateOption={step.onCreateOption}
+                transformer={step.transformer}
               />
             </ControlledInput>
           )
