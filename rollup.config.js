@@ -6,8 +6,10 @@ import commonjs from '@rollup/plugin-commonjs'
 import resolve from "@rollup/plugin-node-resolve"
 import { terser } from 'rollup-plugin-terser'
 import copy from 'rollup-plugin-copy'
+import command from 'rollup-plugin-command';
 
 const isDev = process.env.NODE_ENV !== 'production'
+const isYalcActivated = process.env.YALC === 'activated'
 
 export default [
   {
@@ -59,7 +61,8 @@ export default [
         ],
         verbose: true,
         hook: 'closeBundle'
-      })
+      }),
+      isYalcActivated ? command('yalc push') : undefined
     ].filter(f => f),
     external: Object.keys(pkg.peerDependencies || {})
   }

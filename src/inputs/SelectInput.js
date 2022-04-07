@@ -4,7 +4,6 @@ import CreatableSelect from 'react-select/creatable';
 import Select from 'react-select';
 import { option } from '../Option';
 import { deepEqual, isPromise } from '../utils'
-import { format } from '../format';
 import { useCustomStyle } from '../styleContext';
 
 const valueToSelectOption = (value, possibleValues = [], isMulti = false) => {
@@ -111,8 +110,8 @@ export const SelectInput = (props) => {
     }
     return onChange(v)
   }
-
-  if (props.format === format.buttonsSelect) {
+  
+  if (props.buttons) {
     return (
       <div style={{ display: 'flex' }}>
         {values.map((v, idx) => {
