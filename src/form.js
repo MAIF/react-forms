@@ -15,7 +15,7 @@ import { BooleanInput, Collapse, SelectInput, ObjectInput, CodeInput, MarkdownIn
 import { getShapeAndDependencies } from './resolvers/index';
 import { option } from './Option'
 import { ControlledInput } from './controlledInput';
-import { deepEqual } from './utils';
+import { deepEqual, arrayFlatten } from './utils';
 
 const usePrevious = (value) => {
   // The ref object is a generic container whose current property is mutable ...
@@ -94,22 +94,30 @@ const getDefaultValues = (flow, schema, value) => {
 }
 
 
-const cleanInputArray = (obj, defaultValues, subSchema) => {
-  return Object.entries(subSchema).reduce((acc, [key, step]) => {
-    let v
-    if (obj)
-      v = obj[key]
-    if (!v && defaultValues)
-      v = defaultValues[key]
+const cleanInputArray = (obj, defaultValues, flow, subSchema) => {
+  const realFlow = option(flow)
+    .map(f => f.map(v => v.flow || v))
+    .map(arrayFlatten)
+    .getOrElse(Object.keys(subSchema))
 
-    if (step.array && !step.render) {
-      return { ...acc, [key]: (v || []).map(value => ({ value })) }
-    } else if (typeof v === 'object' && !(v instanceof Date) && !Array.isArray(v)) {
-      return { ...acc, [key]: cleanInputArray(v, defaultValues, subSchema[key]?.schema || {}) }
-    } else {
-      return { ...acc, [key]: v }
-    }
-  }, obj)
+
+  return Object.entries(subSchema)
+    .filter(([key]) => realFlow.includes(key))
+    .reduce((acc, [key, step]) => {
+      let v
+      if (obj)
+        v = obj[key]
+      if (!v && defaultValues)
+        v = defaultValues[key]
+
+      if (step.array && !step.render) {
+        return { ...acc, [key]: (v || []).map(value => ({ value })) }
+      } else if (typeof v === 'object' && !(v instanceof Date) && !Array.isArray(v)) {
+        return { ...acc, [key]: cleanInputArray(v, defaultValues, subSchema[key]?.flow, subSchema[key]?.schema || {}) }
+      } else {
+        return { ...acc, [key]: v }
+      }
+    }, obj)
 }
 
 const cleanOutputArray = (obj, subSchema) => {
@@ -176,7 +184,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 
   const methods = useForm({
     resolver: (data, context, options) => yupResolver(resolver(data))(data, context, options),
-    defaultValues: cleanInputArray(value, defaultValues, schema),
+    defaultValues: cleanInputArray(value, defaultValues, flow, schema),
     shouldFocusError: false,
     mode: 'onChange'
   });
@@ -189,12 +197,12 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 
   useEffect(() => {
     if (value) {
-      reset(cleanInputArray(value, defaultValues, schema))
+      reset(cleanInputArray(value, defaultValues, flow, schema))
     }
   }, [value, reset])
 
   useEffect(() => {
-    reset(cleanInputArray(value, defaultValues, schema))
+    reset(cleanInputArray(value, defaultValues, flow, schema))
   }, [schema])
 
   const data = watch();
@@ -433,7 +441,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
           )
         case format.buttonsSelect:
         case format.select: {
-          console.log({step})
+          console.log({ step })
           return (
             <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
               <SelectInput
