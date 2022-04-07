@@ -1,0 +1,99 @@
+{
+  "string": {
+    "type": "string",
+    "placeholder": "Your placeholder"
+  },
+  "select": {
+    "type": "string",
+    "format": "select",
+    "options": ["option 1", "option 2", "option 3"]
+  },
+  "buttonsSelect": {
+    "type": "string",
+    "format": "buttons",
+    "options": ["option 1", "option 2", "option 3","option 4","option 5"]
+  },
+  "email": {
+    "type": "string",
+    "format": "email"
+  },
+  "password": {
+    "type": "string",
+    "format": "password"
+  },
+  "textarea": {
+    "type": "string",
+    "format": "textarea"
+  },
+  "singleLineCode": {
+    "type": "string",
+    "format": "singleLineCode",
+    "defaultValue":"const person = {name:'Bob',age:12}"
+  },
+  "markdown": {
+    "type": "string",
+    "format": "markdown",
+    "defaultValue": "TEST\n- un\n- deux\n- trois"
+  },
+  "array-of-string": {
+    "type": "string",
+    "array": true
+  },
+  "hidden": {
+    "type": "string",
+    "format":"hidden",
+    "defaultValue": "the hidden value"
+  },
+  "number": {
+    "type": "number"
+  },
+  "array-of-number": {
+    "type": "number",
+    "array": true
+  },
+  "buttonsSelect-number": {
+    "type": "number",
+    "format": "buttons",
+    "options": [1,2,3,4,5,6,7,8,9,10]
+  },
+  "date": {
+    "type": "date"
+  },
+  "array-of-date": {
+    "type": "date",
+    "array": true
+  },
+  "bool": {
+    "type": "bool"
+  },
+  "file": {
+    "type": "file"
+  },
+  "object": {
+    "type": "object"
+  },
+  "code": {
+    "type": "object",
+    "format": "code"
+  },
+  "form": {
+    "type": "object",
+    "format": "form",
+    "label":"Personne",
+    "schema": {
+      "name": {
+        "type": "string",
+        "placeholder": "Your name"
+      },
+      "age": {
+        "type": "number",
+        "placeholder": "Your age"
+      }
+    }
+  },
+  "buttonsSelect-object": {
+    "type": "object",
+    "format": "buttons",
+    "options": [{"object":1},{"object":2},{"object":3}]
+  }
+}
