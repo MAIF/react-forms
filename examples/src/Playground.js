@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, Profiler } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Form, CodeInput, SelectInput } from '@maif/react-forms'
 
 import './App.css';
@@ -124,40 +124,30 @@ export const Playground = () => {
             {error && <span style={{ color: 'tomato' }}>{error}</span>}
             <div style={{ backgroundColor: '#ececec', padding: '10px 15px' }}>
               <WrapperError ref={childRef}>
-                <Profiler id="Navigation" onRender={(id, // la prop "id" du Profiler dont l’arborescence vient d’être mise à jour
-                  phase, // soit "mount" (si on est au montage) soit "update" (pour une mise à jour)
-                  actualDuration, // temps passé à faire le rendu de la mise à jour finalisée
-                  baseDuration, // temps estimé du rendu pour l’ensemble du sous-arbre sans mémoïsation
-                  startTime, // horodatage du début de rendu de cette mise à jour par React
-                  commitTime, // horodatage de la finalisation de cette mise à jour par React
-                  interactions) => {
-                  console.log(phase, actualDuration, baseDuration, startTime)
-                }}>
-                  <Form
-                    ref={formRef}
-                    schema={realSchema}
-                    value={value}
-                    flow={Object.keys(realSchema)}
-                    onSubmit={d => alert(JSON.stringify(d, null, 2))}
-                    options={{
-                      watch: unsaved => {
-                        console.log(unsaved)
-                        ref?.current?.dispatch({
-                          changes: {
-                            from: 0,
-                            to: ref.current.state.doc.length,
-                            insert: JSON.stringify(unsaved, null, 2)
-                          }
-                        })
-                      },
-                      actions: {
-                        submit: {
-                          label: 'Try it'
+                <Form
+                  ref={formRef}
+                  schema={realSchema}
+                  value={value}
+                  flow={Object.keys(realSchema)}
+                  onSubmit={d => alert(JSON.stringify(d, null, 2))}
+                  options={{
+                    watch: unsaved => {
+                      console.log(unsaved)
+                      ref?.current?.dispatch({
+                        changes: {
+                          from: 0,
+                          to: ref.current.state.doc.length,
+                          insert: JSON.stringify(unsaved, null, 2)
                         }
+                      })
+                    },
+                    actions: {
+                      submit: {
+                        label: 'Try it'
                       }
-                    }}
-                  />
-                </Profiler>
+                    }
+                  }}
+                />
               </WrapperError>
             </div>
             <div className='py-2'>

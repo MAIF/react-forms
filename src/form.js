@@ -103,7 +103,7 @@ const cleanInputArray = (obj, defaultValues, subSchema) => {
 
     if (step.array && !step.render) {
       return { ...acc, [key]: (v || []).map(value => ({ value })) }
-    } else if (!!v && typeof v === 'object' && !(v instanceof Date) && !Array.isArray(v)) {
+    } else if (typeof v === 'object' && !(v instanceof Date) && !Array.isArray(v)) {
       return { ...acc, [key]: cleanInputArray(v, defaultValues, subSchema[key]?.schema || {}) }
     } else {
       return { ...acc, [key]: v }
@@ -193,7 +193,6 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
   }, [value, reset])
 
   useEffect(() => {
-    console.log(cleanInputArray(value, defaultValues, schema))
     reset(cleanInputArray(value, defaultValues, schema))
   }, [schema])
 
@@ -604,7 +603,6 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
   const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.touchedFields)
   const errorDisplayed = !!error && (formState.isSubmitted || isDirty || isTouched)
 
-  console.log(control, entry, getValues())
   const { fields, append, remove } = useFieldArray({
     control, // control props comes from useForm (optional: if you are using FormContext)
     name: entry, // unique name for your Field Array
