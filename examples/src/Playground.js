@@ -77,7 +77,7 @@ export const Playground = () => {
                 setSchema(e)
               }}
             />
-            <CodeInput
+            {/* <CodeInput
               mode="javascript"
               onChange={e => {
                 try {
@@ -87,9 +87,9 @@ export const Playground = () => {
                 }
               }}
               value={typeof schema === 'object' ? JSON.stringify(schema, null, 2) : schema}
-            />
+            /> */}
             <label>Default value</label>
-            <CodeInput
+            {/* <CodeInput
               mode="json"
               onChange={e => {
                 try {
@@ -97,7 +97,7 @@ export const Playground = () => {
                 } catch (_) { }
               }}
               value={typeof value === 'object' ? JSON.stringify(value, null, 2) : value}
-            />
+            /> */}
           </div>
           <div className='col-4 px-2'>
             <label>Generated form</label>
@@ -110,32 +110,32 @@ export const Playground = () => {
                   value={value}
                   flow={Object.keys(realSchema)}
                   onSubmit={d => alert(JSON.stringify(d, null, 2))}
-                  options={{
-                    watch: unsaved => {
-                      ref?.current?.dispatch({
-                        changes: {
-                          from: 0,
-                          to: ref.current.state.doc.length,
-                          insert: JSON.stringify(unsaved, null, 2)
-                        }
-                      })
-                    },
-                    actions: {
-                      submit: {
-                        label: 'Try it'
-                      }
-                    }
-                  }}
+                  // options={{
+                  //   watch: unsaved => {
+                  //     ref?.current?.dispatch({
+                  //       changes: {
+                  //         from: 0,
+                  //         to: ref.current.state.doc.length,
+                  //         insert: JSON.stringify(unsaved, null, 2)
+                  //       }
+                  //     })
+                  //   },
+                  //   actions: {
+                  //     submit: {
+                  //       label: 'Try it'
+                  //     }
+                  //   }
+                  // }}
                 />
               </WrapperError>
             </div>
             <div className='py-2'>
               <label>Form state</label>
-              <CodeInput
+              {/* <CodeInput
                 setRef={r => ref.current = r}
                 showGutter={false}
                 mode="json"
-              />
+              /> */}
             </div>
           </div>
         </div>

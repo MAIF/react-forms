@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useImperativeHandle } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup';
 import classNames from 'classnames';
 import { HelpCircle, Loader, Upload, ChevronDown, ChevronUp, Trash2 } from 'react-feather';
-import { useForm, useFormContext, Controller, useFieldArray, FormProvider } from 'react-hook-form';
+import { useForm, useFormContext, Controller, useFieldArray, FormProvider, useWatch } from 'react-hook-form';
 import { DatePicker } from 'react-rainbow-components';
 import ReactToolTip from 'react-tooltip';
 import { v4 as uuid } from 'uuid';
@@ -197,28 +197,25 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 
   useEffect(() => {
     if (value) {
+      console.log('reset from value/reset effect')
       reset(cleanInputArray(value, defaultValues, flow, schema))
     }
   }, [value, reset])
 
   useEffect(() => {
+    console.log('reset from schema effect')
     reset(cleanInputArray(value, defaultValues, flow, schema))
   }, [schema])
 
   const data = watch();
-  const prevData = usePrevious(cleanOutputArray(data, schema))
-  useEffect(() => {
-    //todo: with debounce
-    if (!!options.autosubmit && !isEqual(cleanOutputArray(data, schema), prevData)) {
-      handleSubmit(data => {
-        const clean = cleanOutputArray(data, schema)
-        onSubmit(clean)
-      }, onError)()
-    }
-  }, [data])
+
+  if (!!options.autosubmit) {
+    handleSubmit(data => onSubmit(cleanOutputArray(data, schema)), onError)()
+  }
 
   if (options.watch) {
     if (typeof options.watch === 'function') {
+      console.log('call watch')
       options.watch(cleanOutputArray(data, schema))
     } else {
       console.group('react-form watch')
@@ -369,23 +366,19 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
   const errorDisplayed = !!error && (isSubmitted || isDirty || isTouched)
 
   const data = watch()
-  const currentData = usePrevious(cleanOutputArray(data, schema))
+  const newData = cleanOutputArray(data, schema)
+  const onAfterChangeFunc = onAfterChange || step.onAfterChange || step.on_after_change
 
-  useEffect(() => {
-    const newData = cleanOutputArray(data, schema)
-    const onAfterChange = onAfterChange || step.onAfterChange || step.on_after_change
-
-    if (onAfterChange && !deepEqual(newData, currentData)) {
-      onAfterChange({
-        entry,
-        value: getValues(entry),
-        getValue: e => getValues(e),
-        rawValues: newData,
-        setValue,
-        onChange: v => setValue(entry, v)
-      })
-    }
-  }, [data])
+  if (onAfterChangeFunc) {
+    onAfterChangeFunc({
+      entry,
+      value: getValues(entry),
+      getValue: e => getValues(e),
+      rawValues: newData,
+      setValue,
+      onChange: v => setValue(entry, v)
+    })
+  }
 
   if (step.array) {
     return (
@@ -393,7 +386,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
         setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v)
       }} error={error}>
         <ArrayStep
-          entry={entry} 
+          entry={entry}
           step={step}
           defaultValue={step.defaultValue || null}
           disabled={functionalProperty(entry, step.disabled)}
@@ -402,7 +395,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
               <Step
                 entry={`${entry}.${idx}.value`}
                 onAfterChange={step.onAfterChange || step.on_after_change}
-                step={{  ...(schema[realEntry || entry]), render: step.itemRender, onChange: undefined, array: false }}
+                step={{ ...(schema[realEntry || entry]), render: step.itemRender, onChange: undefined, array: false }}
                 schema={schema}
                 inputWrapper={inputWrapper}
                 httpClient={httpClient}
@@ -443,7 +436,6 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
           )
         case format.buttonsSelect:
         case format.select: {
-          console.log({ step })
           return (
             <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
               <SelectInput
