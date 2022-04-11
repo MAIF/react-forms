@@ -43,6 +43,8 @@ export const ControlledInput = ({ defaultValue, step, entry, children, component
     }
 
     const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], errors)
+    
+    console.log("render controlled input " + entry)
 
     return (
         <CustomizableInput

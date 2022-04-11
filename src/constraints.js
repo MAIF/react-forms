@@ -60,7 +60,7 @@ export const maxSize = (ref, message = `size is excedeed ${ref}`) => (r) => {
 //mixed
 export const nullable = () => (r) => r.nullable().optional().transform(v => {
   const { type } = r.describe()
-  switch (type) { 
+  switch (type) {
     case 'string':
     case 'number':
       return (v || '').toString().length <= 0 ? null : v
@@ -85,6 +85,10 @@ export const when = (ref, test, then = [], otherwise = []) => (r, key, dependenc
   return r.when(ref, { is: test, then: thenReducer, otherwise: otherWiseReducer })
 }
 export const oneOf = (arrayOfValues, message = `This value must be one of ${arrayOfValues.join(', ')}`) => (r) => r.oneOf(arrayOfValues.map(maybeRef), message)
+
+export const blacklist = (arrayOfValues, message = `This value can't include the following values ${arrayOfValues.join(', ')}`) => (r) => r.test('blacklist' + Date.now(), message, value => {
+  return !arrayOfValues.some(f => value.includes(f))
+})
 
 export const ref = (ref) => yup.ref(ref)
 const maybeRef = (x) => x?.ref ? ref(x.ref) : x
@@ -112,6 +116,7 @@ export const jsonConstraints = {
   test: (c) => test(c.name, c.message, c.test),
   when: ({ ref, test, then = [], otherwise = [] }) => when(ref, test, then, otherwise),
   oneOf: ({ arrayOfValues, message = `This value must be one of ${arrayOfValues.join(', ')}` }) => oneOf(arrayOfValues, message),
+  blacklist: ({ arrayOfValues, message = `This value can't include the following values ${arrayOfValues.join(', ')}` }) => blacklist(arrayOfValues, message),
   ref: (val) => ref(val.ref),
   nullable: () => nullable()
 }

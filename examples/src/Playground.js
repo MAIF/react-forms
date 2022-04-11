@@ -77,7 +77,7 @@ export const Playground = () => {
                 setSchema(e)
               }}
             />
-            {/* <CodeInput
+            <CodeInput
               mode="javascript"
               onChange={e => {
                 try {
@@ -87,9 +87,9 @@ export const Playground = () => {
                 }
               }}
               value={typeof schema === 'object' ? JSON.stringify(schema, null, 2) : schema}
-            /> */}
+            />
             <label>Default value</label>
-            {/* <CodeInput
+            <CodeInput
               mode="json"
               onChange={e => {
                 try {
@@ -97,7 +97,7 @@ export const Playground = () => {
                 } catch (_) { }
               }}
               value={typeof value === 'object' ? JSON.stringify(value, null, 2) : value}
-            /> */}
+            />
           </div>
           <div className='col-4 px-2'>
             <label>Generated form</label>

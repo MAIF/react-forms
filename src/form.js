@@ -154,6 +154,22 @@ export const validate = (flow, schema, value) => {
     })
 }
 
+const Watcher = ({ options, control, schema }) => {
+  const data = useWatch({ control });
+
+  if (options.watch) {
+    if (typeof options.watch === 'function') {
+      options.watch(cleanOutputArray(data, schema))
+    } else {
+      console.group('react-form watch')
+      console.log(cleanOutputArray(data, schema))
+      console.groupEnd()
+    }
+  }
+
+  return null
+}
+
 export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSubmit, onError = () => { }, footer, style = {}, className, options = {} }, ref) => {
   const classes = useCustomStyle(style)
   const formFlow = flow || Object.keys(schema)
@@ -186,42 +202,28 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
     resolver: (data, context, options) => yupResolver(resolver(data))(data, context, options),
     defaultValues: cleanInputArray(value, defaultValues, flow, schema),
     shouldFocusError: false,
-    mode: 'onChange'
+    mode: 'onSubmit' // onChange triggers re-rendering
   });
 
-  const { handleSubmit, formState: { errors, dirtyFields }, reset, watch, trigger, getValues } = methods
+  const { handleSubmit, formState: { errors, dirtyFields }, reset, trigger, getValues } = methods
 
   useEffect(() => {
+    console.log('re-render cauz trigger')
     trigger()
   }, [trigger])
 
   useEffect(() => {
-    if (value) {
-      console.log('reset from value/reset effect')
-      reset(cleanInputArray(value, defaultValues, flow, schema))
-    }
+    console.log('re-render cauz value/reset changed')
+    reset(cleanInputArray(value, defaultValues, flow, schema))
   }, [value, reset])
 
   useEffect(() => {
-    console.log('reset from schema effect')
+    console.log('re-render cauz schema changed')
     reset(cleanInputArray(value, defaultValues, flow, schema))
   }, [schema])
 
-  const data = watch();
-
   if (!!options.autosubmit) {
     handleSubmit(data => onSubmit(cleanOutputArray(data, schema)), onError)()
-  }
-
-  if (options.watch) {
-    if (typeof options.watch === 'function') {
-      console.log('call watch')
-      options.watch(cleanOutputArray(data, schema))
-    } else {
-      console.group('react-form watch')
-      console.log(cleanOutputArray(data, schema))
-      console.groupEnd()
-    }
   }
 
   const functionalProperty = (entry, prop) => {
@@ -243,7 +245,8 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
   }));
 
   return (
-    <FormProvider {...methods} >
+    <FormProvider {...methods}>
+      <Watcher options={options} control={methods.control} schema={schema} />
       <form className={className || `${classes.pr_15} ${classes.w_100}`} onSubmit={handleSubmit(data => {
         const clean = cleanOutputArray(data, schema)
         onSubmit(clean)
@@ -264,6 +267,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
             .map(visible => {
               switch (typeof visible) {
                 case 'object':
+                  console.log('watch from visibleStep')
                   const value = watch(step.visible.ref);
                   return option(step.visible.test).map(test => test(value, idx)).getOrElse(value)
                 case 'boolean':
@@ -314,6 +318,8 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
   const classes = useCustomStyle();
   const { formState: { errors, dirtyFields, touchedFields, isSubmitted }, control, trigger, getValues, setValue, watch, register } = useFormContext();
 
+  console.log("re-render : " + entry)
+
   if (entry && typeof entry === 'object') {
     const errored = entry.flow.some(step => !!errors[step] && (dirtyFields[step] || touchedFields[step]))
     return (
@@ -334,6 +340,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
             .map(visible => {
               switch (typeof visible) {
                 case 'object':
+                  console.log("watch of collapse")
                   const value = watch(visible.ref);
                   return option(visible.test).map(test => test(value, index)).getOrElse(value)
                 case 'boolean':
@@ -365,19 +372,30 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
   const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], touchedFields)
   const errorDisplayed = !!error && (isSubmitted || isDirty || isTouched)
 
-  const data = watch()
-  const newData = cleanOutputArray(data, schema)
   const onAfterChangeFunc = onAfterChange || step.onAfterChange || step.on_after_change
 
   if (onAfterChangeFunc) {
-    onAfterChangeFunc({
-      entry,
-      value: getValues(entry),
-      getValue: e => getValues(e),
-      rawValues: newData,
-      setValue,
-      onChange: v => setValue(entry, v)
-    })
+    const data = watch()
+
+    const d = entry
+      .replace('[', '.').replace(']', '')
+      .split('.')
+      .reduce((acc, curr) => acc && acc[curr], data) || {}
+
+    const currentData = usePrevious(cleanOutputArray(d, schema))
+
+    const newData = cleanOutputArray(d, schema)
+
+    if (!deepEqual(newData, currentData))
+      onAfterChangeFunc({
+        entry,
+        previousValue: currentData,
+        value: getValues(entry),
+        getValue: e => getValues(e),
+        rawValues: newData,
+        setValue,
+        onChange: v => setValue(entry, v)
+      })
   }
 
   if (step.array) {
@@ -539,7 +557,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
                   try {
                     v = JSON.parse(e)
                   } catch (err) {
-                    v = {}
+                    v = e
                   }
                   field.onChange(v)
                   option(step.onChange)
