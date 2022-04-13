@@ -4,14 +4,13 @@ import { option } from '../Option'
 import { jsonConstraints } from '../constraints';
 
 const resolvers = {
-  [type.string]: (typeErrorMessage) => yup.string().typeError(typeErrorMessage || 'Value must be a string'),
-  [type.number]: (typeErrorMessage) => yup.number().transform(v => {
-    return isNaN(v) ? null : v
-  })
+  [type.string]: (typeErrorMessage) => yup.string().nullable().optional().typeError(typeErrorMessage || 'Value must be a string'),
+  [type.number]: (typeErrorMessage) => yup.number().nullable().optional()
+    .transform(v => { return isNaN(v) ? null : v})
     .typeError(typeErrorMessage || 'Value must be a number'),
-  [type.bool]: () => yup.bool(),
+  [type.bool]: () => yup.bool().nullable().optional(),
   [type.object]: () => yup.object(),
-  [type.date]: (typeErrorMessage) => yup.date().typeError(typeErrorMessage || 'Value must be a date'),
+  [type.date]: (typeErrorMessage) => yup.date().nullable().optional().typeError(typeErrorMessage || 'Value must be a date'),
   [type.file]: () => yup.mixed()
 }
 

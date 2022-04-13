@@ -58,20 +58,6 @@ export const maxSize = (ref, message = `size is excedeed ${ref}`) => (r) => {
 }
 
 //mixed
-export const nullable = () => (r) => r.nullable().optional().transform(v => {
-  const { type } = r.describe()
-  switch (type) {
-    case 'string':
-    case 'number':
-      return (v || '').toString().length <= 0 ? null : v
-    case 'object':
-      return Object.keys(v || {}).length === 0 ? null : v
-    default:
-      return v
-  }
-
-  return v
-})
 export const test = (name, message = 'Test failed', test) => (r) => r.test(name, message, test)
 export const when = (ref, test, then = [], otherwise = []) => (r, key, dependencies) => {
   // dependencies.push([key, ref])
@@ -117,6 +103,5 @@ export const jsonConstraints = {
   when: ({ ref, test, then = [], otherwise = [] }) => when(ref, test, then, otherwise),
   oneOf: ({ arrayOfValues, message = `This value must be one of ${arrayOfValues.join(', ')}` }) => oneOf(arrayOfValues, message),
   blacklist: ({ arrayOfValues, message = `This value can't include the following values ${arrayOfValues.join(', ')}` }) => blacklist(arrayOfValues, message),
-  ref: (val) => ref(val.ref),
-  nullable: () => nullable()
+  ref: (val) => ref(val.ref)
 }
