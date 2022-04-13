@@ -114,7 +114,7 @@ const cleanInputArray = (obj, defaultValues, flow, subSchema) => {
       } else if (typeof v === 'object' && !(v instanceof Date) && !Array.isArray(v)) {
         return { ...acc, [key]: cleanInputArray(v, defaultValues, subSchema[key]?.flow, subSchema[key]?.schema || {}) }
       } else {
-        return { ...acc, [key]: v === undefined ? (Array.isArray(v) ? [] : null) : v }
+        return { ...acc, [key]: v === undefined ? (Array.isArray(v) ? [] : step.type === type.object ? {} : null) : v }
       }
     }, obj)
 }
@@ -201,8 +201,12 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 
   const resolver = (rawData) => {
     const { shape, dependencies } = getShapeAndDependencies(formFlow, schema, [], rawData);
-    const resolver = yup.object().shape(shape, dependencies);
 
+    
+    
+    const resolver = yup.object().shape(shape, dependencies);
+    
+    console.debug({rawData, shape, resolver})
     return resolver;
   }
 
@@ -414,6 +418,10 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
   }
 
   if (step.array) {
+    console.log({
+      values: getValues(),
+      entry
+    })
     return (
       <CustomizableInput render={step.render} field={{
         setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v)

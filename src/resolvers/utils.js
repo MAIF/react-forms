@@ -9,7 +9,7 @@ const resolvers = {
     .transform(v => { return isNaN(v) ? null : v})
     .typeError(typeErrorMessage || 'Value must be a number'),
   [type.bool]: () => yup.bool().nullable().optional(),
-  [type.object]: () => yup.object(),
+  [type.object]: () => yup.object().nullable().optional(),
   [type.date]: (typeErrorMessage) => yup.date().nullable().optional().typeError(typeErrorMessage || 'Value must be a date'),
   [type.file]: () => yup.mixed()
 }
@@ -32,6 +32,9 @@ export const buildSubResolver = (props, key, dependencies, rawData) => {
       return jsonOrFunctionConstraint(constraint, resolver, key, dependencies)
     }, arrayResolver)
   } else if (props.type === type.object && props.schema) {
+    if (!Object.keys(props.schema).length) {
+      return yup.object()
+    }
     const subResolver = getShapeAndDependencies(props.flow || Object.keys(props.schema), props.schema, dependencies, rawData);
     return constraints.reduce((resolver, constraint) => {
       return jsonOrFunctionConstraint(constraint, resolver, key, dependencies)
@@ -72,12 +75,20 @@ const jsonOrFunctionConstraint = (constraint, resolver, key, dependencies) => {
 }
 
 export const getShapeAndDependencies = (flow, schema, dependencies = [], rawData) => {
+  if (!Object.keys(schema).length) {
+    return { shape: yup.object().shape({}), dependencies }
+  }
   const shape = (flow || Object.keys(schema))
     .reduce((resolvers, key) => {
 
       if (typeof key === 'object') {
         return { ...resolvers, ...getShapeAndDependencies(key.flow, schema, dependencies, rawData).shape }
       }
+
+      if (!schema[key]) {
+        return resolvers
+      }
+
       const resolver = buildSubResolver(schema[key], key, dependencies, rawData);
       return { ...resolvers, [key]: resolver }
     }, {})
