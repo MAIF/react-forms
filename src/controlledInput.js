@@ -56,12 +56,10 @@ export const ControlledInput = ({ defaultValue, step, entry, children, component
             option(step.onChange)
                 .map(onChange => onChange({ rawValues: getValues(), value, setValue }))
         },
-        value: field.value || ''
+        value: field.value
     }
 
     const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], errors)
-
-    // console.log("CONTROLLED_INPUT" + entry + " - value : " + JSON.stringify(field.value, null, 4))
 
     return <CustomizableInput
         render={step.render}

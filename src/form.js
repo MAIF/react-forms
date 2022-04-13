@@ -206,7 +206,6 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
     
     const resolver = yup.object().shape(shape, dependencies);
     
-    console.debug({rawData, shape, resolver})
     return resolver;
   }
 
@@ -220,11 +219,9 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
   const { handleSubmit, formState: { errors, dirtyFields }, reset, trigger, getValues, watch } = methods
 
   useEffect(() => {
-    console.log('re-render cauz trigger')
     trigger()
 
     return () => {
-      console.log("ça demonte")
       reset(null)
     }
   }, [])
@@ -234,8 +231,6 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 
   useEffect(() => {
     if (!deepEqual(value, prev) || !deepEqual(schema, prevSchema)) {
-      console.log('re-render cauz value or schema changed')
-      console.log(value, prev)
       reset({ ...cleanInputArray(value, defaultValues, flow, schema) })
     }
   }, [value, schema])
@@ -286,7 +281,6 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
             .map(visible => {
               switch (typeof visible) {
                 case 'object':
-                  console.log('watch from visibleStep')
                   const value = watch(step.visible.ref);
                   return option(step.visible.test).map(test => test(value, idx)).getOrElse(value)
                 case 'boolean':
@@ -337,8 +331,6 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
   const classes = useCustomStyle();
   const { formState: { errors, dirtyFields, touchedFields, isSubmitted }, control, trigger, getValues, setValue, watch, register } = useFormContext();
 
-  // console.log("re-render : " + JSON.stringify(entry) + JSON.stringify(getValues()))
-
   if (entry && typeof entry === 'object') {
     const errored = entry.flow.some(step => !!errors[step] && (dirtyFields[step] || touchedFields[step]))
     return (
@@ -359,7 +351,6 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
             .map(visible => {
               switch (typeof visible) {
                 case 'object':
-                  console.log("watch of collapse")
                   const value = watch(visible.ref);
                   return option(visible.test).map(test => test(value, index)).getOrElse(value)
                 case 'boolean':
@@ -418,10 +409,6 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
   }
 
   if (step.array) {
-    console.log({
-      values: getValues(),
-      entry
-    })
     return (
       <CustomizableInput render={step.render} field={{
         setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v)

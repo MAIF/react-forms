@@ -228,6 +228,16 @@ export const style = {
     borderRadius: "20px",
     display: "flex",
     marginTop: "10px",
+    backgroundColor: "#dc3545",
+    border: "1px solid #dc3545",
+    justifyContent: "flex-start"
+  },
+  content_switch_button_null: {
+    width: "35px",
+    height: "22px",
+    borderRadius: "20px",
+    display: "flex",
+    marginTop: "10px",
     backgroundColor: "#fff",
     border: "1px solid #dfdfdf",
     justifyContent: "flex-start"
@@ -242,6 +252,15 @@ export const style = {
     borderRadius: "20px"
   },
   switch_button_off: {
+    backgroundColor: "#fff",
+    borderRadius: "20px",
+    cursor: "pointer",
+    width: "20px",
+    height: "20px",
+    border: "1px solid #dfdfdf",
+    boxShadow: "1px 0px 5px 0px rgba(0, 0, 0, 0.3)"
+  }, 
+  switch_button_null: {
     backgroundColor: "#fff",
     borderRadius: "20px",
     cursor: "pointer",
