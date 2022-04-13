@@ -76,7 +76,7 @@ const CustomizableInput = props => {
   return props.children
 }
 
-const defaultVal = (value, t, array, defaultValue) => {
+const defaultVal = (value, array, defaultValue) => {
   if (!!defaultValue) return defaultValue
   if (!!array) return []
   return value
@@ -89,7 +89,7 @@ const getDefaultValues = (flow, schema, value) => {
     }
     const entry = schema[key]
     if (!entry) { return acc }
-    return { ...acc, [key]: defaultVal(value ? value[key] : null, entry.type, entry.array || entry.isMulti, entry.defaultValue) }
+    return { ...acc, [key]: defaultVal(value ? value[key] : null, entry.array || entry.isMulti, entry.defaultValue) }
   }, {})
 }
 
@@ -100,14 +100,13 @@ const cleanInputArray = (obj, defaultValues, flow, subSchema) => {
     .map(arrayFlatten)
     .getOrElse(Object.keys(subSchema))
 
-
   return Object.entries(subSchema)
     .filter(([key]) => realFlow.includes(key))
     .reduce((acc, [key, step]) => {
       let v
       if (obj)
         v = obj[key]
-      if (!v && defaultValues)
+      if (((step.type === type.bool && v === null) || (step.type !== type.bool && !v)) && defaultValues)
         v = defaultValues[key]
 
       if (step.array && !step.render) {
@@ -115,14 +114,13 @@ const cleanInputArray = (obj, defaultValues, flow, subSchema) => {
       } else if (typeof v === 'object' && !(v instanceof Date) && !Array.isArray(v)) {
         return { ...acc, [key]: cleanInputArray(v, defaultValues, subSchema[key]?.flow, subSchema[key]?.schema || {}) }
       } else {
-        return { ...acc, [key]: v }
+        return { ...acc, [key]: v === undefined ? (Array.isArray(v) ? [] : null) : v }
       }
     }, obj)
 }
 
 const cleanOutputArray = (obj, subSchema) => {
   return Object.entries(obj).reduce((acc, curr) => {
-
     const [key, v] = curr;
 
     if (Array.isArray(v)) {
@@ -131,6 +129,7 @@ const cleanOutputArray = (obj, subSchema) => {
         .map(s => s[key])
         .map(entry => !!entry.array && !entry.render)
         .getOrElse(false)
+
       if (isArray) {
         return { ...acc, [key]: v.map(({ value }) => value) }
       }
@@ -138,7 +137,7 @@ const cleanOutputArray = (obj, subSchema) => {
     } else if (!!v && typeof v === 'object' && !(v instanceof (Date) && !Array.isArray(v))) {
       return { ...acc, [key]: cleanOutputArray(v, subSchema[key]?.schema || {}) }
     } else {
-      return { ...acc, [key]: v === undefined ? null : v }
+      return { ...acc, [key]: v }
     }
   }, {})
 }
@@ -154,8 +153,18 @@ export const validate = (flow, schema, value) => {
     })
 }
 
-const Watcher = ({ options, control, schema }) => {
-  const data = useWatch({ control });
+const Watcher = ({ options, control, schema, onSubmit, handleSubmit, getValues, watch }) => {
+  const data = useWatch({ control })
+  const prev = usePrevious(data)
+
+  useEffect(() => {
+    if (!!options.autosubmit) {
+      if (!deepEqual(data, prev))
+        handleSubmit(() => {
+          onSubmit(cleanOutputArray(data, schema))
+        })()
+    }
+  }, [data])
 
   if (options.watch) {
     if (typeof options.watch === 'function') {
@@ -188,7 +197,6 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
   }
 
   const defaultValues = getDefaultValues(formFlow, schema, value);
-
   //FIXME: get real schema through the switch
 
   const resolver = (rawData) => {
@@ -202,29 +210,31 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
     resolver: (data, context, options) => yupResolver(resolver(data))(data, context, options),
     defaultValues: cleanInputArray(value, defaultValues, flow, schema),
     shouldFocusError: false,
-    mode: 'onSubmit' // onChange triggers re-rendering
+    mode: 'onChange'
   });
 
-  const { handleSubmit, formState: { errors, dirtyFields }, reset, trigger, getValues } = methods
+  const { handleSubmit, formState: { errors, dirtyFields }, reset, trigger, getValues, watch } = methods
 
   useEffect(() => {
     console.log('re-render cauz trigger')
     trigger()
-  }, [trigger])
+
+    return () => {
+      console.log("ça demonte")
+      reset(null)
+    }
+  }, [])
+
+  const prev = usePrevious(value)
+  const prevSchema = usePrevious(schema)
 
   useEffect(() => {
-    console.log('re-render cauz value/reset changed')
-    reset(cleanInputArray(value, defaultValues, flow, schema))
-  }, [value, reset])
-
-  useEffect(() => {
-    console.log('re-render cauz schema changed')
-    reset(cleanInputArray(value, defaultValues, flow, schema))
-  }, [schema])
-
-  if (!!options.autosubmit) {
-    handleSubmit(data => onSubmit(cleanOutputArray(data, schema)), onError)()
-  }
+    if (!deepEqual(value, prev) || !deepEqual(schema, prevSchema)) {
+      console.log('re-render cauz value or schema changed')
+      console.log(value, prev)
+      reset({ ...cleanInputArray(value, defaultValues, flow, schema) })
+    }
+  }, [value, schema])
 
   const functionalProperty = (entry, prop) => {
     if (typeof prop === 'function') {
@@ -239,14 +249,19 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
       const clean = cleanOutputArray(data, schema)
       onSubmit(clean)
     }, onError)(),
-    rawData: () => cleanOutputArray(data, schema),
     trigger,
     methods
   }));
 
   return (
     <FormProvider {...methods}>
-      <Watcher options={options} control={methods.control} schema={schema} />
+      <Watcher
+        options={options}
+        control={methods.control}
+        schema={schema}
+        onSubmit={onSubmit}
+        handleSubmit={handleSubmit}
+        watch={methods.watch} />
       <form className={className || `${classes.pr_15} ${classes.w_100}`} onSubmit={handleSubmit(data => {
         const clean = cleanOutputArray(data, schema)
         onSubmit(clean)
@@ -318,7 +333,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
   const classes = useCustomStyle();
   const { formState: { errors, dirtyFields, touchedFields, isSubmitted }, control, trigger, getValues, setValue, watch, register } = useFormContext();
 
-  console.log("re-render : " + entry)
+  // console.log("re-render : " + JSON.stringify(entry) + JSON.stringify(getValues()))
 
   if (entry && typeof entry === 'object') {
     const errored = entry.flow.some(step => !!errors[step] && (dirtyFields[step] || touchedFields[step]))
@@ -406,7 +421,6 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
         <ArrayStep
           entry={entry}
           step={step}
-          defaultValue={step.defaultValue || null}
           disabled={functionalProperty(entry, step.disabled)}
           component={((props, idx) => {
             return (
@@ -659,11 +673,7 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
   const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.touchedFields)
   const errorDisplayed = !!error && (formState.isSubmitted || isDirty || isTouched)
 
-  const { fields, append, remove } = useFieldArray({
-    control, // control props comes from useForm (optional: if you are using FormContext)
-    name: entry, // unique name for your Field Array
-    // keyName: "id", default to "id", you can change the key name
-  });
+  const { fields, append, remove } = useFieldArray({ control, name: entry });
 
   return (
     <>
@@ -689,7 +699,7 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
         })}
       <div className={classNames(classes.flex, classes.jc_flex_end)}>
         <button type="button" className={classNames(classes.btn, classes.btn_blue, classes.btn_sm, classes.mt_5, { [classes.input__invalid]: errorDisplayed })} onClick={() => {
-          append({ value: step.addableDefaultValue || defaultVal(null, step.type) })
+          append({ value: step.addableDefaultValue || defaultVal(null) })
           trigger(entry);
           option(step.onChange)
             .map(onChange => onChange({ rawValues: getValues(), value: getValues(entry), setValue }))

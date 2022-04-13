@@ -7,9 +7,10 @@ import { deepEqual, isPromise } from '../utils'
 import { useCustomStyle } from '../styleContext';
 
 const valueToSelectOption = (value, possibleValues = [], isMulti = false) => {
-  if (value === null) {
+  if (value === null || !value) {
     return null;
   }
+
   if (isMulti) {
     return option(value)
       .map(v => {

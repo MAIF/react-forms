@@ -4,20 +4,27 @@ import './index.css';
 import Playground from './Playground';
 import Storybook from './Storybook';
 import Tabs from './Tabs';
+import ReleaseCandidate from './ReleaseCandidate'
 
 ReactDOM.render(
   <React.StrictMode>
     <Tabs tabs={[
       {
-        id:"playground",
-        label:"Playground",
+        id: "playground",
+        label: "Playground",
         content: <Playground />
-      },{
-        id:"storybook",
-        label:"Storybook",
+      },
+      {
+        id: "release-candidate",
+        label: "Release Candidate",
+        content: <ReleaseCandidate />
+      },
+      {
+        id: "storybook",
+        label: "Storybook",
         content: <Storybook />
       }]}
-      defaultTab="playground"/>
+      defaultTab="playground" />
   </React.StrictMode>,
   document.getElementById('root')
 );
