@@ -202,30 +202,28 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 
   const resolver = (rawData) => {
     const { shape, dependencies } = getShapeAndDependencies(formFlow, schema, [], rawData);
-
-
-
     const resolver = yup.object().shape(shape, dependencies);
-
     return resolver;
   }
 
   const methods = useForm({
     resolver: (data, context, options) => yupResolver(resolver(data))(data, context, options),
-    defaultValues: cleanInputArray(value, defaultValues, flow, schema),
     shouldFocusError: false,
     mode: 'onChange'
   });
 
-  const { handleSubmit, formState: { errors, dirtyFields }, reset, trigger, getValues, watch } = methods
+  const [initialReseted, setReset] = useState(false)
 
   useEffect(() => {
-    trigger()
+    reset(cleanInputArray(value, defaultValues, flow, schema))
+    setReset(true)
+  }, [reset])
 
-    return () => {
-      reset(null)
-    }
-  }, [])
+  useEffect(() => {
+    initialReseted && trigger();
+  }, [trigger, initialReseted])
+
+  const { handleSubmit, formState: { errors, dirtyFields }, reset, trigger, getValues, watch } = methods
 
   const prev = usePrevious(value)
   const prevSchema = usePrevious(schema)

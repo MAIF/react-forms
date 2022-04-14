@@ -93,7 +93,7 @@ const converter = new showdown.Converter({
 });
 
 export const MarkdownInput = (props) => {
-  const [preview, setPreview] = useState(false);
+  const [preview, setPreview] = useState(props.preview);
   const [editor, setEditor] = useState(undefined);
 
   useEffect(() => {
@@ -210,9 +210,10 @@ Proin vehicula ligula vel enim euismod, sed congue mi egestas. Nullam varius ut 
   ];
 
   const showPreview = () => {
-    Array.from(document.querySelectorAll('pre code')).forEach((block, idx) => {
-      window.hljs.highlightElement(block);
-    });
+    const parent = [...document.getElementsByClassName('preview')]
+    if (parent.length > 0)
+      [...parent[0].querySelectorAll('pre code')]
+        .forEach(block => window.hljs.highlightElement(block));
   };
 
   const injectButtons = () => {
@@ -253,7 +254,7 @@ Proin vehicula ligula vel enim euismod, sed congue mi egestas. Nullam varius ut 
   const classes = useCustomStyle()
 
   return <div className={classNames(props.className)}>
-    <div
+    {!props.readOnly && <div
       style={{
         marginBottom: 10,
       }}
@@ -277,13 +278,13 @@ Proin vehicula ligula vel enim euismod, sed congue mi egestas. Nullam varius ut 
         </div>
       </div>
       <div className={classNames(classes.flex)}>{injectButtons()}</div>
-    </div>
+    </div>}
     {!preview && (
       <CodeInput {...props} />
     )}
     {preview && (
       <div
-        className="api-description"
+        className="preview"
         dangerouslySetInnerHTML={{ __html: converter.makeHtml(props.value) }}
       />
     )}

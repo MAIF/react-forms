@@ -33,7 +33,7 @@ const valueToSelectOption = (value, possibleValues = [], isMulti = false) => {
     });
 };
 
-export const SelectInput = (props) => {
+export const SelectInput = React.forwardRef((props, _) => {
   const classes = useCustomStyle()
   const possibleValues = (props.possibleValues || [])
     .map(v => props.transformer ?
@@ -170,4 +170,4 @@ export const SelectInput = (props) => {
       />
     )
   }
-}
+})
