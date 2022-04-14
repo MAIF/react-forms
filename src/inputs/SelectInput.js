@@ -3,7 +3,8 @@ import classNames from 'classnames';
 import CreatableSelect from 'react-select/creatable';
 import Select from 'react-select';
 import { option } from '../Option';
-import { deepEqual, isPromise } from '../utils'
+import { isPromise } from '../utils'
+import deepEqual from 'fast-deep-equal';
 import { useCustomStyle } from '../styleContext';
 
 const valueToSelectOption = (value, possibleValues = [], isMulti = false) => {

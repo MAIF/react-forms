@@ -15,7 +15,8 @@ import { BooleanInput, Collapse, SelectInput, ObjectInput, CodeInput, MarkdownIn
 import { getShapeAndDependencies } from './resolvers/index';
 import { option } from './Option'
 import { ControlledInput } from './controlledInput';
-import { deepEqual, arrayFlatten } from './utils';
+import deepEqual from 'fast-deep-equal';
+import { arrayFlatten } from './utils';
 
 const usePrevious = (value) => {
   // The ref object is a generic container whose current property is mutable ...
@@ -202,10 +203,10 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
   const resolver = (rawData) => {
     const { shape, dependencies } = getShapeAndDependencies(formFlow, schema, [], rawData);
 
-    
-    
+
+
     const resolver = yup.object().shape(shape, dependencies);
-    
+
     return resolver;
   }
 

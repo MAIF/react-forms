@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { PlusCircle, MinusCircle } from 'react-feather';
 import classNames from 'classnames';
 import { useCustomStyle } from '../styleContext';
-import { deepEqual } from '../utils';
+import deepEqual from 'fast-deep-equal';
 
 export const ObjectInput = (props) => {
   const [internalState, setInternalState] = useState()
