@@ -9,7 +9,7 @@
     "label": "Your age"
   },
   "code": {
-    "type": "object",
-    "format": "code"
+    "type": "string",
+    "format": "markdown"
   }
 }

@@ -1,16 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import showdown from 'showdown';
 import classNames from 'classnames';
 import { useCustomStyle } from '../styleContext'
 
 import '@fortawesome/fontawesome-free/css/all.css';
 import 'highlight.js/styles/monokai.css';
-
 import hljs from 'highlight.js';
 
 import { CodeInput } from './CodeInput';
-
-window.hljs = window.hljs || hljs;
 
 const DaikokuExtension = () => {
   // @ref: []()
@@ -95,6 +92,7 @@ const converter = new showdown.Converter({
 export const MarkdownInput = (props) => {
   const [preview, setPreview] = useState(props.preview);
   const [editor, setEditor] = useState(undefined);
+  const ref = useRef()
 
   useEffect(() => {
     if (preview) {
@@ -213,12 +211,13 @@ Proin vehicula ligula vel enim euismod, sed congue mi egestas. Nullam varius ut 
     const parent = [...document.getElementsByClassName('preview')]
     if (parent.length > 0)
       [...parent[0].querySelectorAll('pre code')]
-        .forEach(block => window.hljs.highlightElement(block));
+        .forEach(block => hljs.highlightElement(block));
   };
 
   const injectButtons = () => {
     const classes = useCustomStyle()
 
+    console.log(ref)
     return commands.map((command, idx) => {
       if (command.component) {
         return command.component(idx);
@@ -231,19 +230,24 @@ Proin vehicula ligula vel enim euismod, sed congue mi egestas. Nullam varius ut 
           title={command.name}
           key={`toolbar-btn-${idx}`}
           onClick={() => {
-            const selection = editor.getSelection();
-            if (selection) {
-              editor.session.replace(
-                selection.getRange(),
-                command.inject(editor.getSelectedText())
-              );
-            } else {
-              editor.session.insert(editor.getCursorPosition(), command.inject());
+            const editor = ref.current
+            const selections = editor.state.selection.ranges
+            if (selections.length === 1 && selections[0].from === selections[0].to)
+              editor.dispatch({
+                changes: {
+                  from: 0,
+                  to: editor.state.doc.length,
+                  insert: command.inject()
+                }
+              })
+            else {
+              // selections.
+              editor.dispatch(editor.state.replaceSelection(command.inject()))
             }
-            if (command.move) {
-              command.move(editor.getCursorPosition(), (p) => editor.moveCursorToPosition(p));
-            }
-            editor.focus();
+
+            // if (command.move) {
+            //   command.move(editor.getCursorPosition(), (p) => editor.moveCursorToPosition(p));
+            // }
           }}>
           <i className={`fas fa-${command.icon}`} />
         </button>
@@ -280,7 +284,7 @@ Proin vehicula ligula vel enim euismod, sed congue mi egestas. Nullam varius ut 
       <div className={classNames(classes.flex)}>{injectButtons()}</div>
     </div>}
     {!preview && (
-      <CodeInput {...props} />
+      <CodeInput {...props} setRef={e => ref.current = e} />
     )}
     {preview && (
       <div
