@@ -25,7 +25,7 @@ export const deepEqual = (obj1, obj2) => {
     }
 
     if (
-      typeof obj1[key] === 'function' ||
+      typeof obj1[key] === 'function' &&
       typeof obj2[key] === 'function'
     ) {
       if (obj1[key].toString() !== obj2[key].toString()) {

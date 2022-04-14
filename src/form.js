@@ -24,7 +24,7 @@ const usePrevious = (value) => {
 
   // Store current value in ref
   useEffect(() => {
-    ref.current = value && JSON.parse(JSON.stringify(value));
+    ref.current = value;
   }, [value]); // Only re-run if value changes
 
   // Return previous value (happens before update in useEffect above)
@@ -737,7 +737,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
   const prevSchema = usePrevious(schemaAndFlow.schema);
   useEffect(() => {
     if (!!prevSchema && !deepEqual(prevSchema, schemaAndFlow.schema)) {
-      const def = getDefaultValues(schemaAndFlow.flow, schemaAndFlow.schema);
+      const def = getDefaultValues(schemaAndFlow.flow, schemaAndFlow.schema, getValues(parent));
       setValue(parent, def, { shouldValidate: false })
     }
   }, [prevSchema, schemaAndFlow.schema])
