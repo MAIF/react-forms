@@ -394,8 +394,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
     const currentData = usePrevious(cleanOutputArray(d, schema))
 
     const newData = cleanOutputArray(d, schema)
-
-    if (!deepEqual(newData, currentData))
+    if (!deepEqual(newData, currentData) || (newData !== undefined && currentData === undefined))
       onAfterChangeFunc({
         entry,
         previousValue: currentData,
