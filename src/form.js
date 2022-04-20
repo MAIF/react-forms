@@ -472,6 +472,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
                 isMulti={step.isMulti}
                 createOption={step.createOption}
                 transformer={step.transformer}
+                optionsFrom={step.optionsFrom}
                 buttons={step.format === format.buttonsSelect}
               />
             </ControlledInput>
@@ -502,6 +503,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
                 createOption={step.createOption}
                 onCreateOption={step.onCreateOption}
                 transformer={step.transformer}
+                optionsFrom={step.optionsFrom}
                 buttons={step.format === format.buttonsSelect}
               />
             </ControlledInput>
@@ -539,6 +541,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
                 createOption={step.createOption}
                 onCreateOption={step.onCreateOption}
                 transformer={step.transformer}
+                optionsFrom={step.optionsFrom}
                 buttons={step.format === format.buttonsSelect}
               />
             </ControlledInput>
