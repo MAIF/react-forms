@@ -14,11 +14,11 @@ ReactDOM.render(
         label: "Playground",
         content: <Playground />
       },
-      {
-        id: "release-candidate",
-        label: "Release Candidate",
-        content: <ReleaseCandidate />
-      },
+      // {
+      //   id: "release-candidate",
+      //   label: "Release Candidate",
+      //   content: <ReleaseCandidate />
+      // },
       {
         id: "storybook",
         label: "Storybook",
