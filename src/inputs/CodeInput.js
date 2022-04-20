@@ -41,7 +41,7 @@ export function CodeInput({
       changes: {
         from: 0,
         to: editor.state.doc.length,
-        insert: typeof value === 'object' ? JSON.stringify(value, null, 2) : value
+        insert: value === null ? '' : (typeof value === 'object' ? JSON.stringify(value, null, 2) : value)
       }
     })
   }, [value])

@@ -81,7 +81,6 @@ export default function App() {
 }
 
 const Toto = ({ data }) => {
-    console.log("render toto", data);
     return <h1>{JSON.stringify(data, null, 4)}</h1>;
 };
 
