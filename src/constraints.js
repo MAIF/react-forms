@@ -72,8 +72,8 @@ export const when = (ref, test, then = [], otherwise = []) => (r, key, dependenc
 }
 export const oneOf = (arrayOfValues, message = `This value must be one of ${arrayOfValues.join(', ')}`) => (r) => r.oneOf(arrayOfValues.map(maybeRef), message)
 
-export const blacklist = (arrayOfValues, message = `This value can't include the following values ${arrayOfValues.join(', ')}`) => (r) => r.test('blacklist' + Date.now(), message, value => {
-  return !arrayOfValues.some(f => value.includes(f))
+export const blacklist = (arrayOfValues, message = `This value can't include the following values ${arrayOfValues.join(', ')}`) => (r) => r.test('blacklist', message, value => {
+  return !arrayOfValues.some(f => (value || '').includes(f))
 })
 
 export const ref = (ref) => yup.ref(ref)

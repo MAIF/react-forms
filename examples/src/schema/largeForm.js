@@ -2,22 +2,12 @@ const schema = `{
     "target_refs": {
         "label": "target_refs",
         "type": "string",
-        "constraints": [
-            {
-                "type": "nullable"
-            }
-        ],
         "array": true,
         "format": null
     },
     "root": {
         "label": "root",
-        "type": "string",
-        "constraints": [
-            {
-                "type": "nullable"
-            }
-        ]
+        "type": "string"
     },
     "client": {
         "label": "client",
@@ -28,68 +18,33 @@ const schema = `{
         "schema": {
             "custom_timeouts": {
                 "label": "custom_timeouts",
-                "type": "object",
-                "constraints": [
-                    {
-                        "type": "nullable"
-                    }
-                ],
+                "type": "object"
                 "array": true,
                 "format": "form",
                 "schema": {
                     "connection_timeout": {
                         "label": "connection_timeout",
-                        "type": "number",
-                        "constraints": [
-                            {
-                                "type": "nullable"
-                            }
-                        ]
+                        "type": "number"
                     },
                     "call_and_stream_timeout": {
                         "label": "call_and_stream_timeout",
-                        "type": "number",
-                        "constraints": [
-                            {
-                                "type": "nullable"
-                            }
-                        ]
+                        "type": "number"
                     },
                     "path": {
                         "label": "path",
-                        "type": "string",
-                        "constraints": [
-                            {
-                                "type": "nullable"
-                            }
-                        ]
+                        "type": "string"
                     },
                     "call_timeout": {
                         "label": "call_timeout",
-                        "type": "number",
-                        "constraints": [
-                            {
-                                "type": "nullable"
-                            }
-                        ]
+                        "type": "number"
                     },
                     "idle_timeout": {
                         "label": "idle_timeout",
-                        "type": "number",
-                        "constraints": [
-                            {
-                                "type": "nullable"
-                            }
-                        ]
+                        "type": "number"
                     },
                     "global_timeout": {
                         "label": "global_timeout",
-                        "type": "number",
-                        "constraints": [
-                            {
-                                "type": "nullable"
-                            }
-                        ]
+                        "type": "number"
                     }
                 },
                 "flow": [
@@ -103,39 +58,19 @@ const schema = `{
             },
             "global_timeout": {
                 "label": "global_timeout",
-                "type": "number",
-                "constraints": [
-                    {
-                        "type": "nullable"
-                    }
-                ]
+                "type": "number"
             },
             "max_errors": {
                 "label": "max_errors",
-                "type": "number",
-                "constraints": [
-                    {
-                        "type": "nullable"
-                    }
-                ]
+                "type": "number"
             },
             "retry_initial_delay": {
                 "label": "retry_initial_delay",
-                "type": "number",
-                "constraints": [
-                    {
-                        "type": "nullable"
-                    }
-                ]
+                "type": "number"
             },
             "backoff_factor": {
                 "label": "backoff_factor",
-                "type": "number",
-                "constraints": [
-                    {
-                        "type": "nullable"
-                    }
-                ]
+                "type": "number"
             },
             "cache_connection_settings": {
                 "label": "cache_connection_settings",
@@ -146,21 +81,11 @@ const schema = `{
                 "schema": {
                     "queue_size": {
                         "label": "queue_size",
-                        "type": "number",
-                        "constraints": [
-                            {
-                                "type": "nullable"
-                            }
-                        ]
+                        "type": "number"
                     },
                     "enabled": {
                         "label": "enabled",
-                        "type": "bool",
-                        "constraints": [
-                            {
-                                "type": "nullable"
-                            }
-                        ]
+                        "type": "bool"
                     }
                 },
                 "flow": [
@@ -170,30 +95,15 @@ const schema = `{
             },
             "sample_interval": {
                 "label": "sample_interval",
-                "type": "number",
-                "constraints": [
-                    {
-                        "type": "nullable"
-                    }
-                ]
+                "type": "number"
             },
             "call_and_stream_timeout": {
                 "label": "call_and_stream_timeout",
-                "type": "number",
-                "constraints": [
-                    {
-                        "type": "nullable"
-                    }
-                ]
+                "type": "number"
             },
             "retries": {
                 "label": "retries",
-                "type": "number",
-                "constraints": [
-                    {
-                        "type": "nullable"
-                    }
-                ]
+                "type": "number"
             },
             "proxy": {
                 "label": "proxy",
@@ -206,30 +116,15 @@ const schema = `{
             },
             "call_timeout": {
                 "label": "call_timeout",
-                "type": "number",
-                "constraints": [
-                    {
-                        "type": "nullable"
-                    }
-                ]
+                "type": "number"
             },
             "idle_timeout": {
                 "label": "idle_timeout",
-                "type": "number",
-                "constraints": [
-                    {
-                        "type": "nullable"
-                    }
-                ]
+                "type": "number"
             },
             "connection_timeout": {
                 "label": "connection_timeout",
-                "type": "number",
-                "constraints": [
-                    {
-                        "type": "nullable"
-                    }
-                ]
+                "type": "number"
             }
         },
         "flow": [
@@ -257,21 +152,11 @@ const schema = `{
         "schema": {
             "enabled": {
                 "label": "enabled",
-                "type": "bool",
-                "constraints": [
-                    {
-                        "type": "nullable"
-                    }
-                ]
+                "type": "bool"
             },
             "url": {
                 "label": "url",
-                "type": "string",
-                "constraints": [
-                    {
-                        "type": "nullable"
-                    }
-                ]
+                "type": "string"
             }
         },
         "flow": [
@@ -282,11 +167,6 @@ const schema = `{
     "targets": {
         "label": "targets",
         "type": "object",
-        "constraints": [
-            {
-                "type": "nullable"
-            }
-        ],
         "array": true,
         "format": "form",
         "schema": {
@@ -299,77 +179,37 @@ const schema = `{
                 "schema": {
                     "rack": {
                         "label": "rack",
-                        "type": "string",
-                        "constraints": [
-                            {
-                                "type": "nullable"
-                            }
-                        ]
+                        "type": "string"
                     },
                     "provider": {
                         "label": "provider",
-                        "type": "string",
-                        "constraints": [
-                            {
-                                "type": "nullable"
-                            }
-                        ]
+                        "type": "string"
                     },
                     "dataCenter": {
                         "label": "dataCenter",
-                        "type": "string",
-                        "constraints": [
-                            {
-                                "type": "nullable"
-                            }
-                        ]
+                        "type": "string"
                     },
                     "zone": {
                         "label": "zone",
-                        "type": "string",
-                        "constraints": [
-                            {
-                                "type": "nullable"
-                            }
-                        ]
+                        "type": "string"
                     },
                     "positions": {
                         "label": "positions",
                         "type": "object",
-                        "constraints": [
-                            {
-                                "type": "nullable"
-                            }
-                        ],
                         "array": true,
                         "format": "form",
                         "schema": {
                             "latitude": {
                                 "label": "latitude",
-                                "type": "number",
-                                "constraints": [
-                                    {
-                                        "type": "nullable"
-                                    }
-                                ]
+                                "type": "number"
                             },
                             "longitude": {
                                 "label": "longitude",
-                                "type": "number",
-                                "constraints": [
-                                    {
-                                        "type": "nullable"
-                                    }
-                                ]
+                                "type": "number"
                             },
                             "radius": {
                                 "label": "radius",
-                                "type": "number",
-                                "constraints": [
-                                    {
-                                        "type": "nullable"
-                                    }
-                                ]
+                                "type": "number"
                             }
                         },
                         "flow": [
@@ -381,11 +221,6 @@ const schema = `{
                     "type": {
                         "label": "type",
                         "type": "string",
-                        "constraints": [
-                            {
-                                "type": "nullable"
-                            }
-                        ],
                         "format": "select",
                         "options": [
                             "AlwaysMatch",
@@ -395,21 +230,11 @@ const schema = `{
                     },
                     "region": {
                         "label": "region",
-                        "type": "string",
-                        "constraints": [
-                            {
-                                "type": "nullable"
-                            }
-                        ]
+                        "type": "string"
                     },
                     "dc": {
                         "label": "dc",
-                        "type": "string",
-                        "constraints": [
-                            {
-                                "type": "nullable"
-                            }
-                        ]
+                        "type": "string"
                     }
                 },
                 "flow": [
@@ -425,48 +250,23 @@ const schema = `{
             },
             "protocol": {
                 "label": "protocol",
-                "type": "string",
-                "constraints": [
-                    {
-                        "type": "nullable"
-                    }
-                ]
+                "type": "string"
             },
             "hostname": {
                 "label": "hostname",
-                "type": "string",
-                "constraints": [
-                    {
-                        "type": "nullable"
-                    }
-                ]
+                "type": "string"
             },
             "port": {
                 "label": "port",
-                "type": "number",
-                "constraints": [
-                    {
-                        "type": "nullable"
-                    }
-                ]
+                "type": "number"
             },
             "weight": {
                 "label": "weight",
-                "type": "number",
-                "constraints": [
-                    {
-                        "type": "nullable"
-                    }
-                ]
+                "type": "number"
             },
             "tls": {
                 "label": "tls",
-                "type": "bool",
-                "constraints": [
-                    {
-                        "type": "nullable"
-                    }
-                ]
+                "type": "bool"
             },
             "tls_config": {
                 "label": "tls_config",
@@ -477,50 +277,25 @@ const schema = `{
                 "schema": {
                     "enabled": {
                         "label": "enabled",
-                        "type": "bool",
-                        "constraints": [
-                            {
-                                "type": "nullable"
-                            }
-                        ]
+                        "type": "bool"
                     },
                     "certs": {
                         "label": "certs",
                         "type": "string",
-                        "constraints": [
-                            {
-                                "type": "nullable"
-                            }
-                        ],
                         "array": true,
                         "format": null
                     },
                     "loose": {
                         "label": "loose",
-                        "type": "bool",
-                        "constraints": [
-                            {
-                                "type": "nullable"
-                            }
-                        ]
+                        "type": "bool"
                     },
                     "trust_all": {
                         "label": "trust_all",
-                        "type": "bool",
-                        "constraints": [
-                            {
-                                "type": "nullable"
-                            }
-                        ]
+                        "type": "bool"
                     },
                     "trusted_certs": {
                         "label": "trusted_certs",
                         "type": "string",
-                        "constraints": [
-                            {
-                                "type": "nullable"
-                            }
-                        ],
                         "array": true,
                         "format": null
                     }
@@ -535,21 +310,11 @@ const schema = `{
             },
             "id": {
                 "label": "id",
-                "type": "string",
-                "constraints": [
-                    {
-                        "type": "nullable"
-                    }
-                ]
+                "type": "string"
             },
             "ip_address": {
                 "label": "ip_address",
-                "type": "string",
-                "constraints": [
-                    {
-                        "type": "nullable"
-                    }
-                ]
+                "type": "string"
             }
         },
         "flow": [
@@ -566,12 +331,7 @@ const schema = `{
     },
     "rewrite": {
         "label": "rewrite",
-        "type": "bool",
-        "constraints": [
-            {
-                "type": "nullable"
-            }
-        ]
+        "type": "bool"
     },
     "load_balancing": {
         "label": "load_balancing",
@@ -583,11 +343,6 @@ const schema = `{
             "type": {
                 "label": "type",
                 "type": "string",
-                "constraints": [
-                    {
-                        "type": "nullable"
-                    }
-                ],
                 "format": "select",
                 "options": [
                     "BestResponseTime",
@@ -600,12 +355,7 @@ const schema = `{
             },
             "ratio": {
                 "label": "ratio",
-                "type": "number",
-                "constraints": [
-                    {
-                        "type": "nullable"
-                    }
-                ]
+                "type": "number"
             }
         },
         "flow": [

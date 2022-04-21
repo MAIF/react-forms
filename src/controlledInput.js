@@ -51,7 +51,7 @@ export const ControlledInput = ({ defaultValue, step, entry, children, component
                     return e;
                 }
             })()
-            // field.onChange(!e ? null : e.target ? e.target.value || null : e)
+            console.log(entry, value, getValues())
             field.onChange(value)
             option(step.onChange)
                 .map(onChange => onChange({ rawValues: getValues(), value, setValue }))

@@ -84,7 +84,7 @@ const defaultVal = (value, array, defaultValue) => {
 }
 
 const getDefaultValues = (flow, schema, value) => {
-  return flow.reduce((acc, key) => {
+  return (flow || []).reduce((acc, key) => {
     if (typeof key === 'object') {
       return { ...acc, ...getDefaultValues(key.flow, schema, value) }
     }
@@ -471,7 +471,6 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
                 isMulti={step.isMulti}
                 createOption={step.createOption}
                 transformer={step.transformer}
-                optionsFrom={step.optionsFrom}
                 buttons={step.format === format.buttonsSelect}
               />
             </ControlledInput>
@@ -502,7 +501,6 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
                 createOption={step.createOption}
                 onCreateOption={step.onCreateOption}
                 transformer={step.transformer}
-                optionsFrom={step.optionsFrom}
                 buttons={step.format === format.buttonsSelect}
               />
             </ControlledInput>
@@ -540,7 +538,6 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
                 createOption={step.createOption}
                 onCreateOption={step.onCreateOption}
                 transformer={step.transformer}
-                optionsFrom={step.optionsFrom}
                 buttons={step.format === format.buttonsSelect}
               />
             </ControlledInput>
@@ -695,8 +692,9 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
         })}
       <div className={classNames(classes.flex, classes.jc_flex_end)}>
         <button type="button" className={classNames(classes.btn, classes.btn_blue, classes.btn_sm, classes.mt_5, { [classes.input__invalid]: errorDisplayed })} onClick={() => {
-          append({ value: step.addableDefaultValue || defaultVal(null) })
-          trigger(entry);
+          const newValue = cleanInputArray({}, getValues(entry), step.flow, step.schema)
+          append({ value: step.addableDefaultValue || (newValue ? newValue : defaultVal()) })
+          // trigger(entry);
           option(step.onChange)
             .map(onChange => onChange({ rawValues: getValues(), value: getValues(entry), setValue }))
         }} disabled={disabled}>Add</button>
