@@ -160,7 +160,7 @@ export const MarkdownInput = (props) => {
           </button>
         </div>
       </div>
-      <div className={classNames(classes.flex)}>{injectButtons()}</div>
+      <div className={classNames(classes.flex, classes.flexWrap)}>{injectButtons()}</div>
     </div>}
     {!preview && (
       <CodeInput {...props} setRef={e => ref.current = e} />

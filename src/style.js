@@ -111,6 +111,9 @@ export const style = {
   d_none: {
     display: "none",
   },
+  flexWrap: {
+    flexWrap: 'wrap'
+  },
   flex: {
     display: "flex",
   },
@@ -191,16 +194,16 @@ export const style = {
   nestedform__border: {
     borderLeft: '2px solid lightGray',
     paddingLeft: '0.5rem',
-    marginLeft:'0.5rem',
+    marginLeft: '0.5rem',
     marginBottom: '.5rem',
     paddingBottom: '1rem',
     marginRight: '.5rem',
-    paddingRight:'2.5rem',
+    paddingRight: '2.5rem',
   },
   border__error: {
     borderColor: "#dc3545"
   },
-  btn_for_descriptionToolbar:{
+  btn_for_descriptionToolbar: {
     textAlign: "left",
     cursor: "pointer",
     height: "22px",
@@ -259,7 +262,7 @@ export const style = {
     height: "20px",
     border: "1px solid #dfdfdf",
     boxShadow: "1px 0px 5px 0px rgba(0, 0, 0, 0.3)"
-  }, 
+  },
   switch_button_null: {
     backgroundColor: "#fff",
     borderRadius: "20px",
@@ -270,5 +273,5 @@ export const style = {
     marginLeft: "-1px",
     border: "1px solid #dfdfdf",
     boxShadow: "1px 0px 5px 0px rgba(0, 0, 0, 0.3)"
-  }  
+  }
 }
