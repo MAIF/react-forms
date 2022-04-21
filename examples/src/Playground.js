@@ -5,7 +5,6 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css'
 
 import basic from './schema/basic.json';
-import largeForm from './schema/largeForm';
 import formArray from './schema/formArray';
 import constrainedBasic from './schema/constrainedBasic.json';
 import constraintsWithRef from './schema/constraintsWithRef.json';
@@ -17,7 +16,6 @@ import WrapperError from './WrapperError';
 
 const examples = {
   basic,
-  largeForm,
   formArray,
   constrainedBasic,
   constraintsWithRef,
