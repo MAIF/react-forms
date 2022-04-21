@@ -117,7 +117,7 @@ export const SelectInput = React.forwardRef((props, _) => {
     return (
       <div style={{ display: 'flex' }}>
         {values.map((v, idx) => {
-          const active = props.isMulti ? value.includes(v) : v.value === value.value
+          const active = !!value && (props.isMulti ? value.includes(v) : v.value === value.value)
           return (
             <button
               key={idx}
