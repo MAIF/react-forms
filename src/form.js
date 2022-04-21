@@ -439,7 +439,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
       switch (step.format) {
         case format.text:
           return (
-            <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
+            <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
               <textarea
                 type="text"
                 className={classNames(classes.input, { [classes.input__invalid]: errorDisplayed })} />
@@ -449,20 +449,20 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
         case format.singleLineCode:
           const Component = step.format === format.code ? CodeInput : SingleLineCode
           return (
-            <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
+            <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
               <Component className={classNames({ [classes.input__invalid]: errorDisplayed })} />
             </ControlledInput>
           )
         case format.markdown:
           return (
-            <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
+            <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
               <MarkdownInput className={classNames({ [classes.input__invalid]: errorDisplayed })} />
             </ControlledInput>
           )
         case format.buttonsSelect:
         case format.select: {
           return (
-            <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
+            <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
               <SelectInput
                 className={classNames(classes.flex_grow_1, { [classes.input__invalid]: errorDisplayed })}
                 disabled={functionalProperty(entry, step.disabled)}
@@ -478,7 +478,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
         }
         default:
           return (
-            <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
+            <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
               <input
                 type={step.format || 'text'}
                 className={classNames(classes.input, { [classes.input__invalid]: errorDisplayed })}
@@ -492,7 +492,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
         case format.buttonsSelect:
         case format.select:
           return (
-            <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
+            <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
               <SelectInput
                 className={classNames(classes.content, { [classes.input__invalid]: errorDisplayed })}
                 possibleValues={step.options}
@@ -506,7 +506,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
             </ControlledInput>
           )
         default:
-          return <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
+          return <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
             <input
               type={step.format || 'number'}
               className={classNames(classes.input, { [classes.input__invalid]: errorDisplayed })}
@@ -519,7 +519,8 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
         <ControlledInput
           defaultValue={defaultValue}
           step={step}
-          entry={entry}>
+          entry={entry}
+          errorDisplayed={errorDisplayed}>
           <BooleanInput className={classNames({ [classes.input__invalid]: errorDisplayed })} />
         </ControlledInput>
       )
@@ -529,7 +530,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
         case format.buttonsSelect:
         case format.select:
           return (
-            <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
+            <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
               <SelectInput
                 className={classNames(classes.flex_grow_1, { [classes.input__invalid]: errorDisplayed })}
                 possibleValues={step.options}
@@ -555,11 +556,11 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
 
         case format.code:
           return (
-            <ControlledInput defaultValue={defaultValue} step={step} entry={entry} component={(field, props) => (
+            <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed} component={(field, props) => (
               <CodeInput
                 {...props}
                 className={classNames({ [classes.input__invalid]: error })}
-                onChange={(e) => {
+                onChange={(e) => { errorDisplayed={errorDisplayed}
                   let v
                   try {
                     v = JSON.parse(e)
@@ -577,7 +578,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
           )
         default:
           return (
-            <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
+            <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
               <ObjectInput
                 className={classNames({ [classes.input__invalid]: errorDisplayed })}
                 possibleValues={step.options}
@@ -587,7 +588,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
       }
     case type.date:
       return (
-        <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
+        <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
           <DatePicker
             className={classNames(classes.datepicker, { [classes.input__invalid]: errorDisplayed })}
             formatStyle="large"
@@ -642,7 +643,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
             };
 
             return (
-              <ControlledInput defaultValue={defaultValue} step={step} entry={entry}>
+              <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
                 <FileInput />
               </ControlledInput>
             )

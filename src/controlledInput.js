@@ -5,16 +5,15 @@ import { type } from './type'
 
 const CustomizableInput = React.memo(
     props => {
-        // console.log("CUSTOMIZABLE_INPUT" + props.field.name)
         if (props.render) {
             return (
                 props.render({ ...props.field, error: props.error })
             )
         }
         return props.children
-    }, (prev, next) => prev.field.value === next.field.value)
+    }, (prev, next) => (prev.field.value === next.field.value && next.errorDisplayed === prev.errorDisplayed))
 
-export const ControlledInput = ({ defaultValue, step, entry, children, component }) => {
+export const ControlledInput = ({ defaultValue, step, entry, children, component, errorDisplayed }) => {
     const { field } = useController({
         defaultValue: defaultValue || null,
         name: entry
@@ -51,7 +50,6 @@ export const ControlledInput = ({ defaultValue, step, entry, children, component
                     return e;
                 }
             })()
-            console.log(entry, value, getValues())
             field.onChange(value)
             option(step.onChange)
                 .map(onChange => onChange({ rawValues: getValues(), value, setValue }))
@@ -64,7 +62,7 @@ export const ControlledInput = ({ defaultValue, step, entry, children, component
     return <CustomizableInput
         render={step.render}
         field={{ parent, setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }}
-        error={error}>
+        error={error} errorDisplayed={errorDisplayed}>
         {component ? component(field, props) : React.cloneElement(children, { ...props })}
     </CustomizableInput>
 }
