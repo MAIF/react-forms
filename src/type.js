@@ -4,5 +4,6 @@ export const type = {
   bool: 'bool',
   date: 'date',
   object: 'object',
-  file: 'file'
+  file: 'file',
+  json: 'json'
 }

@@ -9,7 +9,6 @@
     "label": "Your age"
   },
   "code": {
-    "type": "string",
-    "format": "markdown"
+    "type": "json"
   }
 }

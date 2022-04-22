@@ -36,14 +36,16 @@ export function CodeInput({
   }, [])
 
   useEffect(() => {
-    if (editor && (typeof value === 'object' ? JSON.stringify(value, null, 2) : value) !== editor.state.doc.toString())
-    editor.dispatch({
-      changes: {
-        from: 0,
-        to: editor.state.doc.length,
-        insert: value === null ? '' : (typeof value === 'object' ? JSON.stringify(value, null, 2) : value)
-      }
-    })
+    if (editor && (typeof value === 'object' ? JSON.stringify(value, null, 2) : value) !== editor.state.doc.toString()) {
+      console.log("set value", value, (value === null || value === undefined) ? '' : (typeof value === 'object' ? JSON.stringify(value, null, 2) : value), editor.state.doc.toString())
+      editor.dispatch({
+        changes: {
+          from: 0,
+          to: editor.state.doc.length,
+          insert: (value === null || value === undefined) ? '' : (typeof value === 'object' ? JSON.stringify(value, null, 2) : value)
+        }
+      })
+    }
   }, [value])
 
   return <div ref={ref} />

@@ -30,7 +30,7 @@ export const MarkdownInput = (props) => {
     if (preview) {
       showPreview();
     }
-  }, [preview]);
+  }, [preview, props.value]);
 
   const commands = [
     {

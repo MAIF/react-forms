@@ -11,7 +11,8 @@ const resolvers = {
   [type.bool]: () => yup.bool().nullable().optional(),
   [type.object]: () => yup.object().nullable().optional(),
   [type.date]: (typeErrorMessage) => yup.date().nullable().optional().typeError(typeErrorMessage || 'Value must be a date'),
-  [type.file]: () => yup.mixed()
+  [type.file]: () => yup.mixed(),
+  [type.json]: () => yup.mixed()
 }
 
 export const buildSubResolver = (props, key, dependencies, rawData) => {

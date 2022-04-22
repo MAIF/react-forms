@@ -138,7 +138,15 @@ const cleanOutputArray = (obj, subSchema) => {
     } else if (!!v && typeof v === 'object' && !(v instanceof (Date) && !Array.isArray(v))) {
       return { ...acc, [key]: cleanOutputArray(v, subSchema[key]?.schema || {}) }
     } else {
-      return { ...acc, [key]: v }
+      if (subSchema[key]?.type === 'json') {
+        try {
+          return { ...acc, [key]: JSON.parse(v) }
+        } catch(err) {
+          return { ...acc, [key]: v }
+        }
+      } else {
+        return { ...acc, [key]: v }
+      }
     }
   }, {})
 }
@@ -649,6 +657,24 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
           }}
         />
       )
+
+    case type.json:
+      return (
+        <ControlledInput defaultValue={defaultValue} step={step} entry={entry} component={(field, props) => (
+          <CodeInput
+            {...props}
+            className={classNames({ [classes.input__invalid]: error })}
+            onChange={v => {
+              field.onChange(v)
+              option(step.onChange)
+                .map(onChange => onChange({ rawValues: getValues(), value: v, setValue }))
+            }}
+            value={field.value}
+          />
+        )}>
+        </ControlledInput>
+      )
+
     default:
       return null;
   }
