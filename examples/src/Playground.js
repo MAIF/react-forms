@@ -107,7 +107,7 @@ export const Playground = () => {
                   schema={realSchema}
                   value={value}
                   flow={Object.keys(realSchema)}
-                  onSubmit={d => alert(JSON.stringify(d, null, 2))}
+                  onSubmit={d => console.log(JSON.stringify(d, null, 4))}
                   options={{
                     watch: unsaved => {
                       ref?.current?.dispatch({

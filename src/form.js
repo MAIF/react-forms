@@ -132,8 +132,15 @@ const cleanOutputArray = (obj, subSchema) => {
         .getOrElse(false)
 
       if (isArray) {
-        return { ...acc, [key]: v.map(({ value }) => value) }
+        return {
+          ...acc, [key]: v.map(({ value }) => {
+            if (!!value && typeof value === 'object' && !(value instanceof (Date) && !Array.isArray(value)))
+              return cleanOutputArray(value, subSchema[key]?.schema || {})
+            return value
+          })
+        }
       }
+      console.log('Not array', key)
       return { ...acc, [key]: v }
     } else if (!!v && typeof v === 'object' && !(v instanceof (Date) && !Array.isArray(v))) {
       return { ...acc, [key]: cleanOutputArray(v, subSchema[key]?.schema || {}) }
@@ -141,7 +148,7 @@ const cleanOutputArray = (obj, subSchema) => {
       if (subSchema[key]?.type === 'json') {
         try {
           return { ...acc, [key]: JSON.parse(v) }
-        } catch(err) {
+        } catch (err) {
           return { ...acc, [key]: v }
         }
       } else {
@@ -568,7 +575,8 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
               <CodeInput
                 {...props}
                 className={classNames({ [classes.input__invalid]: error })}
-                onChange={(e) => { errorDisplayed={errorDisplayed}
+                onChange={(e) => {
+                  errorDisplayed = { errorDisplayed }
                   let v
                   try {
                     v = JSON.parse(e)
@@ -720,7 +728,7 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
       <div className={classNames(classes.flex, classes.jc_flex_end)}>
         <button type="button" className={classNames(classes.btn, classes.btn_blue, classes.btn_sm, classes.mt_5, { [classes.input__invalid]: errorDisplayed })} onClick={() => {
           const newValue = cleanInputArray({}, getValues(entry), step.flow, step.schema)
-          append({ value: step.addableDefaultValue || ((step.type ===  type.object && newValue) ? newValue : defaultVal()) })
+          append({ value: step.addableDefaultValue || ((step.type === type.object && newValue) ? newValue : defaultVal()) })
           // trigger(entry);
           option(step.onChange)
             .map(onChange => onChange({ rawValues: getValues(), value: getValues(entry), setValue }))
