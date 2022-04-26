@@ -103,7 +103,7 @@ export const ObjectInput = (props) => {
           <input
             disabled={props.disabled}
             type="text"
-            className={classNames(classes.w_50)}
+            className={classNames(classes.w_50, classes.input)}
             placeholder={props.placeholderKey}
             value={key}
             onChange={e => changeKey(id, e.target.value)}
@@ -111,7 +111,7 @@ export const ObjectInput = (props) => {
           <input
             disabled={props.disabled}
             type="text"
-            className={classNames(classes.w_50)}
+            className={classNames(classes.w_50, classes.input)}
             placeholder={props.placeholderValue}
             value={value}
             onChange={e => changeValue(id, e.target.value)}

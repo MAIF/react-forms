@@ -99,9 +99,9 @@ const cleanInputArray = (obj, defaultValues, flow, subSchema) => {
   const realFlow = option(flow)
     .map(f => f.map(v => v.flow || v))
     .map(arrayFlatten)
-    .getOrElse(Object.keys(subSchema))
+    .getOrElse(Object.keys(subSchema || {}))
 
-  return Object.entries(subSchema)
+  return Object.entries(subSchema || {})
     .filter(([key]) => realFlow.includes(key))
     .reduce((acc, [key, step]) => {
       let v
@@ -720,7 +720,7 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
       <div className={classNames(classes.flex, classes.jc_flex_end)}>
         <button type="button" className={classNames(classes.btn, classes.btn_blue, classes.btn_sm, classes.mt_5, { [classes.input__invalid]: errorDisplayed })} onClick={() => {
           const newValue = cleanInputArray({}, getValues(entry), step.flow, step.schema)
-          append({ value: step.addableDefaultValue || (newValue ? newValue : defaultVal()) })
+          append({ value: step.addableDefaultValue || ((step.type ===  type.object && newValue) ? newValue : defaultVal()) })
           // trigger(entry);
           option(step.onChange)
             .map(onChange => onChange({ rawValues: getValues(), value: getValues(entry), setValue }))
