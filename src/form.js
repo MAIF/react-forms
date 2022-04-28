@@ -267,7 +267,10 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
       onSubmit(clean)
     }, onError)(),
     trigger,
-    methods
+    methods: {
+      ...methods,
+      data: () => cleanOutputArray(getValues(), schema)
+    }
   }));
 
   return (

@@ -32,6 +32,13 @@ export function CodeInput({
     if (setRef)
       setRef(e)
 
+    e.dispatch({
+      changes: {
+        from: 0,
+        to: e.state.doc.length,
+        insert: (value === null || value === undefined) ? '' : (typeof value === 'object' ? JSON.stringify(value, null, 2) : value)
+      }
+    })
     setEditor(e)
   }, [])
 
