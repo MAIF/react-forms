@@ -111,7 +111,12 @@ const cleanInputArray = (obj, defaultValues, flow, subSchema) => {
         v = defaultValues[key]
 
       if (step.array && !step.render) {
-        return { ...acc, [key]: (v || []).map(value => ({ value })) }
+        return {
+          ...acc, [key]: (v || []).map(value => ({
+            value: typeof value === 'object' && !(value instanceof Date) && !Array.isArray(value) ?
+              cleanInputArray(value, defaultValues, subSchema[key]?.flow, subSchema[key]?.schema || {}) : value
+          }))
+        }
       } else if (typeof v === 'object' && !(v instanceof Date) && !Array.isArray(v)) {
         return { ...acc, [key]: cleanInputArray(v, defaultValues, subSchema[key]?.flow, subSchema[key]?.schema || {}) }
       } else {
@@ -133,14 +138,13 @@ const cleanOutputArray = (obj, subSchema) => {
 
       if (isArray) {
         return {
-          ...acc, [key]: v.map(({ value }) => {
-            if (!!value && typeof value === 'object' && !(value instanceof (Date) && !Array.isArray(value)))
-              return cleanOutputArray(value, subSchema[key]?.schema || {})
-            return value
+          ...acc, [key]: v.map(step => {
+            if (!!step.value && typeof step.value === 'object' && !(step.value instanceof (Date) && !Array.isArray(step.value)))
+              return cleanOutputArray(step.value, subSchema[key]?.schema || {})
+            return step.value
           })
         }
       }
-      console.log('Not array', key)
       return { ...acc, [key]: v }
     } else if (!!v && typeof v === 'object' && !(v instanceof (Date) && !Array.isArray(v))) {
       return { ...acc, [key]: cleanOutputArray(v, subSchema[key]?.schema || {}) }
@@ -407,15 +411,15 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
       .reduce((acc, curr) => acc && acc[curr], data) || {}
 
     const currentData = usePrevious(cleanOutputArray(d, schema))
-
     const newData = cleanOutputArray(d, schema)
+
     if (!deepEqual(newData, currentData) || (newData !== undefined && currentData === undefined))
       onAfterChangeFunc({
         entry,
-        previousValue: currentData,
         value: getValues(entry),
-        getValue: e => getValues(e),
         rawValues: newData,
+        previousValue: currentData,
+        getValue: e => getValues(e),
         setValue,
         onChange: v => setValue(entry, v)
       })
