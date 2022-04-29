@@ -32,7 +32,7 @@ const usePrevious = (value) => {
   return ref.current;
 }
 
-const BasicWrapper = ({ entry, className, label, help, children, render }) => {
+const BasicWrapper = ({ entry, className, label, help, children, render, collapsed }) => {
   if (typeof entry === 'object') {
     return children
   }
@@ -47,8 +47,15 @@ const BasicWrapper = ({ entry, className, label, help, children, render }) => {
   const errorDisplayed = formState.isSubmitted || isDirty || isTouched
 
   if (render) {
-    return render({ entry, label, error, help, children })
+    return render({ entry, label, error, help, children, collapsed })
   }
+
+  const childrenWithProps = React.Children.map(children, child => {
+    if (React.isValidElement(child)) {
+      return React.cloneElement(child, { collapsed });
+    }
+    return child;
+  });
 
   return (
     <div className={`${classes.mt_10} ${className}`} style={{ position: 'relative' }}>
@@ -62,7 +69,7 @@ const BasicWrapper = ({ entry, className, label, help, children, render }) => {
         </>}
       </label>}
 
-      {children}
+      {childrenWithProps}
       {error && <div className={classNames(classes.feedback, { [classes.txt_red]: errorDisplayed })}>{error.message}</div>}
     </div>
   )
@@ -348,14 +355,14 @@ const Footer = (props) => {
   )
 }
 
-const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaultValue, index, functionalProperty, parent, onAfterChange }) => {
+const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaultValue, index, functionalProperty, parent, onAfterChange, collapsed }) => {
   const classes = useCustomStyle();
   const { formState: { errors, dirtyFields, touchedFields, isSubmitted }, control, trigger, getValues, setValue, watch, register } = useFormContext();
 
   if (entry && typeof entry === 'object') {
     const errored = entry.flow.some(step => !!errors[step] && (dirtyFields[step] || touchedFields[step]))
     return (
-      <Collapse {...entry} errored={errored}>
+      <Collapse {...entry} errored={errored} collapsed={collapsed}>
         {entry.flow.map((en, entryIdx) => {
           const stp = schema[en]
           const err = typeof en === 'object' ? undefined : en.split('.').reduce((object, key) => {
@@ -387,8 +394,9 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
           }
 
           return (
-            <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} label={functionalProperty(en, stp?.label === null ? null : stp?.label || en)} help={stp?.help} render={inputWrapper}>
+            <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} label={functionalProperty(en, stp?.label === null ? null : stp?.label || en)} help={stp?.help} render={inputWrapper} collapsed={collapsed}>
               <Step entry={en} step={stp} schema={schema}
+                collapsed={collapsed}
                 inputWrapper={inputWrapper} httpClient={httpClient}
                 defaultValue={stp?.defaultValue} functionalProperty={functionalProperty} />
             </BasicWrapper>
@@ -449,7 +457,8 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
                 defaultValue={props.defaultValue?.value}
                 value={props.value}
                 index={idx}
-                functionalProperty={functionalProperty} />
+                functionalProperty={functionalProperty}
+                collapsed={collapsed} />
             )
           })} />
       </CustomizableInput >
@@ -570,7 +579,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
           return (
             <CustomizableInput render={step.render} field={{ parent, setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }}>
               <NestedForm
-                schema={step.schema} flow={flow} step={step} parent={entry}
+                schema={step.schema} flow={flow} step={step} parent={entry} collapsed={collapsed}
                 inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={getValues(entry) || defaultValue}
                 index={index} functionalProperty={functionalProperty} errorDisplayed={errorDisplayed} />
             </CustomizableInput>
@@ -746,17 +755,16 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
   )
 }
 
-const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, errorDisplayed, value, step, functionalProperty, index }) => {
+const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, errorDisplayed, value, step, functionalProperty, index, ...props }) => {
   const { getValues, setValue, watch, trigger, formState } = useFormContext();
-  const [collapsed, setCollapsed] = useState(!!step.collapsed);
+  const [collapsed, setCollapsed] = useState(!!step.collapsed || props.collapsed);
+
+  useEffect(() => {
+    setCollapsed(props.collapsed)
+  }, [props.collapsed])
 
   const classes = useCustomStyle();
 
-  // TODO - voir ce qui se passe et à quoi ça sert
-  // const v = getValues(parent);
-  // useEffect(() => {
-  //   trigger(parent)
-  // }, [JSON.stringify(v)])
 
   const schemaAndFlow = option(step.conditionalSchema)
     .map(condiSchema => {
