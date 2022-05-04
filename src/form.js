@@ -512,6 +512,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
                 createOption={step.createOption}
                 transformer={step.transformer}
                 buttons={step.format === format.buttonsSelect}
+                optionsFrom={step.optionsFrom}
               />
             </ControlledInput>
           )
@@ -542,6 +543,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
                 onCreateOption={step.onCreateOption}
                 transformer={step.transformer}
                 buttons={step.format === format.buttonsSelect}
+                optionsFrom={step.optionsFrom}
               />
             </ControlledInput>
           )
@@ -580,6 +582,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
                 onCreateOption={step.onCreateOption}
                 transformer={step.transformer}
                 buttons={step.format === format.buttonsSelect}
+                optionsFrom={step.optionsFrom}
               />
             </ControlledInput>
           )
@@ -622,7 +625,6 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
             <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
               <ObjectInput
                 className={classNames({ [classes.input__invalid]: errorDisplayed })}
-                possibleValues={step.options}
               />
             </ControlledInput>
           )
