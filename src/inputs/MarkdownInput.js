@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import showdown from 'showdown';
 import classNames from 'classnames';
-import { useCustomStyle } from '../styleContext'
 
 import '@fortawesome/fontawesome-free/css/all.css';
 import 'highlight.js/styles/monokai.css';
@@ -98,7 +97,7 @@ export const MarkdownInput = (props) => {
   };
 
   const injectButtons = () => {
-    const classes = useCustomStyle()
+    const classes = props.classes
     return commands.map((command, idx) => {
       if (command.component) {
         return command.component(idx);
@@ -134,7 +133,7 @@ export const MarkdownInput = (props) => {
     });
   };
 
-  const classes = useCustomStyle()
+  const classes = props.classes
 
   return <div className={classNames(props.className)}>
     {!props.readOnly && <div

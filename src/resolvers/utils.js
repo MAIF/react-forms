@@ -6,7 +6,7 @@ import { jsonConstraints } from '../constraints';
 const resolvers = {
   [type.string]: (typeErrorMessage) => yup.string().nullable().optional().typeError(typeErrorMessage || 'Value must be a string'),
   [type.number]: (typeErrorMessage) => yup.number().nullable().optional()
-    .transform(v => { return isNaN(v) ? null : v})
+    .transform(v => { return isNaN(v) ? null : v })
     .typeError(typeErrorMessage || 'Value must be a number'),
   [type.bool]: () => yup.bool().nullable().optional(),
   [type.object]: () => yup.object().nullable().optional(),
@@ -43,7 +43,7 @@ export const buildSubResolver = (props, key, dependencies, rawData) => {
   } else if (props.type === type.object && props.conditionalSchema) {
     const { schema, flow } = option(props.conditionalSchema)
       .map(condiSchema => {
-        const ref = option(condiSchema.ref).map(ref => rawData[ref]).getOrNull();
+        const ref = option(condiSchema.ref).map(ref => rawData ? rawData[ref] : null).getOrNull();
 
         const filterSwitch = condiSchema.switch.find(s => {
           if (typeof s.condition === 'function') {

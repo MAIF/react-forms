@@ -44,7 +44,7 @@ export function CodeInput({
 
   useEffect(() => {
     if (editor && (typeof value === 'object' ? JSON.stringify(value, null, 2) : value) !== editor.state.doc.toString()) {
-      console.log("set value", value, (value === null || value === undefined) ? '' : (typeof value === 'object' ? JSON.stringify(value, null, 2) : value), editor.state.doc.toString())
+      // console.log("set value", value, (value === null || value === undefined) ? '' : (typeof value === 'object' ? JSON.stringify(value, null, 2) : value), editor.state.doc.toString())
       editor.dispatch({
         changes: {
           from: 0,

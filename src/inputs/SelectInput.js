@@ -5,7 +5,6 @@ import Select from 'react-select';
 import { option } from '../Option';
 import { isPromise } from '../utils'
 import deepEqual from 'fast-deep-equal';
-import { useCustomStyle } from '../styleContext';
 
 const valueToSelectOption = (value, possibleValues = [], isMulti = false) => {
   if (value === null || !value) {
@@ -34,7 +33,7 @@ const valueToSelectOption = (value, possibleValues = [], isMulti = false) => {
 };
 
 export const SelectInput = React.forwardRef((props, _) => {
-  const classes = useCustomStyle()
+  const classes = props.classes
   const possibleValues = (props.possibleValues || [])
     .map(v => props.transformer ?
       (typeof props.transformer === 'function' ?
@@ -112,7 +111,7 @@ export const SelectInput = React.forwardRef((props, _) => {
     }
     return onChange(v)
   }
-  
+
   if (props.buttons) {
     return (
       <div style={{ display: 'flex' }}>

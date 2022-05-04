@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { PlusCircle, MinusCircle } from 'react-feather';
 import classNames from 'classnames';
-import { useCustomStyle } from '../styleContext';
 import deepEqual from 'fast-deep-equal';
 
 export const ObjectInput = (props) => {
@@ -85,7 +84,7 @@ export const ObjectInput = (props) => {
     onChange(newState)
   };
 
-  const classes = useCustomStyle();
+  const classes = props.classes
 
   return (
     <div className={props.className}>
