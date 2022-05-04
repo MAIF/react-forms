@@ -63,6 +63,9 @@ export const style = {
   txt_red: {
     color: "#dc3545",
   },
+  error_txt: {
+    fontSize: '.75rem',
+  },
   ml_5: {
     marginLeft: 5,
   },

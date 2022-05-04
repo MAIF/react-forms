@@ -1,20 +1,22 @@
 import React from 'react'
+import classNames from 'classnames';
+
 import { option } from './Option'
 import { type } from './type'
 
-// const CustomizableInput = React.memo(
-//     props => {
-//         if (props.render) {
-//             return (
-//                 props.render({ ...props.field, error: props.error })
-//             )
-//         }
-//         return props.children
-//     }, (prev, next) => (prev.field.value === next.field.value && next.errorDisplayed === prev.errorDisplayed))
+const Error = ({ error, errorDisplayed, children, classes }) =>
+    <>
+        {children}
+        {errorDisplayed && <span className={classNames(classes.txt_red, classes.error_txt)}>{error}</span>}
+    </>
 
 export class ControlledInput extends React.Component {
     render() {
-        const { value, onChange, step, entry, children, component, errorDisplayed, functionalProperty, getField, render, classes } = this.props;
+        const {
+            value, onChange, step, entry, children, component,
+            errorDisplayed, error,
+            functionalProperty, getField, render, classes
+        } = this.props;
 
         const props = {
             ...step.props,
@@ -32,12 +34,19 @@ export class ControlledInput extends React.Component {
                             return null;
                         }
                     } else if (e.target) {
+                        if (e.target.type === 'number') {
+                            if (e.target.value.length === 0)
+                                return null
+                            else if (isNaN(Number(e.target.value)))
+                                return null
+                            return Number(e.target.value)
+                        }
                         return e.target.value || null;
                     } else {
                         return e;
                     }
                 })()
-                console.log("onChange component", value)
+                console.log(e, value)
                 onChange(value)
                 option(step.onChange)
                     .map(onChange => onChange({
@@ -49,8 +58,6 @@ export class ControlledInput extends React.Component {
             value
         }
 
-        // const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], errors)
-
         if (render) {
             return render({
                 parent,
@@ -59,9 +66,13 @@ export class ControlledInput extends React.Component {
                 value,
                 onChange,
                 ...props,
-                // error={error} errorDisplayed={errorDisplayed}
+                error,
+                errorDisplayed
             })
-        } else
-            return component ? component(props) : React.cloneElement(children, { ...props })
+        } else {
+            return <Error error={error} errorDisplayed={errorDisplayed} classes={classes}>
+                {component ? component(props) : React.cloneElement(children, { ...props })}
+            </Error>
+        }
     }
 }

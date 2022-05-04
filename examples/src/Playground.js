@@ -34,6 +34,8 @@ export const Playground = () => {
   const childRef = useRef()
   const formRef = useRef()
 
+  console.log(formRef)
+
   useEffect(() => {
     if (childRef.current)
       childRef.current.reset()
@@ -60,84 +62,88 @@ export const Playground = () => {
   }
 
   return (
-      <div className="container" style={{ marginTop: '70px' }}>
-        <em className='tagline px-0 py-2'>Choose a JSON schema below and check the generated form. Check the <a href='https://github.com/MAIF/react-forms'>documentation</a> for more details.</em>
-        <div className="d-flex">
-          <div className='col-8' style={{ marginRight: '10px' }}>
-            <label htmlFor="selector">Try with a schema</label>
-            <SelectInput
-              className="py-2"
-              possibleValues={Object.entries(examples)}
-              transformer={([k, v]) => ({ label: k, value:v })}
-              value={selectedSchema}
-              onChange={e => {
-                setSelectedSchema(e)
+    <div className="container" style={{ marginTop: '70px' }}>
+      <em className='tagline px-0 py-2'>Choose a JSON schema below and check the generated form. Check the <a href='https://github.com/MAIF/react-forms'>documentation</a> for more details.</em>
+      <div className="d-flex">
+        <div className='col-8' style={{ marginRight: '10px' }}>
+          <label htmlFor="selector">Try with a schema</label>
+          <SelectInput
+            className="py-2"
+            possibleValues={Object.entries(examples)}
+            transformer={([k, v]) => ({ label: k, value: v })}
+            value={selectedSchema}
+            onChange={e => {
+              setSelectedSchema(e)
+              setSchema(e)
+            }}
+          />
+          <CodeInput
+            mode="javascript"
+            onChange={e => {
+              try {
                 setSchema(e)
-              }}
-            />
-            <CodeInput
-              mode="javascript"
-              onChange={e => {
-                try {
-                  setSchema(e)
-                } catch (err) {
-                  console.log(err)
-                }
-              }}
-              value={typeof schema === 'object' ? JSON.stringify(schema, null, 2) : schema}
-            />
-            <label>Default value</label>
-            <CodeInput
-              mode="json"
-              onChange={e => {
-                try {
-                  setValue(JSON.parse(e))
-                } catch (_) { }
-              }}
-              value={typeof value === 'object' ? JSON.stringify(value, null, 2) : value}
-            />
-          </div>
-          <div className='col-4 px-2'>
-            <label>Generated form</label>
-            {error && <span style={{ color: 'tomato' }}>{error}</span>}
-            <div style={{ backgroundColor: '#ececec', padding: '10px 15px' }}>
-              <WrapperError ref={childRef}>
-                <Form
-                  ref={formRef}
-                  schema={realSchema}
-                  value={value}
-                  flow={Object.keys(realSchema)}
-                  onSubmit={d => console.log(JSON.stringify(d, null, 4))}
-                  options={{
-                    watch: unsaved => {
-                      ref?.current?.dispatch({
-                        changes: {
-                          from: 0,
-                          to: ref.current.state.doc.length,
-                          insert: JSON.stringify(unsaved, null, 2)
-                        }
-                      })
-                    },
-                    actions: {
-                      submit: {
-                        label: 'Try it'
+              } catch (err) {
+                console.log(err)
+              }
+            }}
+            value={typeof schema === 'object' ? JSON.stringify(schema, null, 2) : schema}
+          />
+          <label>Default value</label>
+          <CodeInput
+            mode="json"
+            onChange={e => {
+              try {
+                setValue(JSON.parse(e))
+              } catch (_) { }
+            }}
+            value={typeof value === 'object' ? JSON.stringify(value, null, 2) : value}
+          />
+        </div>
+        <div className='col-4 px-2'>
+          <label>Generated form</label>
+          {error && <span style={{ color: 'tomato' }}>{error}</span>}
+          <div style={{ backgroundColor: '#ececec', padding: '10px 15px' }}>
+            <WrapperError ref={childRef}>
+              <Form
+                ref={formRef}
+                schema={realSchema}
+                value={value}
+                flow={Object.keys(realSchema)}
+                onSubmit={d => {
+                  console.log(JSON.stringify(d, null, 4))
+                  setValue(d)
+                }}
+                options={{
+                  autosubmit: true,
+                  watch: unsaved => {
+                    ref?.current?.dispatch({
+                      changes: {
+                        from: 0,
+                        to: ref.current.state.doc.length,
+                        insert: JSON.stringify(unsaved, null, 2)
                       }
+                    })
+                  },
+                  actions: {
+                    submit: {
+                      label: 'Try it'
                     }
-                  }}
-                />
-              </WrapperError>
-            </div>
-            <div className='py-2'>
-              <label>Form state</label>
-              <CodeInput
-                setRef={r => ref.current = r}
-                showGutter={false}
-                mode="json"
+                  }
+                }}
               />
-            </div>
+            </WrapperError>
+          </div>
+          <div className='py-2'>
+            <label>Form state</label>
+            <CodeInput
+              setRef={r => ref.current = r}
+              showGutter={false}
+              mode="json"
+            />
           </div>
         </div>
       </div>
+    </div>
   )
 }
 

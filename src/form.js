@@ -73,9 +73,14 @@ const getDefaultValues = (flow, schema, value) => {
     if (typeof key === 'object') {
       return { ...acc, ...getDefaultValues(key.flow, schema, value) }
     }
-    const entry = schema[key]
-    if (!entry) { return acc }
-    return { ...acc, [key]: defaultVal(value ? value[key] : null, entry.array || entry.isMulti, entry.defaultValue) }
+    const step = schema[key]
+    if (!step) { return acc }
+    return {
+      ...acc,
+      [key]: (value && value[key]) ? value[key] :
+        (step.format === format.form && step.type === type.object && !step.array ? { ...getDefaultValues(step.flow || Object.keys(step.schema), step.schema, value) } :
+          defaultVal(value ? value[key] : null, step.array || step.isMulti, step.defaultValue))
+    }
   }, {})
 }
 
@@ -90,44 +95,20 @@ export const validate = (flow, schema, value) => {
     })
 }
 
-// const Watcher = ({ options, control, schema, onSubmit, handleSubmit, getValues, watch }) => {
-//   const data = useWatch({ control })
-//   const prev = usePrevious(data)
-
-//   useEffect(() => {
-//     if (!!options.autosubmit) {
-//       if (!deepEqual(data, prev))
-//         handleSubmit(() => {
-//           onSubmit(cleanOutputArray(data, schema))
-//         })()
-//     }
-//   }, [data])
-
-//   if (options.watch) {
-//     if (typeof options.watch === 'function') {
-//       options.watch(cleanOutputArray(data, schema))
-//     } else {
-//       console.group('react-form watch')
-//       console.log(cleanOutputArray(data, schema))
-//       console.groupEnd()
-//     }
-//   }
-
-//   return null
-// }
-
-
-
 class FormComponent extends React.Component {
   state = {
     expandedAll: false,
-    value: undefined,
+    intervalValue: undefined,
     errors: []
   }
 
-  reset = () => this.setState({
-    value: getDefaultValues(this.props.flow || Object.keys(this.props.schema), this.props.schema, this.props.value)
-  })
+  reset = () => {
+    const { flow, schema, value } = this.props
+    if (!this.state.intervalValue || !deepEqual(value, this.state.intervalValue))
+      this.setState({
+        intervalValue: getDefaultValues(flow || Object.keys(schema), schema, value)
+      }, this.watch)
+  }
 
   componentDidMount() {
     this.reset()
@@ -135,7 +116,27 @@ class FormComponent extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (prevProps.schema !== this.props.schema || prevProps.flow !== this.props.flow)
-      this.reset()
+      this.setState({
+        intervalValue: getDefaultValues(this.props.flow || Object.keys(this.props.schema), this.props.schema, this.props.value)
+      })
+  }
+
+  watch = () => {
+    const { options } = this.props
+
+    if (!!options.autosubmit) {
+      this.validate()
+    }
+
+    if (options.watch) {
+      if (typeof options.watch === 'function') {
+        options.watch(this.state.intervalValue)
+      } else {
+        console.group('react-form watch')
+        console.log(this.state.intervalValue)
+        console.groupEnd()
+      }
+    }
   }
 
   maybeCustomHttpClient = (url, method) => {
@@ -151,28 +152,21 @@ class FormComponent extends React.Component {
     })
   }
 
-  // useImperativeHandle(ref, () => ({
-  //   handleSubmit: () => handleSubmit(data => {
-  //     const clean = cleanOutputArray(data, schema)
-  //     onSubmit(clean)
-  //   }, onError)(),
-  //   trigger,
-  //   methods: {
-  //     ...methods,
-  //     data: () => cleanOutputArray(getValues(), schema)
-  //   }
-  // }));
-
   validate = e => {
-    e.preventDefault()
+    if (e && e.preventDefault)
+      e.preventDefault()
+
     const formFlow = this.props.flow || Object.keys(this.props.schema)
 
     const { shape, dependencies } = getShapeAndDependencies(formFlow, this.props.schema);
     return yup.object()
       .shape(shape, dependencies)
-      .validate(this.state.value, { abortEarly: false })
+      .validate(this.state.intervalValue, { abortEarly: false })
       .then(() => {
-        this.props.onSubmit(this.state.value)
+        this.setState({
+          errors: []
+        })
+        this.props.onSubmit(this.state.intervalValue)
       })
       .catch(err => {
         if (typeof this.props.onError === 'function')
@@ -182,9 +176,7 @@ class FormComponent extends React.Component {
 
         if (err.inner && Array.isArray(err.inner)) {
           this.setState({
-            errors: err.inner.map(r => ({
-              error: r.message, path: r.path
-            }))
+            errors: err.inner.reduce((acc, r) => set(acc, r.path, r.message), {})
           })
         }
       })
@@ -192,7 +184,7 @@ class FormComponent extends React.Component {
 
   functionalProperty = (entry, prop) => {
     if (typeof prop === 'function') {
-      return prop({ rawValues: value, value: get(this.state.value, entry) });
+      return prop({ rawValues: value, value: get(this.state.intervalValue, entry) });
     } else {
       return prop;
     }
@@ -213,7 +205,7 @@ class FormComponent extends React.Component {
 
     const { expandedAll, errors } = this.state
 
-    console.log(errors)
+    console.log(errors, this.state.intervalValue)
 
     return <form className={className || `${classes.pr_15} ${classes.w_100}`} onSubmit={this.validate}>
       {options.controls && <div className={classNames(classes.flex, classes.mt_20)}>
@@ -273,18 +265,19 @@ class FormComponent extends React.Component {
               httpClient={this.maybeCustomHttpClient}
               functionalProperty={this.functionalProperty}
               expandedAll={expandedAll}
-              value={get(this.state.value, entry)}
+              value={get(this.state.intervalValue, entry)}
               errors={errors}
               onChange={(key, e) => {
                 console.log('onChange', key, e)
 
-                const newState = { ...this.state.value }
+                const newState = { ...this.state.intervalValue }
                 set(newState, key, e)
                 this.setState({
-                  value: newState
-                })
+                  intervalValue: newState
+                }, this.watch)
               }}
-              getField={key => get(this.state.value, key)}
+              getField={key => !key ? this.state.intervalValue : get(this.state.intervalValue, key)}
+              getErrorField={key => get(errors, key)}
             />
           </BasicWrapper>
         </Style>
@@ -300,26 +293,62 @@ class FormComponent extends React.Component {
   }
 }
 
-// export const Form = React.forwardRef(() => FormComponent)
-export const Form = (props) => {
+export const Form = React.forwardRef((props, ref) => {
   return <Style overrideStyle={props.style}>
-    <FormComponent {...props} />
+    <FormComponent {...props} ref={ref} />
   </Style>
-}
+})
+
+const FileInput = ({ onChange, classes, readOnly, value, error }) => {
+  const [uploading, setUploading] = useState(false);
+  const [input, setInput] = useState(undefined);
+
+  const setFiles = (e) => {
+    const files = e.target.files;
+    setUploading(true);
+    onChange([...files])
+    setUploading(false);
+  };
+
+  const files = value || []
+
+  return (
+    <div className={classNames(classes.flex, classes.ai_center, { [classes.input__invalid]: error })}>
+      <input
+        ref={(r) => setInput(r)}
+        type="file"
+        multiple
+        className={classes.d_none}
+        onChange={setFiles}
+      />
+      <button
+        type="button"
+        className={`${classes.btn} ${classes.btn_sm} ${classes.flex} ${classes.ai_center}`}
+        disabled={uploading || readOnly}
+        onClick={() => {
+          input.click();
+        }}>
+        {uploading && <Loader />}
+        {!uploading && <Upload />}
+        <span className={`${classes.ml_5}`}>Select file(s)</span>
+      </button>
+
+      <span className={`${classes.ml_5}`}>{files.length <= 0 ? 'No files selected' : files.map(r => r.name).join(" , ")}</span>
+    </div>
+  );
+};
 
 class Step extends React.Component {
   render() {
     const {
       entry, realEntry, step, schema, inputWrapper, httpClient,
       defaultValue, index, functionalProperty, parent, expandedAll, getField, value,
-      onChange, errors } = this.props
+      onChange, errors, getErrorField } = this.props
 
     if (entry && typeof entry === 'object') {
-      //const errored = entry.flow.some(step => !!errors[step] && (dirtyFields[step] || touchedFields[step]))
+      const errored = entry.flow.some(step => !!getErrorField(step))// && (dirtyFields[step] || touchedFields[step]))
       return <Style>
-        <Collapse {...entry}
-        /*errored={errored}*/
-        >
+        <Collapse {...entry} errored={errored}>
           {entry.flow.map((en, entryIdx) => {
             const stp = schema[en]
 
@@ -358,6 +387,7 @@ class Step extends React.Component {
                   defaultValue={stp?.defaultValue}
                   functionalProperty={functionalProperty}
                   errors={errors}
+                  getErrorField={getErrorField}
                   value={getField(`${entry}.${en}`)}
                   onChange={e => onChange(`${entry}.${en}`, e)} />
               </BasicWrapper>
@@ -367,16 +397,16 @@ class Step extends React.Component {
       </Style>
     }
 
-    const error = false // entry.split('.').reduce((acc, curr) => acc && acc[curr], errors)
+    const error = getErrorField(entry)
     // const isDirty = entry.split('.').reduce((acc, curr) => acc && acc[curr], dirtyFields)
     // const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], touchedFields)
-    const errorDisplayed = false // !!error && (isSubmitted || isDirty || isTouched)
+    const errorDisplayed = !!error // && (isSubmitted || isDirty || isTouched)
 
     if (step.array) {
       return (
         <CustomizableInput render={step.render} field={{
           setValue: onChange,
-          // rawValues: value,
+          rawValues: getField(),
           value,
           onChange: e => onChange(entry, e)
         }} error={error}>
@@ -408,6 +438,7 @@ class Step extends React.Component {
                     functionalProperty={functionalProperty}
                     expandedAll={expandedAll}
                     getField={getField}
+                    getErrorField={getErrorField}
                     classes={classes} />
                 )
               })} />
@@ -421,12 +452,10 @@ class Step extends React.Component {
       defaultValue,
       step,
       entry,
+      error,
       errorDisplayed,
       getField,
-      onChange: v => {
-        console.log('controlled props', entry, v)
-        onChange(entry, v)
-      },
+      onChange: v => onChange(entry, v),
       value
     }
 
@@ -467,8 +496,7 @@ class Step extends React.Component {
 
     const uncontrolledInput = {
       [type.object]: [format.form, format.code],
-      [type.file]: []
-      [type.json]
+      [type.json]: []
     }
 
     const components = {
@@ -503,7 +531,7 @@ class Step extends React.Component {
             <CustomizableInput render={step.render} field={{
               parent,
               setValue: onChange,
-              // rawValues: getValues(),
+              rawValues: getField(),
               value,
               onChange: e => onChange(entry, e)
             }}>
@@ -519,21 +547,21 @@ class Step extends React.Component {
                   functionalProperty={functionalProperty}
                   errorDisplayed={errorDisplayed}
                   expandedAll={expandedAll}
-                  value={getField(entry)} // TODO
-                  onChange={onChange} // TODO
+                  value={getField(entry)}
+                  onChange={onChange}
                   getField={getField}
+                  getErrorField={getErrorField}
                 />
               </Style>
             </CustomizableInput>
           )
         },
-        [format.code]: () => {
+        [format.code]: () =>
           <ControlledInput {...controlledProps} component={props => (
             <CodeInput
               {...props}
               className={classNames({ [props.classes.input__invalid]: error })}
               onChange={(e) => {
-                errorDisplayed = { errorDisplayed }
                 let v
                 try {
                   v = JSON.parse(e)
@@ -543,7 +571,7 @@ class Step extends React.Component {
                 props.onChange(v)
                 option(step.onChange)
                   .map(onChange => onChange({
-                    // rawValues: getValues(), TODO
+                    rawValues: getField(),
                     value,
                     setValue: onChange
                   }))
@@ -551,8 +579,7 @@ class Step extends React.Component {
               value={props.value === null ? null : ((typeof props.value === 'object') ? JSON.stringify(props.value, null, 2) : props.value)}
             />
           )}>
-          </ControlledInput>
-        },
+          </ControlledInput>,
         default: ({ classes }) => <ObjectInput
           className={classNames({ [classes.input__invalid]: errorDisplayed })}
           possibleValues={step.options}
@@ -565,71 +592,19 @@ class Step extends React.Component {
         />
       },
       [type.file]: {
-        default: ({ classes }) => <Controller
-          name={entry}
-          control={control}
-          render={({ field }) => {
-            const FileInput = ({ onChange }) => {
-              const [uploading, setUploading] = useState(false);
-              const [input, setInput] = useState(undefined);
-
-              const setFiles = (e) => {
-                const files = e.target.files;
-                setUploading(true);
-                onChange([...files])
-                setUploading(false);
-              };
-
-              const trigger = () => {
-                input.click();
-              };
-
-              const files = field.value || []
-
-              return (
-                <div className={classNames(classes.flex, classes.ai_center, { [classes.input__invalid]: error })}>
-                  <input
-                    ref={(r) => setInput(r)}
-                    type="file"
-                    multiple
-                    className={classes.d_none}
-                    onChange={setFiles}
-                  />
-                  <button
-                    type="button"
-                    className={`${classes.btn} ${classes.btn_sm} ${classes.flex} ${classes.ai_center}`}
-                    disabled={uploading || functionalProperty(entry, step.disabled)}
-                    onClick={trigger}>
-                    {uploading && <Loader />}
-                    {!uploading && <Upload />}
-                    <span className={`${classes.ml_5}`}>Select file(s)</span>
-                  </button>
-
-                  <span className={`${classes.ml_5}`}>{files.length <= 0 ? 'No files selected' : files.map(r => r.name).join(" , ")}</span>
-                </div>
-              );
-            };
-
-            return (
-              <ControlledInput {...controlledProps}>
-                <FileInput />
-              </ControlledInput>
-            )
-          }}
-        />
+        default: () => <FileInput />
       },
       [type.json]: {
-        default: () => <ControlledInput {...controlledProps} component={(field, props) => (
+        default: () => <ControlledInput {...controlledProps} component={props => (
           <CodeInput
             {...props}
-            className={classNames({ [props.classes.input__invalid]: error })}
-            // onChange={v => {
-            //   field.onChange(v)
-            //   option(step.onChange)
-            //     .map(onChange => onChange({ rawValues: getValues(), value: v, setValue }))
-            // }}
-            value={props.value}
-            onChange={e => onChange(entry, e)}
+            value={JSON.stringify(props.value, null, 2)}
+            className={classNames({ [props.classes.input__invalid]: errorDisplayed })}
+            onChange={e => {
+              onChange(entry, JSON.parse(e))
+              option(step.onChange)
+                .map(onChange => onChange({ rawValues: getField(), value, setValue: onChange }))
+            }}
           />
         )}>
         </ControlledInput>
@@ -650,7 +625,9 @@ class Step extends React.Component {
       const component = stepComponentFormat ? stepComponentFormat : stepComponentType.default
 
       if (isUncontrolled)
-        return component()
+        return <Style>
+          {component()}
+        </Style>
       else {
         return <Style>
           <ControlledInput {...controlledProps} component={props => {
@@ -733,7 +710,11 @@ class NestedForm extends React.Component {
   loadSchemaAndFlow = () => {
     this.setState({
       schemaAndFlow: this.calculateConditionalSchema()
-    })
+    }, () => this.props.onChange(this.props.parent, getDefaultValues(
+      this.state.schemaAndFlow.flow,
+      this.state.schemaAndFlow.schema,
+      {}
+    )))
   }
 
   calculateConditionalSchema = () => option(this.props.step.conditionalSchema)
@@ -756,22 +737,14 @@ class NestedForm extends React.Component {
   componentDidUpdate() {
     if (!deepEqual(this.calculateConditionalSchema().schema, this.state.schemaAndFlow.schema)) {
       this.loadSchemaAndFlow()
-      this.props.onChange(this.props.parent, getDefaultValues(this.props.step.flow, this.props.step.schema, {}))
     }
   }
-
-  // useEffect(() => {
-  //   if (!!prevSchema && !deepEqual(prevSchema, schemaAndFlow.schema)) {
-  //     const def = getDefaultValues(schemaAndFlow.flow, schemaAndFlow.schema, getValues(parent));
-  //     setValue(parent, def, { shouldValidate: false })
-  //   }
-  // }, [prevSchema, schemaAndFlow.schema])
 
   render() {
     const {
       parent, inputWrapper, maybeCustomHttpClient,
       errorDisplayed, value, step, functionalProperty, index, expandedAll,
-      getField, onChange, classes
+      getField, onChange, classes, getErrorField
     } = this.props
 
     const { collapsed, schemaAndFlow } = this.state
@@ -847,6 +820,7 @@ class NestedForm extends React.Component {
                 httpClient={maybeCustomHttpClient}
                 defaultValue={value && value[entry]}
                 functionalProperty={functionalProperty}
+                getErrorField={getErrorField}
                 expandedAll={expandedAll}
                 value={getField(`${parent}.${entry}`)}
                 onChange={onChange}

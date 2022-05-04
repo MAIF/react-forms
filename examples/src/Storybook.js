@@ -36,38 +36,47 @@ const Storybook = () => {
           </div>
         </div>
         <div className="col-9" style={{ marginRight: "10px" }}>
-            {Object.keys(schema)
-              .map((item) => ({ key: item, ...schema[item] }))
-              .filter(({ type }) => filter === type)
-              .map(({ key, ...item }, index) => (
-                <WrapperError key={`form-${key}-${index}`}>
-                  <label style={{ fontWeight: "bold" }}>
-                    Input type {item.type}
-                    {item.format && ` (format: ${item.format})`}
-                  </label>
-                  <div
-                    style={{
-                      backgroundColor: "#ececec",
-                      padding: "10px 15px",
-                      marginBottom: "15px"
+          {Object.keys(schema)
+            .map((item) => ({ key: item, ...schema[item] }))
+            .filter(({ type }) => filter === type)
+            .map(({ key, ...item }, index) => (
+              <WrapperError key={`form-${key}-${index}`}>
+                <label style={{ fontWeight: "bold" }}>
+                  Input type {item.type}
+                  {item.format && ` (format: ${item.format})`}
+                </label>
+                <div
+                  style={{
+                    backgroundColor: "#ececec",
+                    padding: "10px 15px",
+                    marginBottom: "15px"
+                  }}
+                >
+                  <Form
+                    schema={{
+                      [key]: {
+                        constraints: [
+                          constraints.required(`${key} is required`)
+                        ],
+                        ...item
+                      }
                     }}
-                  >
-                    <Form
-                      schema={{
-                        [key]: {
-                          constraints: [
-                            constraints.required(`${key} is required`)
-                          ],
-                          ...item
+                    flow={[key]}
+                    onSubmit={(d) => {
+                      console.log(d)
+                      alert(JSON.stringify(d, null, 2))
+                    }}
+                    options={{
+                      actions: {
+                        submit: {
+                          label: "Show It!"
                         }
-                      }}
-                      flow={[key]}
-                      onSubmit={(d) => alert(JSON.stringify(d, null, 2))}
-                      options={{actions:{submit:{label:"Show It!"}}}}
-                    />
-                  </div>
-                </WrapperError>
-              ))}
+                      }
+                    }}
+                  />
+                </div>
+              </WrapperError>
+            ))}
         </div>
       </div>
     </div>

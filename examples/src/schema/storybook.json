@@ -6,12 +6,22 @@
   "select": {
     "type": "string",
     "format": "select",
-    "options": ["option 1", "option 2", "option 3"]
+    "options": [
+      "option 1",
+      "option 2",
+      "option 3"
+    ]
   },
   "buttonsSelect": {
     "type": "string",
     "format": "buttons",
-    "options": ["option 1", "option 2", "option 3","option 4","option 5"]
+    "options": [
+      "option 1",
+      "option 2",
+      "option 3",
+      "option 4",
+      "option 5"
+    ]
   },
   "email": {
     "type": "string",
@@ -28,7 +38,7 @@
   "singleLineCode": {
     "type": "string",
     "format": "singleLineCode",
-    "defaultValue":"const person = {name:'Bob',age:12}"
+    "defaultValue": "const person = {name:'Bob',age:12}"
   },
   "markdown": {
     "type": "string",
@@ -41,7 +51,7 @@
   },
   "hidden": {
     "type": "string",
-    "format":"hidden",
+    "format": "hidden",
     "defaultValue": "the hidden value"
   },
   "number": {
@@ -54,7 +64,18 @@
   "buttonsSelect-number": {
     "type": "number",
     "format": "buttons",
-    "options": [1,2,3,4,5,6,7,8,9,10]
+    "options": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ]
   },
   "date": {
     "type": "date"
@@ -74,12 +95,13 @@
   },
   "code": {
     "type": "object",
+    "label": "Object as json input",
     "format": "code"
   },
   "form": {
     "type": "object",
     "format": "form",
-    "label":"Personne",
+    "label": "Personne",
     "schema": {
       "name": {
         "type": "string",
@@ -94,6 +116,19 @@
   "buttonsSelect-object": {
     "type": "object",
     "format": "buttons",
-    "options": [{"object":1},{"object":2},{"object":3}]
+    "options": [
+      {
+        "object": 1
+      },
+      {
+        "object": 2
+      },
+      {
+        "object": 3
+      }
+    ]
+  },
+  "json": {
+    "type": "json"
   }
 }
