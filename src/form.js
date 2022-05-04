@@ -1,5 +1,5 @@
-import React, { useState, useImperativeHandle } from 'react'
-import { yupResolver } from '@hookform/resolvers/yup';
+import React, { useState } from 'react'
+// import { yupResolver } from '@hookform/resolvers/yup';
 import classNames from 'classnames';
 import { HelpCircle, Loader, Upload, ChevronDown, ChevronUp, Trash2 } from 'react-feather';
 import { DatePicker } from 'react-rainbow-components';
@@ -15,7 +15,6 @@ import { getShapeAndDependencies } from './resolvers/index';
 import { option } from './Option'
 import { ControlledInput } from './controlledInput';
 import deepEqual from 'fast-deep-equal';
-import { arrayFlatten } from './utils';
 import get from 'lodash.get';
 import set from 'lodash.set';
 
@@ -104,25 +103,31 @@ class FormComponent extends React.Component {
 
   reset = () => {
     const { flow, schema, value } = this.props
-    if (!this.state.intervalValue || !deepEqual(value, this.state.intervalValue))
+    if ((!this.state.intervalValue || !deepEqual(value, this.state.intervalValue)) && (flow || Object.keys(schema)).length > 0) {
+      console.log("reset state")
       this.setState({
         intervalValue: getDefaultValues(flow || Object.keys(schema), schema, value)
       }, this.watch)
+    }
   }
+
+  isDirty = () => !deepEqual(this.props.value, this.state.intervalValue)
 
   componentDidMount() {
     this.reset()
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.schema !== this.props.schema || prevProps.flow !== this.props.flow)
+    if (prevProps.schema !== this.props.schema || prevProps.flow !== this.props.flow) {
+      console.log("reset state from componentDidUpdate", getDefaultValues(this.props.flow || Object.keys(this.props.schema), this.props.schema, this.props.value), this.props)
       this.setState({
         intervalValue: getDefaultValues(this.props.flow || Object.keys(this.props.schema), this.props.schema, this.props.value)
       })
+    }
   }
 
   watch = () => {
-    const { options } = this.props
+    const { options, flow, schema } = this.props
 
     if (!!options.autosubmit) {
       this.validate()
@@ -137,6 +142,59 @@ class FormComponent extends React.Component {
         console.groupEnd()
       }
     }
+
+    this.callAfterChangeMethods((flow || Object.keys(schema)), schema)
+  }
+
+  callAfterChangeMethods = (flow, schema, path) => {
+    (flow || []).forEach(key => {
+      if (typeof key === 'object') {
+        this.callAfterChangeMethods(key.flow, schema, path)
+      }
+
+      const currentPath = path ? `${path}.${key}` : key
+      const step = get(schema, key)
+
+      if (!step)
+        return
+
+      if (step.onAfterChange) {
+        const { intervalValue } = this.state
+
+        if (step.array)
+          (get(intervalValue, currentPath) || []).forEach((v, idx) => {
+            step.onAfterChange({
+              entry: `${key}.${idx}`,
+              parent: path,
+              value: v,
+              rawValues: intervalValue,
+              getValue: e => get(intervalValue, e),
+              getFieldValue: e => get(v, e),
+              setValue: (e, v) => this.setState({
+                internaValue: set(intervalValue, e, v)
+              }),
+              onChange: (entry, v) => {
+                this.setState({
+                  intervalValue: set(intervalValue, `${currentPath}.${idx}.${entry}`, v)
+                })
+              }
+            })
+          })
+        else
+          step.onAfterChange({
+            entry: key,
+            parent: path,
+            value: get(intervalValue, currentPath),
+            rawValues: intervalValue,
+            getValue: e => get(intervalValue, e),
+            setValue: (e, v) => set(intervalValue, e, v),
+            onChange: (entry, v) => set(intervalValue, `${path}.${entry}`, v)
+          })
+      }
+
+      if (!!step.flow || (step.format === format.form && step.type === type.object && !step.array))
+        this.callAfterChangeMethods(step.flow || Object.keys(step.schema), step.schema, currentPath)
+    })
   }
 
   maybeCustomHttpClient = (url, method) => {
@@ -205,7 +263,13 @@ class FormComponent extends React.Component {
 
     const { expandedAll, errors } = this.state
 
-    console.log(errors, this.state.intervalValue)
+    if (!this.state.intervalValue)
+      return null
+
+    // console.log({
+    //   errors,
+    //   value: this.state.intervalValue
+    // })
 
     return <form className={className || `${classes.pr_15} ${classes.w_100}`} onSubmit={this.validate}>
       {options.controls && <div className={classNames(classes.flex, classes.mt_20)}>
@@ -236,7 +300,7 @@ class FormComponent extends React.Component {
           .map(visible => {
             switch (typeof visible) {
               case 'object':
-                const value = this.readAtKey(step.visible.ref);
+                const value = get(this.state.intervalValue, step.visible.ref);
                 return option(step.visible.test).map(test => test(value, idx)).getOrElse(value)
               case 'boolean':
                 return visible;
@@ -268,7 +332,7 @@ class FormComponent extends React.Component {
               value={get(this.state.intervalValue, entry)}
               errors={errors}
               onChange={(key, e) => {
-                console.log('onChange', key, e)
+                // console.log('onChange', key, e)
 
                 const newState = { ...this.state.intervalValue }
                 set(newState, key, e)
@@ -378,7 +442,8 @@ class Step extends React.Component {
 
             return <Style>
               <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} label={functionalProperty(en, stp?.label === null ? null : stp?.label || en)} help={stp?.help} render={inputWrapper}>
-                <Step entry={en}
+                <Step
+                  entry={en}
                   step={stp}
                   schema={schema}
                   expandedAll={expandedAll}
@@ -387,9 +452,10 @@ class Step extends React.Component {
                   defaultValue={stp?.defaultValue}
                   functionalProperty={functionalProperty}
                   errors={errors}
+                  getField={getField}
                   getErrorField={getErrorField}
-                  value={getField(`${entry}.${en}`)}
-                  onChange={e => onChange(`${entry}.${en}`, e)} />
+                  value={getField(en)}
+                  onChange={(key, e) => onChange(key, e)} />
               </BasicWrapper>
             </Style>
           })}
@@ -548,7 +614,7 @@ class Step extends React.Component {
                   errorDisplayed={errorDisplayed}
                   expandedAll={expandedAll}
                   value={getField(entry)}
-                  onChange={onChange}
+                  onChange={(key, e) => onChange(key, e)}
                   getField={getField}
                   getErrorField={getErrorField}
                 />
@@ -696,12 +762,10 @@ class ArrayStep extends React.Component {
 }
 
 class NestedForm extends React.Component {
-
   state = {
     collapsed: !!this.props.step.collapsed,
     schemaAndFlow: undefined
   }
-
 
   componentDidMount() {
     this.loadSchemaAndFlow()
@@ -710,11 +774,18 @@ class NestedForm extends React.Component {
   loadSchemaAndFlow = () => {
     this.setState({
       schemaAndFlow: this.calculateConditionalSchema()
-    }, () => this.props.onChange(this.props.parent, getDefaultValues(
-      this.state.schemaAndFlow.flow,
-      this.state.schemaAndFlow.schema,
-      {}
-    )))
+    }, () => {
+      // console.log('nested form set value', this.props.onChange, this.props.parent, getDefaultValues(
+      //   this.state.schemaAndFlow.flow,
+      //   this.state.schemaAndFlow.schema,
+      //   this.props.getField(this.props.parent)
+      // ))
+      this.props.onChange(this.props.parent, getDefaultValues(
+        this.state.schemaAndFlow.flow,
+        this.state.schemaAndFlow.schema,
+        this.props.getField(this.props.parent)
+      ))
+    })
   }
 
   calculateConditionalSchema = () => option(this.props.step.conditionalSchema)
@@ -821,6 +892,7 @@ class NestedForm extends React.Component {
                 defaultValue={value && value[entry]}
                 functionalProperty={functionalProperty}
                 getErrorField={getErrorField}
+                getField={getField}
                 expandedAll={expandedAll}
                 value={getField(`${parent}.${entry}`)}
                 onChange={onChange}

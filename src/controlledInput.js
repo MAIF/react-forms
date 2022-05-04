@@ -15,8 +15,10 @@ export class ControlledInput extends React.Component {
         const {
             value, onChange, step, entry, children, component,
             errorDisplayed, error,
-            functionalProperty, getField, render, classes
+            functionalProperty, getField, classes
         } = this.props;
+
+        // console.log(entry, value)
 
         const props = {
             ...step.props,
@@ -46,7 +48,6 @@ export class ControlledInput extends React.Component {
                         return e;
                     }
                 })()
-                console.log(e, value)
                 onChange(value)
                 option(step.onChange)
                     .map(onChange => onChange({
@@ -58,8 +59,8 @@ export class ControlledInput extends React.Component {
             value
         }
 
-        if (render) {
-            return render({
+        if (step.render) {
+            return step.render({
                 parent,
                 setValue: onChange,
                 // rawValues: value, // TODO
