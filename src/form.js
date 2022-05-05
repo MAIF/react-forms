@@ -18,17 +18,13 @@ import deepEqual from 'fast-deep-equal';
 import get from 'lodash.get';
 import set from 'lodash.set';
 
-const BasicWrapper = ({ entry, className, label, help, children, render, classes }) => {
+const BasicWrapper = ({ entry, className, label, help, children, render, classes, fieldState, error, isSubmitted }) => {
   if (typeof entry === 'object') {
     return children
   }
   const id = uuid();
 
-  // const { formState } = useFormContext();
-  // const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.errors)
-  // const isDirty = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.dirtyFields)
-  // const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.touchedFields)
-  // const errorDisplayed = formState.isSubmitted || isDirty || isTouched
+  const errorDisplayed = isSubmitted || fieldState?.isDirty || fieldState?.isTouched
 
   if (render) {
     return render({ entry, label, error, help, children })
@@ -47,7 +43,7 @@ const BasicWrapper = ({ entry, className, label, help, children, render, classes
       </label>}
 
       {children}
-      {/* {error && <div className={classNames(classes.feedback, { [classes.txt_red]: errorDisplayed })}>{error.message}</div>} */}
+      {error && <div className={classNames(classes.feedback, { [classes.txt_red]: errorDisplayed })}>{error.message}</div>}
     </div>
   )
 }
@@ -76,7 +72,7 @@ const getDefaultValues = (flow, schema, value) => {
     if (!step) { return acc }
     return {
       ...acc,
-      [key]: (value && value[key]) ? value[key] :
+      [key]: (value && value[key] !== undefined) ? value[key] :
         (step.format === format.form && step.type === type.object && !step.array ? { ...getDefaultValues(step.flow || Object.keys(step.schema), step.schema, value) } :
           defaultVal(value ? value[key] : null, step.array || step.isMulti, step.defaultValue))
     }
@@ -97,21 +93,26 @@ export const validate = (flow, schema, value) => {
 class FormComponent extends React.Component {
   state = {
     expandedAll: false,
-    intervalValue: undefined,
-    errors: []
+    internalValue: undefined,
+    errors: {},
+    isSubmitted: false,
+    isDirty: false,
+    fieldsState: {}
   }
 
   reset = () => {
     const { flow, schema, value } = this.props
-    if ((!this.state.intervalValue || !deepEqual(value, this.state.intervalValue)) && (flow || Object.keys(schema)).length > 0) {
+    if ((!this.state.internalValue || !deepEqual(value, this.state.internalValue)) && (flow || Object.keys(schema)).length > 0) {
       console.log("reset state")
       this.setState({
-        intervalValue: getDefaultValues(flow || Object.keys(schema), schema, value)
+        isSubmitted: false,
+        isDirty: false,
+        internalValue: getDefaultValues(flow || Object.keys(schema), schema, value)
       }, this.watch)
     }
   }
 
-  isDirty = () => !deepEqual(this.props.value, this.state.intervalValue)
+  isDirty = () => Object.keys(this.state.errors).length === 0 && this.state.isDirty
 
   componentDidMount() {
     this.reset()
@@ -121,13 +122,15 @@ class FormComponent extends React.Component {
     if (prevProps.schema !== this.props.schema || prevProps.flow !== this.props.flow) {
       console.log("reset state from componentDidUpdate", getDefaultValues(this.props.flow || Object.keys(this.props.schema), this.props.schema, this.props.value), this.props)
       this.setState({
-        intervalValue: getDefaultValues(this.props.flow || Object.keys(this.props.schema), this.props.schema, this.props.value)
+        isSubmitted: false,
+        isDirty: false,
+        internalValue: getDefaultValues(this.props.flow || Object.keys(this.props.schema), this.props.schema, this.props.value)
       })
     }
   }
 
   watch = () => {
-    const { options, flow, schema } = this.props
+    const { options = {}, flow, schema } = this.props
 
     if (!!options.autosubmit) {
       this.validate()
@@ -135,10 +138,10 @@ class FormComponent extends React.Component {
 
     if (options.watch) {
       if (typeof options.watch === 'function') {
-        options.watch(this.state.intervalValue)
+        options.watch(this.state.internalValue)
       } else {
         console.group('react-form watch')
-        console.log(this.state.intervalValue)
+        console.log(this.state.internalValue)
         console.groupEnd()
       }
     }
@@ -159,23 +162,29 @@ class FormComponent extends React.Component {
         return
 
       if (step.onAfterChange) {
-        const { intervalValue } = this.state
+        const { internalValue } = this.state
 
         if (step.array)
-          (get(intervalValue, currentPath) || []).forEach((v, idx) => {
+          (get(internalValue, currentPath) || []).forEach((v, idx) => {
             step.onAfterChange({
               entry: `${key}.${idx}`,
               parent: path,
               value: v,
-              rawValues: intervalValue,
-              getValue: e => get(intervalValue, e),
+              rawValues: internalValue,
+              getValue: e => get(internalValue, e),
               getFieldValue: e => get(v, e),
-              setValue: (e, v) => this.setState({
-                internaValue: set(intervalValue, e, v)
-              }),
-              onChange: (entry, v) => {
+              setValue: (e, v) => {
+                const newValue = { ...internalValue }
+                set(newValue, e, v)
                 this.setState({
-                  intervalValue: set(intervalValue, `${currentPath}.${idx}.${entry}`, v)
+                  internalValue: newValue
+                })
+              },
+              onChange: (entry, v) => {
+                const newValue = { ...internalValue }
+                set(newValue, `${currentPath}.${idx}.${entry}`, v)
+                this.setState({
+                  internalValue: newValue
                 })
               }
             })
@@ -184,11 +193,11 @@ class FormComponent extends React.Component {
           step.onAfterChange({
             entry: key,
             parent: path,
-            value: get(intervalValue, currentPath),
-            rawValues: intervalValue,
-            getValue: e => get(intervalValue, e),
-            setValue: (e, v) => set(intervalValue, e, v),
-            onChange: (entry, v) => set(intervalValue, `${path}.${entry}`, v)
+            value: get(internalValue, currentPath),
+            rawValues: internalValue,
+            getValue: e => get(internalValue, e),
+            setValue: (e, v) => set(internalValue, e, v),
+            onChange: (entry, v) => set(internalValue, `${path}.${entry}`, v)
           })
       }
 
@@ -210,6 +219,28 @@ class FormComponent extends React.Component {
     })
   }
 
+  handleSubmit = () => this.validate()
+
+  trigger = () => {
+    console.log('trigger')
+    const formFlow = this.props.flow || Object.keys(this.props.schema)
+
+    const { shape, dependencies } = getShapeAndDependencies(formFlow, this.props.schema);
+    yup.object()
+      .shape(shape, dependencies)
+      .validate(this.state.internalValue, { abortEarly: false })
+      .then(() => {
+        this.setState({ errors: {} })
+      })
+      .catch(err => {
+        if (err.inner && Array.isArray(err.inner)) {
+          this.setState({
+            errors: err.inner.reduce((acc, r) => set(acc, r.path, r.message), {})
+          })
+        }
+      })
+  }
+
   validate = e => {
     if (e && e.preventDefault)
       e.preventDefault()
@@ -219,12 +250,14 @@ class FormComponent extends React.Component {
     const { shape, dependencies } = getShapeAndDependencies(formFlow, this.props.schema);
     return yup.object()
       .shape(shape, dependencies)
-      .validate(this.state.intervalValue, { abortEarly: false })
+      .validate(this.state.internalValue, { abortEarly: false })
       .then(() => {
         this.setState({
-          errors: []
+          isSubmitted: true,
+          isDirty: false,
+          errors: {}
         })
-        this.props.onSubmit(this.state.intervalValue)
+        this.props.onSubmit(this.state.internalValue)
       })
       .catch(err => {
         if (typeof this.props.onError === 'function')
@@ -234,6 +267,7 @@ class FormComponent extends React.Component {
 
         if (err.inner && Array.isArray(err.inner)) {
           this.setState({
+            isSubmitted: true,
             errors: err.inner.reduce((acc, r) => set(acc, r.path, r.message), {})
           })
         }
@@ -242,10 +276,43 @@ class FormComponent extends React.Component {
 
   functionalProperty = (entry, prop) => {
     if (typeof prop === 'function') {
-      return prop({ rawValues: value, value: get(this.state.intervalValue, entry) });
+      return prop({ rawValues: value, value: get(this.state.internalValue, entry) });
     } else {
       return prop;
     }
+  }
+
+  onChange = (key, e, automatic) => {
+    console.log('onChange', key, e)
+
+    const { internalValue, fieldsState, isSubmitted, isDirty } = this.state
+
+    const newState = { ...internalValue }
+    set(newState, key, e)
+
+    const newFieldsState = { ...fieldsState }
+    const fieldIsDirty = !deepEqual(get(this.props.value, key), e)
+    console.log(get(this.props.value, key), e)
+    set(newFieldsState, key, {
+      isTouched: !automatic,
+      isDirty: fieldIsDirty
+    })
+
+    let newDirty = isDirty
+
+    if (!newDirty || isDirty === key)
+      newDirty = fieldIsDirty ? key : false
+
+    this.setState({
+      fieldsState: newFieldsState,
+      internalValue: newState,
+      isDirty: newDirty
+    }, () => {
+      this.watch()
+
+      if (isSubmitted)
+        this.trigger()
+    })
   }
 
   render() {
@@ -261,15 +328,24 @@ class FormComponent extends React.Component {
       options = {}
     } = this.props;
 
-    const { expandedAll, errors } = this.state
+    const { expandedAll, errors, fieldsState, internalValue, isSubmitted } = this.state
 
-    if (!this.state.intervalValue)
+    if (!internalValue)
       return null
 
-    // console.log({
-    //   errors,
-    //   value: this.state.intervalValue
-    // })
+    console.log({
+      errors,
+      value: internalValue,
+      fieldsState,
+      hasErrors: Object.keys(this.state.errors).length > 0,
+      isSubmitted,
+      comp: {
+        equal: deepEqual(this.props.value, this.state.internalValue),
+        propsValue: this.props.value,
+        internal: this.state.internalValue
+      },
+      isDirty: this.isDirty()
+    })
 
     return <form className={className || `${classes.pr_15} ${classes.w_100}`} onSubmit={this.validate}>
       {options.controls && <div className={classNames(classes.flex, classes.mt_20)}>
@@ -284,7 +360,7 @@ class FormComponent extends React.Component {
               expandedAll: !expandedAll
             })
           }}>
-          {expandedAll ? 'Expand all' : 'Collapse all'}
+          {expandedAll ? 'Collapse all' : 'Expand all'}
         </button>
       </div>}
       {(flow || Object.keys(schema)).map((entry, idx) => {
@@ -300,7 +376,7 @@ class FormComponent extends React.Component {
           .map(visible => {
             switch (typeof visible) {
               case 'object':
-                const value = get(this.state.intervalValue, step.visible.ref);
+                const value = get(internalValue, step.visible.ref);
                 return option(step.visible.test).map(test => test(value, idx)).getOrElse(value)
               case 'boolean':
                 return visible;
@@ -315,11 +391,16 @@ class FormComponent extends React.Component {
         }
 
         return <Style>
-          <BasicWrapper key={`${entry}-${idx}`}
+          <BasicWrapper
+            key={`${entry}-${idx}`}
             entry={entry}
             label={this.functionalProperty(entry, step?.label === null ? null : step?.label || entry)}
             help={step?.help}
-            render={inputWrapper}>
+            render={inputWrapper}
+            fieldState={get(fieldsState, entry)}
+            error={get(errors, entry)}
+            isSubmitted={isSubmitted}
+          >
             <Step
               key={idx}
               entry={entry}
@@ -329,19 +410,12 @@ class FormComponent extends React.Component {
               httpClient={this.maybeCustomHttpClient}
               functionalProperty={this.functionalProperty}
               expandedAll={expandedAll}
-              value={get(this.state.intervalValue, entry)}
-              errors={errors}
-              onChange={(key, e) => {
-                // console.log('onChange', key, e)
-
-                const newState = { ...this.state.intervalValue }
-                set(newState, key, e)
-                this.setState({
-                  intervalValue: newState
-                }, this.watch)
-              }}
-              getField={key => !key ? this.state.intervalValue : get(this.state.intervalValue, key)}
+              value={get(this.state.internalValue, entry)}
+              onChange={this.onChange}
+              getField={key => !key ? this.state.internalValue : get(this.state.internalValue, key)}
               getErrorField={key => get(errors, key)}
+              getFieldState={key => get(fieldsState, key)}
+              isSubmitted={isSubmitted}
             />
           </BasicWrapper>
         </Style>
@@ -407,12 +481,15 @@ class Step extends React.Component {
     const {
       entry, realEntry, step, schema, inputWrapper, httpClient,
       defaultValue, index, functionalProperty, parent, expandedAll, getField, value,
-      onChange, errors, getErrorField } = this.props
+      onChange, getErrorField, getFieldState, isSubmitted } = this.props
 
     if (entry && typeof entry === 'object') {
-      const errored = entry.flow.some(step => !!getErrorField(step))// && (dirtyFields[step] || touchedFields[step]))
+      const errored = entry.flow.some(step => {
+        const fieldState = getFieldState(step)
+        return !!getErrorField(step) && (fieldState?.isDirty || fieldState?.isTouched)
+      })
       return <Style>
-        <Collapse {...entry} errored={errored}>
+        <Collapse {...entry} errored={errored} expandedAll={expandedAll}>
           {entry.flow.map((en, entryIdx) => {
             const stp = schema[en]
 
@@ -441,7 +518,15 @@ class Step extends React.Component {
             }
 
             return <Style>
-              <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} label={functionalProperty(en, stp?.label === null ? null : stp?.label || en)} help={stp?.help} render={inputWrapper}>
+              <BasicWrapper
+                key={`collapse-${en}-${entryIdx}`}
+                entry={en}
+                label={functionalProperty(en, stp?.label === null ? null : stp?.label || en)}
+                help={stp?.help}
+                render={inputWrapper}
+                fieldState={getFieldState(entry)}
+                error={getErrorField(entry)}
+                isSubmitted={isSubmitted}>
                 <Step
                   entry={en}
                   step={stp}
@@ -451,11 +536,12 @@ class Step extends React.Component {
                   httpClient={httpClient}
                   defaultValue={stp?.defaultValue}
                   functionalProperty={functionalProperty}
-                  errors={errors}
                   getField={getField}
                   getErrorField={getErrorField}
+                  getFieldState={getFieldState}
+                  isSubmitted={isSubmitted}
                   value={getField(en)}
-                  onChange={(key, e) => onChange(key, e)} />
+                  onChange={onChange} />
               </BasicWrapper>
             </Style>
           })}
@@ -464,9 +550,8 @@ class Step extends React.Component {
     }
 
     const error = getErrorField(entry)
-    // const isDirty = entry.split('.').reduce((acc, curr) => acc && acc[curr], dirtyFields)
-    // const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], touchedFields)
-    const errorDisplayed = !!error // && (isSubmitted || isDirty || isTouched)
+    const fieldState = getFieldState(entry)
+    const errorDisplayed = !!error && (isSubmitted || fieldState?.isDirty || fieldState?.isTouched)
 
     if (step.array) {
       return (
@@ -483,7 +568,7 @@ class Step extends React.Component {
               disabled={functionalProperty(entry, step.disabled)}
               values={getField(entry) || []}
               remove={idx => onChange(entry, getField(entry).filter((_, i) => i !== idx))}
-              append={newItem => onChange(entry, [...getField(entry), newItem])}
+              append={newItem => onChange(entry, [...(getField(entry) || []), newItem])}
               component={(({ value, defaultValue, idx, classes }) => {
                 return (
                   <Step
@@ -505,11 +590,13 @@ class Step extends React.Component {
                     expandedAll={expandedAll}
                     getField={getField}
                     getErrorField={getErrorField}
+                    getFieldState={getFieldState}
+                    isSubmitted={isSubmitted}
                     classes={classes} />
                 )
               })} />
           </Style>
-        </CustomizableInput >
+        </CustomizableInput>
       )
     }
 
@@ -614,9 +701,11 @@ class Step extends React.Component {
                   errorDisplayed={errorDisplayed}
                   expandedAll={expandedAll}
                   value={getField(entry)}
-                  onChange={(key, e) => onChange(key, e)}
+                  onChange={onChange}
                   getField={getField}
                   getErrorField={getErrorField}
+                  getFieldState={getFieldState}
+                  isSubmitted={isSubmitted}
                 />
               </Style>
             </CustomizableInput>
@@ -710,12 +799,6 @@ class ArrayStep extends React.Component {
   render() {
     const { entry, step, component, disabled, append, values, remove, classes } = this.props;
 
-    // const values = getValues(entry);
-    // const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.errors)
-    // const isDirty = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.dirtyFields)
-    // const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.touchedFields)
-    const errorDisplayed = false // !!error && (formState.isSubmitted || isDirty || isTouched)
-
     return <>
       {values.map((field, idx) => {
         const key = `${entry}${idx}`
@@ -740,18 +823,14 @@ class ArrayStep extends React.Component {
       <div className={classNames(classes.flex, classes.jc_flex_end)}>
         <button
           type="button"
-          className={classNames(classes.btn, classes.btn_blue, classes.btn_sm, classes.mt_5, { [classes.input__invalid]: errorDisplayed })}
+          className={classNames(classes.btn, classes.btn_blue, classes.btn_sm, classes.mt_5)}
           disabled={disabled}
           onClick={() => {
             const newValue = getDefaultValues(step.flow, step.schema, {})
             append(step.addableDefaultValue || ((step.type === type.object && newValue) ? newValue : defaultVal()))
             // trigger(entry);
             option(step.onChange)
-              .map(onChange => onChange({
-                // rawValues: getValues(), // TODO
-                value,
-                // setValue: onChange // TODO
-              }))
+              .map(onChange => onChange({ rawValues: getField(), value, onChange }))
           }}>
           Add
         </button>
@@ -763,7 +842,7 @@ class ArrayStep extends React.Component {
 
 class NestedForm extends React.Component {
   state = {
-    collapsed: !!this.props.step.collapsed,
+    collapsed: !!this.props.step.collapsed || (this.props.expandedAll ? false : (this.props.parent.split('.').length >= 2 ? !this.props.expandedAll : false)),
     schemaAndFlow: undefined
   }
 
@@ -775,16 +854,11 @@ class NestedForm extends React.Component {
     this.setState({
       schemaAndFlow: this.calculateConditionalSchema()
     }, () => {
-      // console.log('nested form set value', this.props.onChange, this.props.parent, getDefaultValues(
-      //   this.state.schemaAndFlow.flow,
-      //   this.state.schemaAndFlow.schema,
-      //   this.props.getField(this.props.parent)
-      // ))
       this.props.onChange(this.props.parent, getDefaultValues(
         this.state.schemaAndFlow.flow,
         this.state.schemaAndFlow.schema,
         this.props.getField(this.props.parent)
-      ))
+      ), true)
     })
   }
 
@@ -805,9 +879,20 @@ class NestedForm extends React.Component {
     })
     .getOrElse({ schema: this.props.schema, flow: this.props.flow })
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
     if (!deepEqual(this.calculateConditionalSchema().schema, this.state.schemaAndFlow.schema)) {
       this.loadSchemaAndFlow()
+    }
+
+    if (prevProps.expandedAll !== this.props.expandedAll) {
+      if (this.props.expandedAll)
+        this.setState({
+          collapsed: false
+        })
+      else if (this.props.parent.split('.').length >= 2)
+        this.setState({
+          collapsed: !this.props.expandedAll
+        })
     }
   }
 
@@ -815,18 +900,13 @@ class NestedForm extends React.Component {
     const {
       parent, inputWrapper, maybeCustomHttpClient,
       errorDisplayed, value, step, functionalProperty, index, expandedAll,
-      getField, onChange, classes, getErrorField
+      getField, onChange, classes, getErrorField, isSubmitted, getFieldState
     } = this.props
 
     const { collapsed, schemaAndFlow } = this.state
 
     if (!schemaAndFlow)
       return null
-
-    // useEffect(() => {
-    //   if (!expandedAll || (expandedAll && parent.split('.').length >= 2))
-    //     setCollapsed(expandedAll)
-    // }, [expandedAll])
 
     const computedSandF = schemaAndFlow.flow.reduce((acc, entry) => {
       const step = schemaAndFlow.schema[entry]
@@ -874,11 +954,17 @@ class NestedForm extends React.Component {
             return null;
           }
 
-          return <Style>
-            <BasicWrapper key={`${entry}.${idx}`}
+          if ((collapsed && !step.visibleOnCollapse) || !visibleStep)
+            return null
+
+          return <Style key={`${entry}.${idx}`}>
+            <BasicWrapper
               className={classNames({ [classes.display__none]: (collapsed && !step.visibleOnCollapse) || !visibleStep })}
               entry={`${parent}.${entry}`}
-              label={functionalProperty(entry, step?.label === null ? null : step?.label || entry)} help={step.help} render={inputWrapper}>
+              label={functionalProperty(entry, step?.label === null ? null : step?.label || entry)} help={step.help} render={inputWrapper}
+              fieldState={getFieldState(`${parent}.${entry}`)}
+              error={getErrorField(`${parent}.${entry}`)}
+              isSubmitted={isSubmitted}>
               <Step
                 {...this.props}
                 key={`step.${entry}.${idx}`}

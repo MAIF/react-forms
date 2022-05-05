@@ -10,15 +10,13 @@ const Error = ({ error, errorDisplayed, children, classes }) =>
         {errorDisplayed && <span className={classNames(classes.txt_red, classes.error_txt)}>{error}</span>}
     </>
 
-export class ControlledInput extends React.Component {
+class ControlledClass extends React.Component {
     render() {
         const {
             value, onChange, step, entry, children, component,
             errorDisplayed, error,
             functionalProperty, getField, classes
         } = this.props;
-
-        // console.log(entry, value)
 
         const props = {
             ...step.props,
@@ -51,7 +49,6 @@ export class ControlledInput extends React.Component {
                 onChange(value)
                 option(step.onChange)
                     .map(onChange => onChange({
-                        // rawValues: getValues(), TODO
                         value,
                         setValue: onChange
                     }))
@@ -61,14 +58,8 @@ export class ControlledInput extends React.Component {
 
         if (step.render) {
             return step.render({
-                parent,
-                setValue: onChange,
-                // rawValues: value, // TODO
-                value,
-                onChange,
-                ...props,
-                error,
-                errorDisplayed
+                ...this.props,
+                ...props
             })
         } else {
             return <Error error={error} errorDisplayed={errorDisplayed} classes={classes}>
@@ -77,3 +68,8 @@ export class ControlledInput extends React.Component {
         }
     }
 }
+
+
+export const ControlledInput = React.memo(ControlledClass,
+    (prevProps, nextProps) => prevProps.value === nextProps.value && prevProps.errorDisplayed === nextProps.errorDisplayed
+)
