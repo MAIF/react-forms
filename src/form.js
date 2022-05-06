@@ -432,6 +432,15 @@ class FormComponent extends React.Component {
 }
 
 export const Form = React.forwardRef((props, ref) => {
+
+  if (props.options.hideLogs) {
+    var console = {};
+    console.log = function () { }
+    console.error = function () { }
+    console.warn = function () { }
+    window.console = console;
+  }
+
   return <Style overrideStyle={props.style}>
     <FormComponent {...props} ref={ref} />
   </Style>
@@ -812,7 +821,6 @@ class ArrayStep extends React.Component {
                 style={{ position: 'absolute', top: '2px', right: 0 }}
                 className={classNames(classes.btn, classes.btn_red, classes.btn_sm, classes.ml_5)} disabled={disabled} onClick={() => {
                   remove(idx)
-                  // trigger(entry);
                 }}>
                 <Trash2 size={16} />
               </button>
@@ -828,13 +836,11 @@ class ArrayStep extends React.Component {
           onClick={() => {
             const newValue = getDefaultValues(step.flow, step.schema, {})
             append(step.addableDefaultValue || ((step.type === type.object && newValue) ? newValue : defaultVal()))
-            // trigger(entry);
             option(step.onChange)
               .map(onChange => onChange({ rawValues: getField(), value, onChange }))
           }}>
           Add
         </button>
-        {/* {error && <div className="invalid-feedback">{error.message}</div>} */}
       </div>
     </>
   }
