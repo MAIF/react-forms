@@ -16,8 +16,15 @@ class ControlledClass extends React.Component {
         value: this.props.value
     }
 
+    componentDidUpdate(prevProps) {
+        if (this.props.value !== prevProps.value)
+            this.setState({
+                value: this.props.value
+            })
+    }
+
     onChange = (e, target) => {
-        const { step, getField } = this.props;
+        const { step, getField, onChange } = this.props;
         const value = (() => {
             if (!e) {
                 if (step.type === type.bool ||
@@ -42,18 +49,19 @@ class ControlledClass extends React.Component {
         this.setState({
             value
         })
+
         this.propagate(value)
     }
 
     propagate = debounce(value => {
-        const { step, onChange } = this.props;
+        const { step, getField, onChange } = this.props;
         onChange(value)
         option(step.onChange)
             .map(onChange => onChange({
                 value,
                 setValue: onChange
             }))
-    }, 300)
+    }, 125)
 
     render() {
         const {
@@ -86,6 +94,6 @@ class ControlledClass extends React.Component {
 }
 
 
-export const ControlledInput = React.memo(ControlledClass,
+export const ControlledInput = ControlledClass /* React.memo(ControlledClass,
     (prevProps, nextProps) => prevProps.value === nextProps.value && prevProps.errorDisplayed === nextProps.errorDisplayed
-)
+)*/

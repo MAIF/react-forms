@@ -92,7 +92,7 @@ export const validate = (flow, schema, value) => {
 
 class FormComponent extends React.Component {
   state = {
-    expandedAll: false,
+    expandedAll: true,
     internalValue: undefined,
     errors: {},
     isSubmitted: false,
@@ -130,7 +130,7 @@ class FormComponent extends React.Component {
   }
 
   watch = () => {
-    const { options = {}, flow, schema } = this.props
+    const { options = {}, flow = [], schema = {} } = this.props
 
     if (!!options.autosubmit) {
       this.validate()
@@ -196,13 +196,26 @@ class FormComponent extends React.Component {
             value: get(internalValue, currentPath),
             rawValues: internalValue,
             getValue: e => get(internalValue, e),
-            setValue: (e, v) => set(internalValue, e, v),
-            onChange: (entry, v) => set(internalValue, `${path}.${entry}`, v)
+            getFieldValue: e => get(v, e),
+            setValue: (e, v) => {
+              const newValue = { ...internalValue }
+              set(newValue, e, v)
+              this.setState({
+                internalValue: newValue
+              })
+            },
+            onChange: (entry, v) => {
+              const newValue = { ...internalValue }
+              set(newValue, `${currentPath}.${entry}`, v)
+              this.setState({
+                internalValue: newValue
+              })
+            }
           })
       }
 
       if (!!step.flow || (step.format === format.form && step.type === type.object && !step.array))
-        this.callAfterChangeMethods(step.flow || Object.keys(step.schema), step.schema, currentPath)
+        this.callAfterChangeMethods(step.flow || Object.keys(step.schema || {}), step.schema, currentPath)
     })
   }
 
@@ -432,8 +445,8 @@ class FormComponent extends React.Component {
 }
 
 export const Form = React.forwardRef((props, ref) => {
-
-  if (props.options.hideLogs) {
+  const { options = {} } = props
+  if (options.hideLogs) {
     var console = {};
     console.log = function () { }
     console.error = function () { }
