@@ -24,7 +24,7 @@ class ControlledClass extends React.Component {
     }
 
     onChange = (e, target) => {
-        const { step, getField, onChange } = this.props;
+        const { step, getField } = this.props;
         const value = (() => {
             if (!e) {
                 if (step.type === type.bool ||
@@ -93,7 +93,4 @@ class ControlledClass extends React.Component {
     }
 }
 
-
-export const ControlledInput = ControlledClass /* React.memo(ControlledClass,
-    (prevProps, nextProps) => prevProps.value === nextProps.value && prevProps.errorDisplayed === nextProps.errorDisplayed
-)*/
+export const ControlledInput = ControlledClass
