@@ -11,7 +11,13 @@ const CustomizableInput = React.memo(
             )
         }
         return props.children
-    }, (prev, next) => (prev.field.value === next.field.value && next.errorDisplayed === prev.errorDisplayed))
+    }, (prev, next) => {
+        console.debug({prev, next})
+        if (next.render) {
+            return false
+        }
+        return (prev.field.value === next.field.value && next.errorDisplayed === prev.errorDisplayed)
+    })
 
 export const ControlledInput = ({ defaultValue, step, entry, children, component, errorDisplayed }) => {
     const { field } = useController({

@@ -216,8 +216,6 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
     })
   }
 
-  const [expandedAll, setExpandedAll] = useState(false)
-
   const defaultValues = getDefaultValues(formFlow, schema, value);
   //FIXME: get real schema through the switch
 
@@ -288,19 +286,6 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
         const clean = cleanOutputArray(data, schema)
         onSubmit(clean)
       }, onError)}>
-        <div className={classNames(classes.flex, classes.mt_20)}>
-          <button
-            type="button"
-            className={classNames(classes.btn, classes.btn_sm)}
-            style={{ marginLeft: 'auto' }}
-            onClick={e => {
-              if (e)
-                e.stopPropagation()
-              setExpandedAll(!expandedAll)
-            }}>
-            {expandedAll ? 'Expand all' : 'Collapse all'}
-          </button>
-        </div>
         {formFlow.map((entry, idx) => {
           const step = schema[entry]
 
@@ -335,8 +320,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
             <BasicWrapper key={`${entry}-${idx}`} entry={entry} dirtyFields={dirtyFields} label={functionalProperty(entry, step?.label === null ? null : step?.label || entry)} help={step?.help} render={inputWrapper}>
               <Step key={idx} entry={entry} step={step}
                 schema={schema} inputWrapper={inputWrapper}
-                httpClient={maybeCustomHttpClient} functionalProperty={functionalProperty}
-                expandedAll={expandedAll} />
+                httpClient={maybeCustomHttpClient} functionalProperty={functionalProperty} />
             </BasicWrapper>
           )
         })}
@@ -364,7 +348,7 @@ const Footer = (props) => {
   )
 }
 
-const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaultValue, index, functionalProperty, parent, onAfterChange, expandedAll }) => {
+const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaultValue, index, functionalProperty, parent, onAfterChange }) => {
   const classes = useCustomStyle();
   const { formState: { errors, dirtyFields, touchedFields, isSubmitted }, control, trigger, getValues, setValue, watch, register } = useFormContext();
 
@@ -405,7 +389,6 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
           return (
             <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} label={functionalProperty(en, stp?.label === null ? null : stp?.label || en)} help={stp?.help} render={inputWrapper}>
               <Step entry={en} step={stp} schema={schema}
-                expandedAll={expandedAll}
                 inputWrapper={inputWrapper} httpClient={httpClient}
                 defaultValue={stp?.defaultValue} functionalProperty={functionalProperty} />
             </BasicWrapper>
@@ -466,8 +449,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
                 defaultValue={props.defaultValue?.value}
                 value={props.value}
                 index={idx}
-                functionalProperty={functionalProperty}
-                expandedAll={expandedAll} />
+                functionalProperty={functionalProperty}/>
             )
           })} />
       </CustomizableInput >
@@ -593,7 +575,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
               <NestedForm
                 schema={step.schema} flow={flow} step={step} parent={entry}
                 inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={getValues(entry) || defaultValue}
-                index={index} functionalProperty={functionalProperty} errorDisplayed={errorDisplayed} expandedAll={expandedAll} />
+                index={index} functionalProperty={functionalProperty} errorDisplayed={errorDisplayed} />
             </CustomizableInput>
           )
 
@@ -766,15 +748,10 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
   )
 }
 
-const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, errorDisplayed, value, step, functionalProperty, index, expandedAll }) => {
+const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, errorDisplayed, value, step, functionalProperty, index }) => {
   const { getValues, setValue, watch, trigger, formState } = useFormContext();
   const [collapsed, setCollapsed] = useState(!!step.collapsed);
   const classes = useCustomStyle();
-
-  useEffect(() => {
-    if (!expandedAll || (expandedAll && parent.split('.').length >= 2))
-      setCollapsed(expandedAll)
-  }, [expandedAll])
 
   const schemaAndFlow = option(step.conditionalSchema)
     .map(condiSchema => {
@@ -852,8 +829,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
               inputWrapper={inputWrapper}
               httpClient={maybeCustomHttpClient}
               defaultValue={value && value[entry]}
-              functionalProperty={functionalProperty}
-              expandedAll={expandedAll} />
+              functionalProperty={functionalProperty} />
           </BasicWrapper>
         )
       })}
