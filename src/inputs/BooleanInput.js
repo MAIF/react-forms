@@ -2,8 +2,9 @@ import React from 'react';
 import classNames from 'classnames';
 import { useCustomStyle } from '../styleContext';
 
-export const BooleanInput = React.forwardRef(({ onChange, value, readOnly }, ref) => {
-  const classes = useCustomStyle()
+export const BooleanInput = React.forwardRef(({ onChange, value, readOnly, ...props }, ref) => {
+  const style = useCustomStyle()
+  const classes = props.classes || style || {}
 
   const handleClick = (value) => {
     if (!readOnly) {
