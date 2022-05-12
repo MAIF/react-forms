@@ -1,7 +1,10 @@
 import React from 'react';
 import classNames from 'classnames';
+import { useCustomStyle } from '../styleContext';
 
-export const BooleanInput = React.forwardRef(({ onChange, value, readOnly, classes }, ref) => {
+export const BooleanInput = React.forwardRef(({ onChange, value, readOnly }, ref) => {
+  const classes = useCustomStyle()
+
   const handleClick = (value) => {
     if (!readOnly) {
       onChange(value)
