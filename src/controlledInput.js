@@ -12,7 +12,6 @@ const CustomizableInput = React.memo(
         }
         return props.children
     }, (prev, next) => {
-        console.debug({prev, next})
         if (next.render) {
             return false
         }
