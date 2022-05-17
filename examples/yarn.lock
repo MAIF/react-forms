@@ -2182,10 +2182,10 @@
   dependencies:
     "@lezer/lr" "^0.15.0"
 
-"@maif/react-forms@^1.0.37-rc.1", "@maif/react-forms@^1.0.53":
-  version "1.0.53"
-  resolved "https://registry.yarnpkg.com/@maif/react-forms/-/react-forms-1.0.53.tgz#0b4ccf0051cef7d5ca9c4d9016d8c70f0835bcd5"
-  integrity sha512-YGMNZJSnxVf78Kw2U2H2v1R4w7fCcUCfSHjqbA+rTSMQ+Xnt+zcgdr9eRq06FnfmCQoj6hoXQgR5mWBuuVChAQ==
+"@maif/react-forms@^1.0.54":
+  version "1.0.54"
+  resolved "https://registry.yarnpkg.com/@maif/react-forms/-/react-forms-1.0.54.tgz#56143da4bdbbdad4814f088b81794a0790a9b7b6"
+  integrity sha512-gYY4Q6F1LtJF2/LgyLjF2zyQRjOnY+ZDJfxg6mywg8SJeLV3n3VID8kF6/09R2X/q61Dt1mj6eRF0/qEuszfQQ==
   dependencies:
     "@codemirror/basic-setup" "^0.19.1"
     "@codemirror/lang-html" "^0.19.4"
@@ -2196,7 +2196,6 @@
     "@codemirror/theme-one-dark" "^0.19.1"
     "@fortawesome/fontawesome-free" "^5.15.3"
     "@hookform/resolvers" "2.4.0"
-    "@maif/react-forms" "^1.0.37-rc.1"
     "@popperjs/core" "^2.11.2"
     "@testing-library/jest-dom" "^5.11.4"
     "@testing-library/react" "^11.1.0"
