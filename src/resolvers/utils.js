@@ -53,13 +53,19 @@ export const buildSubResolver = (props, key, dependencies, rawData) => {
           }
         })
 
-        return option(filterSwitch).getOrElse(condiSchema.switch.find(s => s.default))
-      }).getOrElse({})
-    const subResolver = getShapeAndDependencies(flow || Object.keys(schema), schema, dependencies, rawData);
-    return constraints.reduce((resolver, constraint) => {
-      return jsonOrFunctionConstraint(constraint, resolver, key, dependencies)
-    }, yup.object().shape(subResolver.shape, dependencies))
+        return option(filterSwitch)
+          .orElse(condiSchema.switch.find(s => s.default))
+          .getOrElse({schema: {}, flow: []})
+      })
+      .getOrElse({schema: {}, flow: []})
 
+    const realFlow = flow || Object.keys(schema)
+    if (realFlow.length) {
+      const subResolver = getShapeAndDependencies(flow || Object.keys(schema), schema, dependencies, rawData);
+      return constraints.reduce((resolver, constraint) => {
+        return jsonOrFunctionConstraint(constraint, resolver, key, dependencies)
+      }, yup.object().shape(subResolver.shape, dependencies))
+    }
   } else {
     return constraints.reduce((resolver, constraint) => {
       return jsonOrFunctionConstraint(constraint, resolver, key, dependencies)

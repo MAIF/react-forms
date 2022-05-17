@@ -62,7 +62,7 @@ export default [
         verbose: true,
         hook: 'closeBundle'
       }),
-      isYalcActivated ? command('yalc push') : undefined
+      isYalcActivated ? command('yalc push --replace') : undefined
     ].filter(f => f),
     external: Object.keys(pkg.peerDependencies || {})
   }

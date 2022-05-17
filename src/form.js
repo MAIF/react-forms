@@ -293,9 +293,6 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
             console.error(`no step found for the entry "${entry}" in the given schema. Your form might not work properly. Please fix it`)
             return null;
           }
-          const error = typeof entry === 'object' ? undefined : entry.split('.').reduce((object, key) => {
-            return object && object[key];
-          }, errors);
 
           const visibleStep = option(step)
             .map(s => s.visible)
@@ -449,7 +446,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
                 defaultValue={props.defaultValue?.value}
                 value={props.value}
                 index={idx}
-                functionalProperty={functionalProperty}/>
+                functionalProperty={functionalProperty} />
             )
           })} />
       </CustomizableInput >
@@ -749,9 +746,11 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
 }
 
 const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, errorDisplayed, value, step, functionalProperty, index }) => {
-  const { getValues, setValue, watch, trigger, formState } = useFormContext();
+  const { getValues, setValue, watch } = useFormContext();
   const [collapsed, setCollapsed] = useState(!!step.collapsed);
   const classes = useCustomStyle();
+
+  useWatch(step?.conditionalSchema?.ref)
 
   const schemaAndFlow = option(step.conditionalSchema)
     .map(condiSchema => {
@@ -766,7 +765,11 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
         }
       })
 
-      return option(filterSwitch).getOrElse(condiSchema.switch.find(s => s.default))
+      const schemaAndFlow = option(filterSwitch)
+        .orElse(condiSchema.switch.find(s => s.default))
+        .getOrElse({schema: {}, flow: []})
+
+      return { schema: schemaAndFlow.schema, flow: schemaAndFlow.flow || Object.keys(schemaAndFlow.schema) }
     })
     .getOrElse({ schema, flow })
 
@@ -799,7 +802,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
     return [...acc, { step, visibleStep, entry }]
   }, [])
 
-  const bordered = computedSandF.filter(x => x.visibleStep).length > 1 && step.label !== null;
+  const bordered = computedSandF.filter(x => x.visibleStep).length >= 1 && step.label !== null;
   return (
     <div className={classNames({ [classes.nestedform__border]: bordered, [classes.border__error]: !!errorDisplayed })} style={{ position: 'relative' }}>
       {!!step.collapsable && schemaAndFlow.flow.length > 1 && collapsed &&

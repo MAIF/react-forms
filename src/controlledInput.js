@@ -12,7 +12,7 @@ const CustomizableInput = React.memo(
         }
         return props.children
     }, (prev, next) => {
-        if (next.render) {
+        if (next.render || next.conditionalSchema) {
             return false
         }
         return (prev.field.value === next.field.value && next.errorDisplayed === prev.errorDisplayed)
