@@ -6,6 +6,7 @@ import { option } from '../Option';
 import { isPromise } from '../utils'
 import deepEqual from 'fast-deep-equal';
 import { useCustomStyle } from '../styleContext';
+import { useFormContext } from 'react-hook-form';
 
 const valueToSelectOption = (value, possibleValues = [], isMulti = false) => {
   if (value === null || !value) {
@@ -34,6 +35,8 @@ const valueToSelectOption = (value, possibleValues = [], isMulti = false) => {
 };
 
 export const SelectInput = React.forwardRef((props, _) => {
+  const { getValues } = useFormContext()
+
   const classes = useCustomStyle()
   const possibleValues = (props.possibleValues || [])
     .map(v => props.transformer ?
@@ -62,8 +65,17 @@ export const SelectInput = React.forwardRef((props, _) => {
 
       if (cond) {
         setLoading(true);
-        const promise = isPromise(props.optionsFrom) ? props.optionsFrom : props.httpClient(props.optionsFrom, 'GET')
-          .then((r) => r.json());
+
+        let promise;
+        if (isPromise(props.optionsFrom)) {
+          promise = props.optionsFrom
+        } else if (typeof props.optionsFrom === 'function') {
+          const result = props.optionsFrom({ rawValues: getValues(), value: getValues(props.id) })
+          promise = isPromise(result) ? result : props.httpClient(result, 'GET').then(r => r.json())
+        } else {
+          promise = props.httpClient(props.optionsFrom, 'GET').then(r => r.json())
+        }
+
         promise
           .then((values) => {
             return values.map(x => props.transformer ? props.transformer(x) : valueToSelectOption(x, values, props.isMulti, props.transformer))
@@ -112,7 +124,7 @@ export const SelectInput = React.forwardRef((props, _) => {
     }
     return onChange(v)
   }
-  
+
   if (props.buttons) {
     return (
       <div style={{ display: 'flex' }}>
