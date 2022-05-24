@@ -154,7 +154,6 @@ export const SelectInput = React.forwardRef((props, _) => {
         value={value}
         isDisabled={props.disabled}
         placeholder={props.placeholder}
-        isClearable
         onChange={onChange}
         options={values}
         onCreateOption={option => handleCreate(option, props.onCreateOption)}
@@ -170,7 +169,6 @@ export const SelectInput = React.forwardRef((props, _) => {
         name={`${props.label}-search`}
         isLoading={loading}
         value={value}
-        isClearable={true}
         defaultValue={value}
         isDisabled={props.disabled}
         placeholder={props.placeholder}

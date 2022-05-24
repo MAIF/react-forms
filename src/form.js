@@ -485,6 +485,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
               <SelectInput
                 className={classNames(classes.flex_grow_1, { [classes.input__invalid]: errorDisplayed })}
                 disabled={functionalProperty(entry, step.disabled)}
+                {...step.props}
                 possibleValues={step.options}
                 httpClient={httpClient}
                 isMulti={step.isMulti}
@@ -515,6 +516,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
             <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
               <SelectInput
                 className={classNames(classes.content, { [classes.input__invalid]: errorDisplayed })}
+                {...step.props}
                 possibleValues={step.options}
                 httpClient={httpClient}
                 isMulti={step.isMulti}
@@ -554,6 +556,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
             <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
               <SelectInput
                 className={classNames(classes.flex_grow_1, { [classes.input__invalid]: errorDisplayed })}
+                {...step.props}
                 possibleValues={step.options}
                 httpClient={httpClient}
                 isMulti={step.isMulti}
