@@ -6,7 +6,7 @@ export const required = (message = "Value required") => (r) => r.required(messag
 export const url = (message = "That is not a valid url") => (r) => r.url(message)
 export const email = (message = "That is not a valid email") => (r) => r.email(message)
 export const uuid = (message = "That is not a valid uuid") => (r) => r.uuid(message)
-export const matches = (regexp = /.*/, message = "This field does not match the pattern") => (r) => r.matches(regexp, { message })
+export const matches = (regexp = /.*/, message = "This field does not match the pattern") => (r) => r.matches(regexp, { message, excludeEmptyString: false })
 
 //string & number
 export const min = (ref, message = "Min value is required") => (r) => r.min(maybeRef(ref), message)
