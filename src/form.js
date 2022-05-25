@@ -16,7 +16,7 @@ import { getShapeAndDependencies } from './resolvers/index';
 import { option } from './Option'
 import { ControlledInput } from './controlledInput';
 import deepEqual from 'fast-deep-equal';
-import { arrayFlatten } from './utils';
+import { arrayFlatten, isDefined } from './utils';
 
 const usePrevious = (value) => {
   // The ref object is a generic container whose current property is mutable ...
@@ -77,8 +77,8 @@ const CustomizableInput = props => {
   return props.children
 }
 
-const defaultVal = (value, array, defaultValue) => {
-  if (!!defaultValue) return defaultValue
+const defaultVal = (value, array, defaultValue, type) => {
+  if (isDefined(defaultValue)) return defaultValue
   if (!!array) return []
   return value
 }
@@ -104,11 +104,15 @@ const cleanInputArray = (obj, defaultValues, flow, subSchema) => {
   return Object.entries(subSchema || {})
     .filter(([key]) => realFlow.includes(key))
     .reduce((acc, [key, step]) => {
-      let v
-      if (obj)
-        v = obj[key]
-      if (((step.type === type.bool && v === null) || (step.type !== type.bool && !v)) && defaultValues)
-        v = defaultValues[key]
+      let v = null;
+      if (obj) {
+        v = obj[key];
+      }
+
+      const maybeDefaultValue = defaultValues[key]
+      if (!v && isDefined(maybeDefaultValue)) {
+        v = maybeDefaultValue;
+      }
 
       if (step.array && !step.render) {
         return {
@@ -217,6 +221,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
   }
 
   const defaultValues = getDefaultValues(formFlow, schema, value);
+
   //FIXME: get real schema through the switch
 
   const resolver = (rawData) => {
@@ -233,13 +238,13 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 
   const [initialReseted, setReset] = useState(false)
 
-  useEffect(() => {
-    reset(cleanInputArray(value, defaultValues, flow, schema))
-    setReset(true)
-  }, [reset])
+  // useEffect(() => {
+  //   reset(cleanInputArray(value, defaultValues, flow, schema))
+  //   setReset(true)
+  // }, [reset])
 
   useEffect(() => {
-    initialReseted && trigger();
+    trigger();
   }, [trigger, initialReseted])
 
   const { handleSubmit, formState: { errors, dirtyFields }, reset, trigger, getValues, watch } = methods
@@ -248,7 +253,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
   const prevSchema = usePrevious(schema)
 
   useEffect(() => {
-    if (!deepEqual(value, prev) || !deepEqual(schema, prevSchema)) {
+    if (prev && prevSchema && !deepEqual(value, prev) || !deepEqual(schema, prevSchema)) {
       reset({ ...cleanInputArray(value, defaultValues, flow, schema) })
     }
   }, [value, schema])
@@ -540,7 +545,6 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
     case type.bool:
       return (
         <ControlledInput
-          defaultValue={defaultValue}
           step={step}
           entry={entry}
           errorDisplayed={errorDisplayed}>

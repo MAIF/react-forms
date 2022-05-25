@@ -1,7 +1,8 @@
-import React from 'react'
-import { useController, useFormContext } from 'react-hook-form'
-import { option } from './Option'
-import { type } from './type'
+import React from 'react';
+import { useController, useFormContext } from 'react-hook-form';
+import { option } from './Option';
+import { type } from './type';
+import { isDefined } from './utils';
 
 const CustomizableInput = React.memo(
     props => {
@@ -18,12 +19,12 @@ const CustomizableInput = React.memo(
         return (prev.field.value === next.field.value && next.errorDisplayed === prev.errorDisplayed)
     })
 
-export const ControlledInput = ({ defaultValue, step, entry, children, component, errorDisplayed }) => {
+export const ControlledInput = ({ step, entry, children, component, errorDisplayed }) => {
     const { field } = useController({
-        defaultValue: defaultValue || null,
+        defaultValue: isDefined(step.defaultValue) ? step.defaultValue : null,
         name: entry
     })
-
+    
     const { getValues, setValue, formState: { errors } } = useFormContext();
 
     const functionalProperty = (entry, prop) => {

@@ -226,6 +226,7 @@ By default all fields of the form are nullable (they can accept `null` or `undef
     - [`constraints.test(name: string, message?:string, test: (val: any) => boolean | Promise<boolean>)`](#constraintstestname-string-messagestring-test-val-any--boolean--promiseboolean)
     - [`constraints.when(ref: string, test: (val: any) => boolean, then: any = [], otherwise: any = [])`](#constraintswhenref-string-test-val-any--boolean-then-any---otherwise-any--)
     - [`constraints.oneOf(arrayOfValues: any[], message?:string)`](#constraintsoneofarrayofvalues-any-messagestring)
+    - [`constraints.ref(ref: any)`](#constraintsrefrefany)
   - [string](#string)
   - [string or number](#string-or-number)
   - [number](#number)
@@ -279,12 +280,40 @@ the following methods works for all type types of value.
 
 #### `constraints.oneOf(arrayOfValues: any[], message?:string)`
   Whitelist a set of values and display an error under field if the provided value is not contains in this set.
+  Values can also be a [`reference`](#constraintsrefrefany) of value
 
   ```javascript
   constraints.oneOf(['foo', 'bar'], 'not foo or bar :(')
   ```
   ```javascript
   {type: 'oneOf', arrayOfValues: ['foo', 'bar'], message: 'not foo or bar :('}
+  ```
+
+#### `constraints.ref(ref:any)`
+  Some constraints accepts reference as property. This methods create a reference to another field.
+  Refs are evaluated in the proper order so that the ref value is resolved before the field using the ref (be careful of circular dependencies!).
+
+   ```javascript
+    const schema = {
+      dad_age: { type: type.number},
+      son_age: {
+          type: type.number,
+          constraints: [
+            constraints.lessThan(constraints.ref('dad_age'), 'too old')
+          ]
+        }
+    }
+  ```
+  ```javascript
+const schema = {
+      dad_age: { type: 'number'},
+      son_age: {
+          type: 'number',
+          constraints: [
+            {type: 'lessThan', ref: { ref: 'dad_age' }, message: 'too old !'}
+          ]
+        }
+    }
   ```
 
 ### string
@@ -324,13 +353,13 @@ the following methods works for string or number values. All methods for [mixed]
 
 
 #### `constraints.min(ref: number | Reference<number>, message: string)`
-Set the minimum value allowed and display an error if the provided value (for a number) or the length of the string is bigger.
+Set the minimum value allowed and display an error if the provided value (for a number) or the length of the string is bigger. Provided value can be a number or a [`reference`](#constraintsrefrefany) to a number
 ```javascript
 {type: 'min', ref: 1, message: 'too small'}
 ```
 
 #### `constraints.max(ref: number | Reference<number>, message: string)`
-Set the maximun value allowed and display an error if provided value (for a number) or the length of the string is smaller.
+Set the maximun value allowed and display an error if provided value (for a number) or the length of the string is smaller. value can be a number or a [`reference`](#constraintsrefrefany) to a number
 ```javascript
 {type: 'max', ref: 5, message: 'too high'}
 ```
@@ -356,13 +385,13 @@ The value must be aa integer number and display an error if it's not.
 ```
 
 #### `constraints.lessThan(ref: number | Reference<number>, message: string)`
-Set the maximun value allowed and display an error if provided value (for a number) or the length of the string is smaller.
+Set the maximun value allowed and display an error if provided value (for a number) or the length of the string is smaller. value can be a number or a [`reference`](#constraintsrefrefany) to a number
 ```javascript
 {type: 'lessThan', ref: 5, message: 'less please'}
 ```
 
 #### `constraints.moreThan(ref: number | Reference<number>, message: string)`
-Set the minimum value allowed and display an error if provided value (for a number) or the length of the string is bigger.
+Set the minimum value allowed and display an error if provided value (for a number) or the length of the string is bigger. value can be a number or a [`reference`](#constraintsrefrefany) to a number
 ```javascript
 {type: 'moreThan', ref: 5, message: 'more please'}
 ```
@@ -371,7 +400,7 @@ Set the minimum value allowed and display an error if provided value (for a numb
 the following methods works for basic types if the format is define to `array`. All methods for [mixed](#mixed) are available.
 
 #### `constraints.length(value: number | Reference<number>, message?:string)`
-Set the length of the array and display an error if it's different.
+Set the length of the array and display an error if it's different. value can be a number or a [`reference`](#constraintsrefrefany) to a number
 ```javascript
 {type: 'length', ref: 5, message: 'this array must have 5 elements'}
 ```

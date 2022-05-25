@@ -8,3 +8,7 @@ export const arrayFlatten = (array) => {
   }
   return array;
 }
+
+export const isDefined = (value) => {
+  return value !== null && value !== undefined
+} 
