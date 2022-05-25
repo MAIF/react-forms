@@ -762,11 +762,11 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
   const schemaAndFlow = option(step.conditionalSchema)
     .map(condiSchema => {
       const ref = option(condiSchema.ref).map(ref => getValues(ref)).getOrNull();
-      const rawData = getValues()
+      const rawValues = getValues()
 
       const filterSwitch = condiSchema.switch.find(s => {
         if (typeof s.condition === 'function') {
-          return s.condition({ rawData, ref })
+          return s.condition({ rawValues, ref })
         } else {
           return s.condition === ref
         }

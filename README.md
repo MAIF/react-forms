@@ -138,7 +138,7 @@ export const Example = () => {
         switch: [
           {
             default: true,
-            condition: ({rawData, ref}) => ref === "mammal",
+            condition: ({rawValues, ref}) => ref === "mammal",
             schema: {
               continent: {
                 type: type.string,
