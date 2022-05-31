@@ -19,11 +19,13 @@ yarn add @maif/react-forms
 
 # Usage
 You must define a form flow (this is just a javascript array which represents the rendering order of the form fields) and a schema (that defines all fields of your form with types or constraints for example)
+You can import the default stylesheet or use your own style by using default classname or passing a classname in your schema.
 
 ## example
 
 ```javascript
 import { Form, type, format, constraints } from '@maif/react-forms'
+import '@maif/react-forms/lib/index.css'
 
 export const Example = () => { 
   const schema = {
@@ -32,6 +34,7 @@ export const Example = () => {
       label: 'age',
       placeholder: 'Your age',
       help: "Just your age",
+      className: "input-number",
       constraints: [
         constraints.required("your age is required"),
         constraints.min(18, 'You must be an adult'),
