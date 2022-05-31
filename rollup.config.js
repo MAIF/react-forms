@@ -7,6 +7,7 @@ import resolve from "@rollup/plugin-node-resolve"
 import { terser } from 'rollup-plugin-terser'
 import copy from 'rollup-plugin-copy'
 import command from 'rollup-plugin-command';
+import scss from 'rollup-plugin-scss'
 
 const isDev = process.env.NODE_ENV !== 'production'
 const isYalcActivated = process.env.YALC === 'activated'
@@ -41,6 +42,7 @@ export default [
       { file: pkg.module, format: 'esm' }
     ],
     plugins: [
+      scss(),
       external(),
       babel({
         exclude: [

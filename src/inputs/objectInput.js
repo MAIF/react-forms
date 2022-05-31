@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { PlusCircle, MinusCircle } from 'react-feather';
-import classNames from 'classnames';
-import { useCustomStyle } from '../styleContext';
 import deepEqual from 'fast-deep-equal';
 
 export const ObjectInput = (props) => {
@@ -85,25 +83,23 @@ export const ObjectInput = (props) => {
     onChange(newState)
   };
 
-  const classes = useCustomStyle();
-
   return (
     <div className={props.className}>
       {Object.keys(internalState || {}).length === 0 && (
         <button
           disabled={props.disabled}
           type="button"
-          className={classNames(classes.flex, classes.btn, classes.btn_blue, classes.btn_sm)}
+          className='flex btn btn_blue btn_sm'
           onClick={addFirst}>
           <PlusCircle />
         </button>
       )}
       {Object.entries(internalState || {}).map(([id, { key, value }], idx) => (
-        <div className={classNames(classes.flex, classes.mt_5)} key={idx}>
+        <div className='flex mt_5' key={idx}>
           <input
             disabled={props.disabled}
             type="text"
-            className={classNames(classes.w_50, classes.input)}
+            className='w_50 input'
             placeholder={props.placeholderKey}
             value={key}
             onChange={e => changeKey(id, e.target.value)}
@@ -111,7 +107,7 @@ export const ObjectInput = (props) => {
           <input
             disabled={props.disabled}
             type="text"
-            className={classNames(classes.w_50, classes.input)}
+            className='w_50 input'
             placeholder={props.placeholderValue}
             value={value}
             onChange={e => changeValue(id, e.target.value)}
@@ -119,7 +115,7 @@ export const ObjectInput = (props) => {
           <button
             disabled={props.disabled}
             type="button"
-            className={classNames(classes.flex, classes.btn, classes.btn_red, classes.btn_sm, classes.ml_10)}
+            className='flex btn btn_red btn_sm ml_10'
             onClick={() => remove(id)}>
             <MinusCircle />
           </button>
@@ -127,7 +123,7 @@ export const ObjectInput = (props) => {
             <button
               disabled={props.disabled}
               type="button"
-              className={classNames(classes.flex, classes.btn, classes.btn_blue, classes.btn_sm, classes.ml_5)}
+              className='flex btn btn_blue btn_sm ml_5'
               onClick={addNext}>
               <PlusCircle />
             </button>

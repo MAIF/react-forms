@@ -1,6 +1,7 @@
-import React, { useEffect, useState, useRef, useImperativeHandle } from 'react'
+import React, { useEffect, useState, useRef, useImperativeHandle, useContext } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup';
 import classNames from 'classnames';
+import deepEqual from 'fast-deep-equal';
 import { HelpCircle, Loader, Upload, ChevronDown, ChevronUp, Trash2 } from 'react-feather';
 import { useForm, useFormContext, Controller, useFieldArray, FormProvider, useWatch } from 'react-hook-form';
 import { DatePicker } from 'react-rainbow-components';
@@ -8,15 +9,15 @@ import ReactToolTip from 'react-tooltip';
 import { v4 as uuid } from 'uuid';
 import * as yup from "yup";
 
-import { useCustomStyle } from './styleContext';
 import { type } from './type';
 import { format } from './format';
 import { BooleanInput, Collapse, SelectInput, ObjectInput, CodeInput, MarkdownInput, SingleLineCode } from './inputs/index';
 import { getShapeAndDependencies } from './resolvers/index';
 import { option } from './Option'
 import { ControlledInput } from './controlledInput';
-import deepEqual from 'fast-deep-equal';
-import { arrayFlatten, isDefined } from './utils';
+import { arrayFlatten, isDefined, useHashEffect } from './utils';
+
+import './style.scss'
 
 const usePrevious = (value) => {
   // The ref object is a generic container whose current property is mutable ...
@@ -37,7 +38,6 @@ const BasicWrapper = ({ entry, className, label, help, children, render }) => {
     return children
   }
 
-  const classes = useCustomStyle()
   const id = uuid();
 
   const { formState } = useFormContext();
@@ -51,19 +51,19 @@ const BasicWrapper = ({ entry, className, label, help, children, render }) => {
   }
 
   return (
-    <div className={`${classes.mt_10} ${className}`} style={{ position: 'relative' }}>
-      {label && <label className={`${classes.flex} ${classes.ai_center} ${classes.mb_5}`} htmlFor={entry}>
+    <div className='mt_10' style={{ position: 'relative' }}>
+      {label && <label className='flex ai_center mb_5' htmlFor={entry}>
         <span>{label}</span>
         {help && <>
           <ReactToolTip html={true} place={'bottom'} id={id} />
-          <span className={`${classes.flex} ${classes.ai_center}`} data-html={true} data-tip={help} data-for={id}>
+          <span className='flex ai_center' data-html={true} data-tip={help} data-for={id}>
             <HelpCircle style={{ color: 'gray', width: 17, marginLeft: '.5rem', cursor: 'help' }} />
           </span>
         </>}
       </label>}
 
       {children}
-      {error && <div className={classNames(classes.feedback, { [classes.txt_red]: errorDisplayed })}>{error.message}</div>}
+      {error && <div className={classNames('feedback', { ['txt_red']: errorDisplayed })}>{error.message}</div>}
     </div>
   )
 }
@@ -177,16 +177,13 @@ export const validate = (flow, schema, value) => {
     })
 }
 
-const Watcher = ({ options, control, schema, onSubmit, handleSubmit, getValues, watch }) => {
+const Watcher = ({ options, control, schema, onSubmit, handleSubmit }) => {
   const data = useWatch({ control })
-  const prev = usePrevious(data)
-
-  useEffect(() => {
+  useHashEffect(() => {
     if (!!options.autosubmit) {
-      if (!deepEqual(data, prev))
-        handleSubmit(() => {
-          onSubmit(cleanOutputArray(data, schema))
-        })()
+      handleSubmit(() => {
+        onSubmit(cleanOutputArray(data, schema))
+      })()
     }
   }, [data])
 
@@ -203,9 +200,9 @@ const Watcher = ({ options, control, schema, onSubmit, handleSubmit, getValues, 
   return null
 }
 
-export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSubmit, onError = () => { }, footer, style = {}, className, options = {} }, ref) => {
-  const classes = useCustomStyle(style)
-  const formFlow = flow || Object.keys(schema)
+export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSubmit, onError = () => { }, footer, style = {}, className, options = {}, nostyle }, ref) => {
+  const [calcSchema, setCalcSchema] = useState(schema)
+  const formFlow = flow || Object.keys(calcSchema)
   const maybeCustomHttpClient = (url, method) => {
     //todo: if present props.resolve()
     if (options.httpClient) {
@@ -220,7 +217,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
     })
   }
 
-  const defaultValues = getDefaultValues(formFlow, schema, value);
+  const defaultValues = getDefaultValues(formFlow, calcSchema, value);
 
   //FIXME: get real schema through the switch
 
@@ -249,14 +246,10 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 
   const { handleSubmit, formState: { errors, dirtyFields }, reset, trigger, getValues, watch } = methods
 
-  const prev = usePrevious(value)
-  const prevSchema = usePrevious(schema)
+  useHashEffect(() => {
+    reset({ ...cleanInputArray(value, defaultValues, flow, schema) })
+  }, [value, calcSchema])
 
-  useEffect(() => {
-    if (prev && prevSchema && !deepEqual(value, prev) || !deepEqual(schema, prevSchema)) {
-      reset({ ...cleanInputArray(value, defaultValues, flow, schema) })
-    }
-  }, [value, schema])
 
   const functionalProperty = (entry, prop) => {
     if (typeof prop === 'function') {
@@ -287,7 +280,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
         onSubmit={onSubmit}
         handleSubmit={handleSubmit}
         watch={methods.watch} />
-      <form className={className || `${classes.pr_15} ${classes.w_100}`} onSubmit={handleSubmit(data => {
+      <form className={className || `pr_15 w_100`} onSubmit={handleSubmit(data => {
         const clean = cleanOutputArray(data, schema)
         onSubmit(clean)
       }, onError)}>
@@ -333,8 +326,6 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 })
 
 const Footer = (props) => {
-  const classes = useCustomStyle();
-
   if (props.render) {
     return props.render({ reset: props.reset, valid: props.valid })
   }
@@ -342,16 +333,15 @@ const Footer = (props) => {
   const isSubmitDisplayed = props.actions?.submit?.display === undefined ? true : !!props.actions?.submit?.display
 
   return (
-    <div className={`${classes.flex} ${classes.jc_end} ${classes.mt_5}`}>
-      {props.actions?.cancel?.display && <button className={`${classes.btn} ${classes.btn_red}`} type="button" onClick={() => props.actions?.cancel.action()}>{props.actions?.cancel?.label || 'Cancel'}</button>}
-      {props.actions?.reset?.display && <button className={`${classes.btn} ${classes.btn_red}`} type="button" onClick={props.reset}>{props.actions?.reset?.label || 'Reset'}</button>}
-      {isSubmitDisplayed && <button className={`${classes.btn} ${classes.btn_green} ${classes.ml_10}`} type="submit">{props.actions?.submit?.label || 'Save'}</button>}
+    <div className='flex jc_end mt_5'>
+      {props.actions?.cancel?.display && <button className='btn btn_red' type="button" onClick={() => props.actions?.cancel.action()}>{props.actions?.cancel?.label || 'Cancel'}</button>}
+      {props.actions?.reset?.display && <button className='btn btn_red' type="button" onClick={props.reset}>{props.actions?.reset?.label || 'Reset'}</button>}
+      {isSubmitDisplayed && <button className='btn btn_green ml_10' type="submit">{props.actions?.submit?.label || 'Save'}</button>}
     </div>
   )
 }
 
 const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaultValue, index, functionalProperty, parent, onAfterChange }) => {
-  const classes = useCustomStyle();
   const { formState: { errors, dirtyFields, touchedFields, isSubmitted }, control, trigger, getValues, setValue, watch, register } = useFormContext();
 
   if (entry && typeof entry === 'object') {
@@ -466,7 +456,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
             <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
               <textarea
                 type="text"
-                className={classNames(classes.input, { [classes.input__invalid]: errorDisplayed })} />
+                className={classNames('input', step.className, { ['input__invalid']: errorDisplayed })} />
             </ControlledInput>
           );
         case format.code:
@@ -474,13 +464,13 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
           const Component = step.format === format.code ? CodeInput : SingleLineCode
           return (
             <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
-              <Component className={classNames({ [classes.input__invalid]: errorDisplayed })} />
+              <Component className={classNames(step.className, { ['input__invalid']: errorDisplayed })} />
             </ControlledInput>
           )
         case format.markdown:
           return (
             <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
-              <MarkdownInput className={classNames({ [classes.input__invalid]: errorDisplayed })} />
+              <MarkdownInput className={classNames(step.className, { ['input__invalid']: errorDisplayed })} />
             </ControlledInput>
           )
         case format.buttonsSelect:
@@ -488,7 +478,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
           return (
             <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
               <SelectInput
-                className={classNames(classes.flex_grow_1, { [classes.input__invalid]: errorDisplayed })}
+                className={classNames('flex_grow_1', step.className, { ['input__invalid']: errorDisplayed })}
                 disabled={functionalProperty(entry, step.disabled)}
                 {...step.props}
                 possibleValues={step.options}
@@ -507,7 +497,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
             <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
               <input
                 type={step.format || 'text'}
-                className={classNames(classes.input, { [classes.input__invalid]: errorDisplayed })}
+                className={classNames('input', step.className, { ['input__invalid']: errorDisplayed })}
               />
             </ControlledInput>
           )
@@ -520,7 +510,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
           return (
             <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
               <SelectInput
-                className={classNames(classes.content, { [classes.input__invalid]: errorDisplayed })}
+                className={classNames('content', step.className, { ['input__invalid']: errorDisplayed })}
                 {...step.props}
                 possibleValues={step.options}
                 httpClient={httpClient}
@@ -537,7 +527,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
           return <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
             <input
               type={step.format || 'number'}
-              className={classNames(classes.input, { [classes.input__invalid]: errorDisplayed })}
+              className={classNames('input', step.className, { ['input__invalid']: errorDisplayed })}
             />
           </ControlledInput>
       }
@@ -548,7 +538,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
           step={step}
           entry={entry}
           errorDisplayed={errorDisplayed}>
-          <BooleanInput className={classNames({ [classes.input__invalid]: errorDisplayed })} />
+          <BooleanInput className={classNames(steop.className, { ['input__invalid']: errorDisplayed })} />
         </ControlledInput>
       )
 
@@ -559,7 +549,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
           return (
             <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
               <SelectInput
-                className={classNames(classes.flex_grow_1, { [classes.input__invalid]: errorDisplayed })}
+                className={classNames('flex_grow_1', step.className, { ['input__invalid']: errorDisplayed })}
                 {...step.props}
                 possibleValues={step.options}
                 httpClient={httpClient}
@@ -588,7 +578,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
             <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed} component={(field, props) => (
               <CodeInput
                 {...props}
-                className={classNames({ [classes.input__invalid]: error })}
+                className={classNames(step.className, { ['input__invalid']: error })}
                 onChange={(e) => {
                   errorDisplayed = { errorDisplayed }
                   let v
@@ -610,7 +600,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
           return (
             <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
               <ObjectInput
-                className={classNames({ [classes.input__invalid]: errorDisplayed })}
+                className={classNames(step.className, { ['input__invalid']: errorDisplayed })}
               />
             </ControlledInput>
           )
@@ -619,7 +609,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
       return (
         <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
           <DatePicker
-            className={classNames(classes.datepicker, { [classes.input__invalid]: errorDisplayed })}
+            className={classNames('datepicker', step.className, { ['input__invalid']: errorDisplayed })}
             formatStyle="large"
           />
         </ControlledInput>
@@ -648,25 +638,25 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
               const files = field.value || []
 
               return (
-                <div className={classNames(classes.flex, classes.ai_center, { [classes.input__invalid]: error })}>
+                <div className={classNames('flex', 'ai_center', step.className, { ['input__invalid']: error })}>
                   <input
                     ref={(r) => setInput(r)}
                     type="file"
                     multiple
-                    className={classes.d_none}
+                    className={'d_none'}
                     onChange={setFiles}
                   />
                   <button
                     type="button"
-                    className={`${classes.btn} ${classes.btn_sm} ${classes.flex} ${classes.ai_center}`}
+                    className='btn btn_sm flex ai_center'
                     disabled={uploading || functionalProperty(entry, step.disabled)}
                     onClick={trigger}>
                     {uploading && <Loader />}
                     {!uploading && <Upload />}
-                    <span className={`${classes.ml_5}`}>Select file(s)</span>
+                    <span className='ml_5'>Select file(s)</span>
                   </button>
 
-                  <span className={`${classes.ml_5}`}>{files.length <= 0 ? 'No files selected' : files.map(r => r.name).join(" , ")}</span>
+                  <span className='ml_5'>{files.length <= 0 ? 'No files selected' : files.map(r => r.name).join(" , ")}</span>
                 </div>
               );
             };
@@ -685,7 +675,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
         <ControlledInput defaultValue={defaultValue} step={step} entry={entry} component={(field, props) => (
           <CodeInput
             {...props}
-            className={classNames({ [classes.input__invalid]: error })}
+            className={classNames({ ['input__invalid']: error })}
             onChange={v => {
               field.onChange(v)
               option(step.onChange)
@@ -705,7 +695,6 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
 
 
 const ArrayStep = ({ entry, step, component, disabled }) => {
-  const classes = useCustomStyle()
   const { getValues, setValue, control, trigger, formState } = useFormContext();
 
   const values = getValues(entry);
@@ -722,13 +711,13 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
         .map((field, idx) => {
           return (
             <div key={field.id}>
-              <div className={classNames(classes.ai_center, classes.mt_5)} style={{ position: 'relative' }}>
+              <div className={classNames('ai_center', 'mt_5')} style={{ position: 'relative' }}>
                 <div style={{ width: '95%' }}>
                   {component({ key: field.id, ...field, defaultValue: values[idx] }, idx)}
                 </div>
                 <button type="button"
                   style={{ position: 'absolute', top: '2px', right: 0 }}
-                  className={classNames(classes.btn, classes.btn_red, classes.btn_sm, classes.ml_5)} disabled={disabled} onClick={() => {
+                  className={classNames('btn', 'btn_red', 'btn_sm', 'ml_5')} disabled={disabled} onClick={() => {
                     remove(idx)
                     trigger(entry);
                   }}>
@@ -738,8 +727,8 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
             </div>
           )
         })}
-      <div className={classNames(classes.flex, classes.jc_flex_end)}>
-        <button type="button" className={classNames(classes.btn, classes.btn_blue, classes.btn_sm, classes.mt_5, { [classes.input__invalid]: errorDisplayed })} onClick={() => {
+      <div className={classNames('flex', 'jc_flex_end')}>
+        <button type="button" className={classNames('btn', 'btn_blue', 'btn_sm', 'mt_5', { ['input__invalid']: errorDisplayed })} onClick={() => {
           const newValue = cleanInputArray({}, getValues(entry), step.flow, step.schema)
           append({ value: step.addableDefaultValue || ((step.type === type.object && newValue) ? newValue : defaultVal()) })
           // trigger(entry);
@@ -755,7 +744,6 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
 const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, errorDisplayed, value, step, functionalProperty, index }) => {
   const { getValues, setValue, watch } = useFormContext();
   const [collapsed, setCollapsed] = useState(!!step.collapsed);
-  const classes = useCustomStyle();
 
   useWatch(step?.conditionalSchema?.ref)
 
@@ -774,19 +762,16 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
 
       const schemaAndFlow = option(filterSwitch)
         .orElse(condiSchema.switch.find(s => s.default))
-        .getOrElse({schema: {}, flow: []})
+        .getOrElse({ schema: {}, flow: [] })
 
       return { schema: schemaAndFlow.schema, flow: schemaAndFlow.flow || Object.keys(schemaAndFlow.schema) }
     })
     .getOrElse({ schema, flow })
 
-  const prevSchema = usePrevious(schemaAndFlow.schema);
-  useEffect(() => {
-    if (!!prevSchema && !deepEqual(prevSchema, schemaAndFlow.schema)) {
-      const def = getDefaultValues(schemaAndFlow.flow, schemaAndFlow.schema, getValues(parent));
-      setValue(parent, def, { shouldValidate: false })
-    }
-  }, [prevSchema, schemaAndFlow.schema])
+  useHashEffect(() => {
+    const def = getDefaultValues(schemaAndFlow.flow, schemaAndFlow.schema, getValues(parent));
+    setValue(parent, def, { shouldValidate: false })
+  }, [schemaAndFlow.schema])
 
   const computedSandF = schemaAndFlow.flow.reduce((acc, entry) => {
     const step = schemaAndFlow.schema[entry]
@@ -811,11 +796,11 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
 
   const bordered = computedSandF.filter(x => x.visibleStep).length >= 1 && step.label !== null;
   return (
-    <div className={classNames({ [classes.nestedform__border]: bordered, [classes.border__error]: !!errorDisplayed })} style={{ position: 'relative' }}>
+    <div className={classNames({ ['nestedform__border']: bordered, ['border__error']: !!errorDisplayed })} style={{ position: 'relative' }}>
       {!!step.collapsable && schemaAndFlow.flow.length > 1 && collapsed &&
-        <ChevronDown size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: -35, right: 0, zIndex: 100 }} strokeWidth="2" onClick={() => setCollapsed(!collapsed)} />}
+        <ChevronDown size={30} className={'cursor_pointer'} style={{ position: 'absolute', top: -35, right: 0, zIndex: 100 }} strokeWidth="2" onClick={() => setCollapsed(!collapsed)} />}
       {!!step.collapsable && schemaAndFlow.flow.length > 1 && !collapsed &&
-        <ChevronUp size={30} className={classes.cursor_pointer} style={{ position: 'absolute', top: -35, right: 0, zIndex: 100 }} strokeWidth="2" onClick={() => setCollapsed(!collapsed)} />}
+        <ChevronUp size={30} className={'cursor_pointer'} style={{ position: 'absolute', top: -35, right: 0, zIndex: 100 }} strokeWidth="2" onClick={() => setCollapsed(!collapsed)} />}
 
       {computedSandF.map(({ step, visibleStep, entry }, idx) => {
 
@@ -826,7 +811,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
 
         return (
           <BasicWrapper key={`${entry}.${idx}`}
-            className={classNames({ [classes.display__none]: (collapsed && !step.visibleOnCollapse) || !visibleStep })}
+            className={classNames({ ['display__none']: (collapsed && !step.visibleOnCollapse) || !visibleStep })}
             entry={`${parent}.${entry}`}
             label={functionalProperty(entry, step?.label === null ? null : step?.label || entry)} help={step.help} render={inputWrapper}>
             <Step

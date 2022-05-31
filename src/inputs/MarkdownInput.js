@@ -1,7 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import showdown from 'showdown';
 import classNames from 'classnames';
-import { useCustomStyle } from '../styleContext'
 
 import '@fortawesome/fontawesome-free/css/all.css';
 import 'highlight.js/styles/monokai.css';
@@ -98,7 +97,6 @@ export const MarkdownInput = (props) => {
   };
 
   const injectButtons = () => {
-    const classes = useCustomStyle()
     return commands.map((command, idx) => {
       if (command.component) {
         return command.component(idx);
@@ -106,7 +104,7 @@ export const MarkdownInput = (props) => {
       return (
         <button
           type="button"
-          className={classNames(classes.btn_for_descriptionToolbar)}
+          className={classNames('btn_for_descriptionToolbar')}
           aria-label={command.name}
           title={command.name}
           key={`toolbar-btn-${idx}`}
@@ -134,8 +132,6 @@ export const MarkdownInput = (props) => {
     });
   };
 
-  const classes = useCustomStyle()
-
   return <div className={classNames(props.className)}>
     {!props.readOnly && <div
       style={{
@@ -146,21 +142,21 @@ export const MarkdownInput = (props) => {
         <div>
           <button
             type="button"
-            className={classNames(classes.btn, classes.btn_sm)}
+            className='btn btn_sm'
             style={{ color: !preview ? '#7f96af' : 'white', backgroundColor: preview ? '#7f96af' : 'white' }}
             onClick={() => setPreview(false)}>
             Write
           </button>
           <button
             type="button"
-            className={classNames(classes.btn, classes.btn_sm, classes.ml_5)}
+            className='btn btn_sm ml_5'
             style={{ color: preview ? '#7f96af' : 'white', backgroundColor: preview ? 'white' : '#7f96af' }}
             onClick={() => setPreview(true)}>
             Preview
           </button>
         </div>
       </div>
-      <div className={classNames(classes.flex, classes.flexWrap)}>{injectButtons()}</div>
+      <div className='flex flexWrap'>{injectButtons()}</div>
     </div>}
     {!preview && (
       <CodeInput {...props} setRef={e => ref.current = e} />

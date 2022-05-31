@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import classNames from 'classnames';
 import CreatableSelect from 'react-select/creatable';
 import Select from 'react-select';
 import { option } from '../Option';
 import { isPromise } from '../utils'
 import deepEqual from 'fast-deep-equal';
-import { useCustomStyle } from '../styleContext';
 import { useFormContext } from 'react-hook-form';
 
 const valueToSelectOption = (value, possibleValues = [], isMulti = false) => {
@@ -37,7 +36,6 @@ const valueToSelectOption = (value, possibleValues = [], isMulti = false) => {
 export const SelectInput = React.forwardRef((props, _) => {
   const { getValues } = useFormContext()
 
-  const classes = useCustomStyle()
   const possibleValues = (props.possibleValues || [])
     .map(v => props.transformer ?
       (typeof props.transformer === 'function' ?
@@ -135,7 +133,7 @@ export const SelectInput = React.forwardRef((props, _) => {
               key={idx}
               type="button"
               disabled={props.disabled}
-              className={classNames(props.className, classes.btn, classes.btn_grey, classes.ml_5, { active })}
+              className={classNames(props.className, 'btn btn_grey ml_5', { active })}
               onClick={() => handleSelectButtonClick(v)}>
               {v.label}
             </button>
