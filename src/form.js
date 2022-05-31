@@ -201,8 +201,8 @@ const Watcher = ({ options, control, schema, onSubmit, handleSubmit }) => {
 }
 
 export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSubmit, onError = () => { }, footer, style = {}, className, options = {}, nostyle }, ref) => {
-  const [calcSchema, setCalcSchema] = useState(schema)
-  const formFlow = flow || Object.keys(calcSchema)
+  
+  const formFlow = flow || Object.keys(schema)
   const maybeCustomHttpClient = (url, method) => {
     //todo: if present props.resolve()
     if (options.httpClient) {
@@ -217,7 +217,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
     })
   }
 
-  const defaultValues = getDefaultValues(formFlow, calcSchema, value);
+  const defaultValues = getDefaultValues(formFlow, schema, value);
 
   //FIXME: get real schema through the switch
 
@@ -248,7 +248,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 
   useHashEffect(() => {
     reset({ ...cleanInputArray(value, defaultValues, flow, schema) })
-  }, [value, calcSchema])
+  }, [value, schema])
 
 
   const functionalProperty = (entry, prop) => {
@@ -538,7 +538,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
           step={step}
           entry={entry}
           errorDisplayed={errorDisplayed}>
-          <BooleanInput className={classNames(steop.className, { ['input__invalid']: errorDisplayed })} />
+          <BooleanInput className={classNames(step.className, { ['input__invalid']: errorDisplayed })} />
         </ControlledInput>
       )
 
