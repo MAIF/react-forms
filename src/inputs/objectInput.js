@@ -89,17 +89,17 @@ export const ObjectInput = (props) => {
         <button
           disabled={props.disabled}
           type="button"
-          className='flex btn btn_blue btn_sm'
+          className='mrf-flex mrf-btn mrf-btn_blue mrf-btn_sm'
           onClick={addFirst}>
           <PlusCircle />
         </button>
       )}
       {Object.entries(internalState || {}).map(([id, { key, value }], idx) => (
-        <div className='flex mt_5' key={idx}>
+        <div className='mrf-flex mrf-mt_5' key={idx}>
           <input
             disabled={props.disabled}
             type="text"
-            className='w_50 input'
+            className='mrf-w_50 mrf-input'
             placeholder={props.placeholderKey}
             value={key}
             onChange={e => changeKey(id, e.target.value)}
@@ -107,7 +107,7 @@ export const ObjectInput = (props) => {
           <input
             disabled={props.disabled}
             type="text"
-            className='w_50 input'
+            className='mrf-w_50 mrf-input'
             placeholder={props.placeholderValue}
             value={value}
             onChange={e => changeValue(id, e.target.value)}
@@ -115,7 +115,7 @@ export const ObjectInput = (props) => {
           <button
             disabled={props.disabled}
             type="button"
-            className='flex btn btn_red btn_sm ml_10'
+            className='mrf-flex mrf-btn mrf-btn_red mrf-btn_sm mrf-ml_10'
             onClick={() => remove(id)}>
             <MinusCircle />
           </button>
@@ -123,7 +123,7 @@ export const ObjectInput = (props) => {
             <button
               disabled={props.disabled}
               type="button"
-              className='flex btn btn_blue btn_sm ml_5'
+              className='mrf-flex mrf-btn mrf-btn_blue mrf-btn_sm mrf-ml_5'
               onClick={addNext}>
               <PlusCircle />
             </button>

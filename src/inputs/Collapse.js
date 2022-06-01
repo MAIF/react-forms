@@ -12,21 +12,21 @@ export const Collapse = (props) => {
 
   return (
     <div>
-      <hr className={classNames({ ['collapse_error']: props.errored })} />
-      <div className='cursor_pointer flex jc_between' onClick={toggle}>
-        <span className={classNames('collapse_label', { ['collapse_error']: props.errored })}>{props.label}</span>
+      <hr className={classNames({ ['mrf-collapse_error']: props.errored })} />
+      <div className='mrf-cursor_pointer mrf-flex mrf-jc_between' onClick={toggle}>
+        <span className={classNames('mrf-collapse_label', { ['mrf-collapse_error']: props.errored })}>{props.label}</span>
         <button
           type="button"
-          className={classNames('btn', 'btn_sm', 'ml_5', { ['collapse_error']: props.errored })}
+          className={classNames('mrf-btn', 'mrf-btn_sm', 'mrf-ml_5', { ['mrf-collapse_error']: props.errored })}
           onClick={toggle}>
           {!!collapsed && <Eye size={16} />}
           {!collapsed && <EyeOff size={16} />}
         </button>
       </div>
-      <div className={classNames('ml_10', {
-        ['display__none']: !!collapsed,
-        ['flex']: !!props.inline,
-        ['collapse__inline']: !!props.inline,
+      <div className={classNames('mrf-ml_10', {
+        ['mrf-display__none']: !!collapsed,
+        ['mrf-flex']: !!props.inline,
+        ['mrf-collapse__inline']: !!props.inline,
       })}>
         {props.children}
       </div>

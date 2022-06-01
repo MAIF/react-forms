@@ -133,7 +133,7 @@ export const SelectInput = React.forwardRef((props, _) => {
               key={idx}
               type="button"
               disabled={props.disabled}
-              className={classNames(props.className, 'btn btn_grey ml_5', { active })}
+              className={classNames(props.className, 'mrf-btn mrf-btn_grey mrf-ml_5', { active })}
               onClick={() => handleSelectButtonClick(v)}>
               {v.label}
             </button>

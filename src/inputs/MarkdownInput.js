@@ -90,7 +90,7 @@ export const MarkdownInput = (props) => {
   ];
 
   const showPreview = () => {
-    const parent = [...document.getElementsByClassName('preview')]
+    const parent = [...document.getElementsByClassName('mrf-preview')]
     if (parent.length > 0)
       [...parent[0].querySelectorAll('pre code')]
         .forEach(block => hljs.highlightElement(block));
@@ -104,7 +104,7 @@ export const MarkdownInput = (props) => {
       return (
         <button
           type="button"
-          className={classNames('btn_for_descriptionToolbar')}
+          className={classNames('mrf-btn_for_descriptionToolbar')}
           aria-label={command.name}
           title={command.name}
           key={`toolbar-btn-${idx}`}
@@ -142,28 +142,28 @@ export const MarkdownInput = (props) => {
         <div>
           <button
             type="button"
-            className='btn btn_sm'
+            className='mrf-btn mrf-btn_sm'
             style={{ color: !preview ? '#7f96af' : 'white', backgroundColor: preview ? '#7f96af' : 'white' }}
             onClick={() => setPreview(false)}>
             Write
           </button>
           <button
             type="button"
-            className='btn btn_sm ml_5'
+            className='mrf-btn mrf-btn_sm mrf-ml_5'
             style={{ color: preview ? '#7f96af' : 'white', backgroundColor: preview ? 'white' : '#7f96af' }}
             onClick={() => setPreview(true)}>
             Preview
           </button>
         </div>
       </div>
-      <div className='flex flexWrap'>{injectButtons()}</div>
+      <div className='mrf-flex mrf-flexWrap'>{injectButtons()}</div>
     </div>}
     {!preview && (
       <CodeInput {...props} setRef={e => ref.current = e} />
     )}
     {preview && (
       <div
-        className="preview"
+        className="mrf-preview"
         dangerouslySetInnerHTML={{ __html: converter.makeHtml(props.value) }}
       />
     )}

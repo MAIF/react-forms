@@ -15,7 +15,7 @@
   }
 }
 
-.input {
+.mrf-input {
   display: block;
   width: 100%;
   padding: 8px 12px;
@@ -31,7 +31,7 @@
   }
 }
 
-.btn {
+.mrf-btn {
   border-radius: 5px;
   padding: 10px;
   font-size: 1rem;
@@ -45,14 +45,14 @@
   }
 }
 
-.btn_sm {
+.mrf-btn_sm {
   font-size: 0.875rem;
   padding: .25rem .5rem;
   line-height: 1.5;
   border-radius: .2rem
 }
 
-.btn_group {
+.mrf-btn_group {
   &>button:not(:last-child) {
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
@@ -64,194 +64,194 @@
   }
 }
 
-.btn_red {
+.mrf-btn_red {
   @include buttonOutline(#dc3545, #bd2130)
 }
 
-.btn_green {
+.mrf-btn_green {
   @include buttonOutline(#28a745, #1e7e34)
 }
 
-.btn_blue {
+.mrf-btn_blue {
   @include buttonOutline(#007bff, #0069d9)
 }
 
-.btn_grey {
+.mrf-btn_grey {
   @include buttonOutline(#6c757d, #5c636a)
 }
 
-.txt_red {
+.mrf-txt_red {
   color: #dc3545;
 }
 
-.ml_5 {
+.mrf-ml_5 {
   margin-left: 5px;
 }
 
-.ml_10 {
+.mrf-ml_10 {
   margin-left: 10px;
 }
 
-.mr_5 {
+.mrf-mr_5 {
   margin-right: 5px;
 }
 
-.mr_10 {
+.mrf-mr_10 {
   margin-right: 10px;
 }
 
-.mt_5 {
+.mrf-mt_5 {
   margin-top: 5px;
 }
 
-.mt_10 {
+.mrf-mt_10 {
   margin-top: 10px;
 }
 
-.mt_20 {
+.mrf-mt_20 {
   margin-top: 20px;
 }
 
-.mb_5 {
+.mrf-mb_5 {
   margin-bottom: 5px;
 }
 
-.mb_10 {
+.mrf-mb_10 {
   margin-bottom: 10px;
 }
 
-.mb_20 {
+.mrf-mb_20 {
   margin-bottom: 20px;
 }
 
-.pt_15 {
+.mrf-pt_15 {
   padding-top: 15px;
 }
 
-.p_15 {
+.mrf-p_15 {
   padding: 15px;
 }
 
-.pr_15 {
+.mrf-pr_15 {
   padding-right: 15px;
 }
 
-.w_100 {
+.mrf-w_100 {
   width: 100%
 }
 
 
-.w_50 {
+.mrf-w_50 {
   width: 50%
 }
 
-.d_none {
+.mrf-d_none {
   display: none;
 }
 
-.flex-wrap {
+.mrf-flex-wrap {
   flex-wrap: wrap
 }
 
-.flex {
+.mrf-flex {
   display: flex;
 }
 
-.flex-column {
+.mrf-flex-column {
   flex-direction: column;
 }
 
-.flex_grow_1 {
+.mrf-flex_grow_1 {
   flex-grow: 1;
 }
 
-.jc_between {
+.mrf-jc_between {
   justify-content: space-between;
 }
 
-.jc_end {
+.mrf-jc_end {
   justify-content: end;
 }
 
-.jc_flex_end {
+.mrf-jc_flex_end {
   justify-content: flex-end;
 }
 
-.jc_flex_start {
+.mrf-jc_flex_start {
   justify-content: flex-start;
 }
 
-.ac_center {
+.mrf-ac_center {
   align-content: center;
 }
 
-.ai_center {
+.mrf-ai_center {
   align-items: center;
 }
 
-.cursor_pointer {
+.mrf-cursor_pointer {
   cursor: pointer;
 }
 
-.cursor_not_allowed {
+.mrf-cursor_not_allowed {
   cursor: not-allowed;
 }
 
-.collapse {
+.mrf-collapse {
   display: flex;
   justify-content: space-between;
   cursor: pointer;
 }
 
-.collapse_label {
+.mrf-collapse_label {
   font-weight: bold;
   margin-top: 7px;
 }
 
-.collapse_label {
+.mrf-collapse_label {
   font-weight: bold;
   margin-top: 7px;
 }
 
-.collapse_error {
+.mrf-collapse_error {
   color: #dc3545
 }
 
-.datepicker {
+.mrf-datepicker {
   & input {
     border-radius: 4px;
   }
 }
 
-.input__boolean__on {
+.mrf-input__boolean__on {
   color: MediumSeaGreen
 }
 
-.input__boolean__off {
+.mrf-input__boolean__off {
   color: tomato
 }
 
-.input__invalid {
+.mrf-input__invalid {
   border-color: #dc3545 !important;
 }
 
-.feedback {
+.mrf-feedback {
   width: 100%;
   margin-top: .25rem;
   font-size: 80%
 }
 
-.display__none {
+.mrf-display__none {
   display: none
 }
 
-.collapse__inline {
-  & .form-group+.form-group {
+.mrf-collapse__inline {
+  & .mrf-form-group+.mrf-form-group {
     margin-left: 20px
   }
 }
 
-.nestedform__border {
+.mrf-nestedform__border {
   border-left: 2px solid lightGray;
   padding-left: 0.5rem;
   margin-left: 0.5rem;
@@ -261,11 +261,11 @@
   padding-right: 2.5rem;
 }
 
-.border__error {
+.mrf-border__error {
   border-color: #dc3545
 }
 
-.btn_for_descriptionToolbar {
+.mrf-btn_for_descriptionToolbar {
   text-align: left;
   cursor: pointer;
   height: 22px;
@@ -275,10 +275,9 @@
   color: #242729;
   margin-right: 5px;
   margin-left: 5px
-
 }
 
-.content_switch_button_on {
+.mrf-content_switch_button_on {
   width: 35px;
   height: 22px;
   border-radius: 20px;
@@ -289,7 +288,7 @@
   justify-content: flex-end
 }
 
-.content_switch_button_off {
+.mrf-content_switch_button_off {
   width: 35px;
   height: 22px;
   border-radius: 20px;
@@ -300,7 +299,7 @@
   justify-content: flex-start
 }
 
-.content_switch_button_null {
+.mrf-content_switch_button_null {
   width: 35px;
   height: 22px;
   border-radius: 20px;
@@ -311,7 +310,7 @@
   justify-content: flex-start
 }
 
-.switch_button_on {
+.mrf-switch_button_on {
   cursor: pointer;
   width: 20px;
   height: 20px;
@@ -321,7 +320,7 @@
   box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.3)
 }
 
-.switch_button_off {
+.mrf-switch_button_off {
   background-color: #fff;
   border-radius: 20px;
   cursor: pointer;
@@ -331,7 +330,7 @@
   box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.3)
 }
 
-.switch_button_null {
+.mrf-switch_button_null {
   background-color: #fff;
   border-radius: 20px;
   cursor: pointer;
