@@ -1,0 +1,18 @@
+$form-text-color: #{"var(--form-text-color, #495057)"};
+$form-border-color: #{"var(--form-border-color, #ced4da)"};
+$form-bg-color: #{"var(--form-bg-color, #fff)"};
+
+$readonly-bg-color: #{"var(--form-readonly-bg-color, #e9ecef)"};
+
+// status
+$error-color: #{"var(--error-color, #dc3545)"}; //status
+$error-hover-color: #{"var(--error-hover-color, #bd2130)"}; //status
+
+$success-color: #{"var(--success-color, #28a745)"}; //status
+$success-hover-color: #{"var(--success-hover-color, #1e7e34)"}; //status
+
+$info-color: #{"var(--info-color, #007bff)"}; //status
+$info-hover-color: #{"var(--info-hover-color, #0069d9)"}; //status
+
+$neutral-color: #{"var(--neutral-color, #6c757d)"}; //status
+$neutral-hover-color: #{"var(--neutral-hover-color, #5c636a)"}; //status

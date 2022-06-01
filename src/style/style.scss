@@ -1,3 +1,5 @@
+@import 'variables';
+
 @mixin buttonOutline($color, $darker) {
   color: $color;
   border-color: $color;
@@ -20,13 +22,13 @@
   width: 100%;
   padding: 8px 12px;
   font-size: 1rem;
-  color: #495057;
-  border: 1px solid #ced4da;
+  color: $form-text-color;
+  border: 1px solid $form-border-color;
   border-radius: 4px;
   box-sizing: border-box;
 
   &[readonly] {
-    background-color: #e9ecef;
+    background-color: $readonly-bg-color;
     opacity: 1;
   }
 }
@@ -37,7 +39,7 @@
   font-size: 1rem;
   cursor: pointer;
   border-width: 1px;
-  background-color: #fff;
+  background-color: $form-bg-color;
 
   &:disabled {
     opacity: .6;
@@ -65,23 +67,23 @@
 }
 
 .mrf-btn_red {
-  @include buttonOutline(#dc3545, #bd2130)
+  @include buttonOutline($error-color, $error-hover-color)
 }
 
 .mrf-btn_green {
-  @include buttonOutline(#28a745, #1e7e34)
+  @include buttonOutline($success-color, $success-hover-color)
 }
 
 .mrf-btn_blue {
-  @include buttonOutline(#007bff, #0069d9)
+  @include buttonOutline($info-color, $info-hover-color)
 }
 
 .mrf-btn_grey {
-  @include buttonOutline(#6c757d, #5c636a)
+  @include buttonOutline($neutral-color, $neutral-hover-color)
 }
 
 .mrf-txt_red {
-  color: #dc3545;
+  color: $error-color;
 }
 
 .mrf-ml_5 {
@@ -214,7 +216,7 @@
 }
 
 .mrf-collapse_error {
-  color: #dc3545
+  color: $error-color
 }
 
 .mrf-datepicker {
@@ -228,11 +230,11 @@
 }
 
 .mrf-input__boolean__off {
-  color: tomato
+  color: $error-color
 }
 
 .mrf-input__invalid {
-  border-color: #dc3545 !important;
+  border-color: $error-color !important;
 }
 
 .mrf-feedback {
@@ -262,7 +264,7 @@
 }
 
 .mrf-border__error {
-  border-color: #dc3545
+  border-color: $error-color
 }
 
 .mrf-btn_for_descriptionToolbar {
@@ -283,8 +285,8 @@
   border-radius: 20px;
   display: flex;
   margin-top: 10px;
-  background-color: green;
-  border: 1px solid green;
+  background-color: $success-color;
+  border: 1px solid $success-hover-color;
   justify-content: flex-end
 }
 
@@ -294,8 +296,8 @@
   border-radius: 20px;
   display: flex;
   margin-top: 10px;
-  background-color: #dc3545;
-  border: 1px solid #dc3545;
+  background-color: $error-color;
+  border: 1px solid $error-hover-color;
   justify-content: flex-start
 }
 
@@ -305,8 +307,8 @@
   border-radius: 20px;
   display: flex;
   margin-top: 10px;
-  background-color: #fff;
-  border: 1px solid #dfdfdf;
+  background-color: $neutral-color;
+  border: 1px solid $neutral-hover-color;
   justify-content: flex-start
 }
 
@@ -314,30 +316,30 @@
   cursor: pointer;
   width: 20px;
   height: 20px;
-  background-color: #fff;
+  background-color: $form-bg-color;
   border-radius: 20px;
-  border: 1px solid #dfdfdf;
+  border: 1px solid $success-hover-color;
   box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.3)
 }
 
 .mrf-switch_button_off {
-  background-color: #fff;
+  background-color: $form-bg-color;
   border-radius: 20px;
   cursor: pointer;
   width: 20px;
   height: 20px;
-  border: 1px solid #dfdfdf;
+  border: 1px solid $error-hover-color;
   box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.3)
 }
 
 .mrf-switch_button_null {
-  background-color: #fff;
+  background-color: $form-bg-color;
   border-radius: 20px;
   cursor: pointer;
   width: 22px;
   height: 22px;
   margin-top: -1px;
   margin-left: -1px;
-  border: 1px solid #dfdfdf;
+  border: 1px solid $neutral-hover-color;
   box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.3)
 }

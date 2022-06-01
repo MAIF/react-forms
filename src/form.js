@@ -17,7 +17,7 @@ import { option } from './Option'
 import { ControlledInput } from './controlledInput';
 import { arrayFlatten, isDefined, useHashEffect } from './utils';
 
-import './style.scss'
+import './style/style.scss'
 
 const usePrevious = (value) => {
   // The ref object is a generic container whose current property is mutable ...
