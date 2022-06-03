@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import showdown from 'showdown';
 import classNames from 'classnames';
+// @ts-ignore
+import Editor from './__generated/editor'
+
 
 import '@fortawesome/fontawesome-free/css/all.css';
 import 'highlight.js/styles/monokai.css';
@@ -21,9 +24,14 @@ const converter = new showdown.Converter({
   ghMentionsLink: '/{u}'
 });
 
-export const MarkdownInput = (props) => {
-  const [preview, setPreview] = useState(props.preview);
-  const ref = useRef()
+interface Range {
+  from: any;
+  to: any;
+}
+
+export const MarkdownInput = (props: {value?: string, preview?: boolean, className: string, readOnly?: boolean, onChange?: (value: string) => void}) => {
+  const [preview, setPreview] = useState<boolean>(props.preview || false);
+  const ref = useRef<Editor>()
 
   useEffect(() => {
     if (preview) {
@@ -35,57 +43,57 @@ export const MarkdownInput = (props) => {
     {
       name: 'Add header',
       icon: 'heading',
-      inject: range => !range ? '#' : [{ from: range.from, insert: "# " }]
+      inject: (range ?:Range) => !range ? '#' : [{ from: range.from, insert: "# " }]
     },
     {
       name: 'Add bold text',
       icon: 'bold',
-      inject: range => !range ? '**  **' : [{ from: range.from, insert: "**" }, { from: range.to, insert: '**' }]
+      inject: (range ?:Range) => !range ? '**  **' : [{ from: range.from, insert: "**" }, { from: range.to, insert: '**' }]
     },
     {
       name: 'Add italic text',
       icon: 'italic',
-      inject: range => !range ? '* *' : [{ from: range.from, insert: '*' }, { from: range.to, insert: '*' }]
+      inject: (range ?:Range) => !range ? '* *' : [{ from: range.from, insert: '*' }, { from: range.to, insert: '*' }]
     },
     {
       name: 'Add strikethrough text',
       icon: 'strikethrough',
-      inject: range => !range ? '~~ ~~' : [{ from: range.from, insert: '~~' }, { from: range.to, insert: '~~' }]
+      inject: (range ?:Range) => !range ? '~~ ~~' : [{ from: range.from, insert: '~~' }, { from: range.to, insert: '~~' }]
     },
     {
       name: 'Add link',
       icon: 'link',
-      inject: range => !range ? '[ ](url)' : [{ from: range.from, insert: '[' }, { from: range.to, insert: '](url)' }]
+      inject: (range ?:Range) => !range ? '[ ](url)' : [{ from: range.from, insert: '[' }, { from: range.to, insert: '](url)' }]
     },
     {
       name: 'Add code',
       icon: 'code',
-      inject: range => !range ? '```\n\n```\n' : [{ from: range.from, insert: '```\n' }, { from: range.to, insert: '\n```\n' }]
+      inject: (range ?:Range) => !range ? '```\n\n```\n' : [{ from: range.from, insert: '```\n' }, { from: range.to, insert: '\n```\n' }]
     },
     {
       name: 'Add quotes',
       icon: 'quote-right',
-      inject: range => !range ? '> ' : [{ from: range.from, insert: '> ' }]
+      inject: (range ?:Range) => !range ? '> ' : [{ from: range.from, insert: '> ' }]
     },
     {
       name: 'Add image',
       icon: 'image',
-      inject: range => !range ? '![ ](image-url)' : [{ from: range.from, insert: '![' }, { from: range.to, insert: '](image-url)' }]
+      inject: (range ?:Range) => !range ? '![ ](image-url)' : [{ from: range.from, insert: '![' }, { from: range.to, insert: '](image-url)' }]
     },
     {
       name: 'Add unordered list',
       icon: 'list-ul',
-      inject: range => !range ? '* ' : [{ from: range.from, insert: '* ' }]
+      inject: (range ?:Range) => !range ? '* ' : [{ from: range.from, insert: '* ' }]
     },
     {
       name: 'Add ordered list',
       icon: 'list-ol',
-      inject: range => !range ? '1. ' : [{ from: range.from, insert: '1. ' }]
+      inject: (range ?:Range) => !range ? '1. ' : [{ from: range.from, insert: '1. ' }]
     },
     {
       name: 'Add check list',
       icon: 'tasks',
-      inject: range => !range ? '* [ ] ' : [{ from: range.from, insert: '* [ ] ' }]
+      inject: (range ?:Range) => !range ? '* [ ] ' : [{ from: range.from, insert: '* [ ] ' }]
     }
   ];
 
@@ -93,14 +101,11 @@ export const MarkdownInput = (props) => {
     const parent = [...document.getElementsByClassName('mrf-preview')]
     if (parent.length > 0)
       [...parent[0].querySelectorAll('pre code')]
-        .forEach(block => hljs.highlightElement(block));
+        .forEach(block => hljs.highlightElement(block as HTMLElement));
   };
 
   const injectButtons = () => {
     return commands.map((command, idx) => {
-      if (command.component) {
-        return command.component(idx);
-      }
       return (
         <button
           type="button"
@@ -120,7 +125,7 @@ export const MarkdownInput = (props) => {
                 }
               })
             else {
-              editor.dispatch(editor.state.changeByRange(range => ({
+              editor.dispatch(editor.state.changeByRange((range: Range) => ({
                 changes: command.inject(range),
                 range
               })))
@@ -164,7 +169,7 @@ export const MarkdownInput = (props) => {
     {preview && (
       <div
         className="mrf-preview"
-        dangerouslySetInnerHTML={{ __html: converter.makeHtml(props.value) }}
+        dangerouslySetInnerHTML={{ __html: converter.makeHtml(props.value || "") }}
       />
     )}
   </div>

@@ -1,25 +1,110 @@
-import React, { useEffect, useState, useRef, useImperativeHandle, useContext } from 'react'
+import React, { useEffect, useState, useRef, useImperativeHandle, useContext, RefObject, FormEvent, ChangeEvent } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup';
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
 import { HelpCircle, Loader, Upload, ChevronDown, ChevronUp, Trash2 } from 'react-feather';
-import { useForm, useFormContext, Controller, useFieldArray, FormProvider, useWatch } from 'react-hook-form';
+import { useForm, useFormContext, Controller, useFieldArray, FormProvider, useWatch, FieldValue, Control, UnpackNestedValue, FieldPathValue } from 'react-hook-form';
 import { DatePicker } from 'react-rainbow-components';
 import ReactToolTip from 'react-tooltip';
 import { v4 as uuid } from 'uuid';
 import * as yup from "yup";
 
-import { type } from './type';
-import { format } from './format';
-import { BooleanInput, Collapse, SelectInput, ObjectInput, CodeInput, MarkdownInput, SingleLineCode } from './inputs/index';
+import { type, Type } from './type';
+import { format, Format } from './format';
+import { BooleanInput, Collapse, SelectInput, ObjectInput, CodeInput, MarkdownInput, SingleLineCode, SelectOption } from './inputs/index';
 import { getShapeAndDependencies } from './resolvers/index';
 import { option } from './Option'
-import { ControlledInput } from './controlledInput';
+import { ControlledInput } from './controlledInput.js';
 import { arrayFlatten, isDefined, useHashEffect } from './utils';
 
 import './style/style.scss'
+import { Constraint, TConstraintType } from './constraints';
 
-const usePrevious = (value) => {
+interface OptionActionItem {
+  display?: boolean;
+  label?: string;
+}
+
+interface OptionActions {
+  reset?: OptionActionItem;
+  submit?: OptionActionItem;
+}
+
+type HttpClient = (url: string, method: string) => Promise<Response>;
+
+interface Option {
+  httpClient?: HttpClient;
+  watch?: boolean | ((param: any) => void);
+  autosubmit?: boolean;
+  actions?: OptionActions
+}
+
+
+export interface Schema {
+  [key: string]: SchemaEntry;
+}
+
+type SchemaRenderType = ({rawValues, value, onChange, error, setValue, parent}:{rawValues?: any, value?: any, onChange?: (param: object) => void, error?: boolean, parent?: string, setValue?: (data: any) => void}) => JSX.Element
+
+interface ConditionnalSchemaElement {
+  default?: boolean;
+  condition?: ({rawValues, ref}: {rawValues: {[x:string]: any}, ref: any}) => boolean | any;
+  schema: Schema;
+  flow: Array<FlowObject|string>
+}
+
+
+export interface ConditionnalSchema {
+  ref: string;
+  switch: ConditionnalSchemaElement[];
+}
+
+export interface SchemaEntry {
+  schema?: Schema;
+  type: Type;
+  format?: Format;
+  array?: boolean;
+  createOption?: boolean;
+  onCreateOption?: (option: string) => any; // TODO specify option style
+  isMulti?: boolean;
+  defaultKeyValue?: object;
+  visible?: boolean | {ref: string, test: (b: any, idx?: number) => boolean};  // TODO match signatures of disabled / label
+  disabled?: boolean | ((prop: {rawValues: {[x: string]: any}, value: any}) => boolean);
+  label?: React.ReactNode | ((prop: {rawValues: {[x: string]: any}, value: any}) => React.ReactNode);
+  placeholder?: string;
+  defaultValue?: any;
+  help?: string;
+  className?: string;
+  style?: object;
+  onChange?: (param: object) => void;
+  render: SchemaRenderType;
+  itemRender?: SchemaRenderType;
+  props: object;
+  options: Array<any|{label: string, value: any}>;
+  optionsFrom: string;
+  transformer: ((v: any) => SelectOption) | {label: string, value: string};
+  conditionalSchema: ConditionnalSchema;
+  constraints: Array<Constraint | {type: TConstraintType, message?: string}>;
+  flow: Array<string|FlowObject>;
+  onAfterChange?: (obj: {entry:string, value: object, rawValues: object, previousValue?: object, getValue: (entry: string) => any, setValue: (entry: string, value: any) => void, onChange: (v: any) => void}) => void;
+  visibleOnCollapse?: boolean;
+  addableDefaultValue: any; /* TODO doc : possible only with array, used to give default value to dynamically added elements */
+  collapsed?: boolean; // TODO doc : indicate wether form is closed or not, only for objects with form
+  collapsable?: boolean; // TODO doc : indicate wether schema can be collapsed, only for objects with form
+}
+
+interface FlowObject {
+  label: string;
+  flow: Flow;
+  collapse: boolean;
+}
+export type Flow = Array<string | FlowObject>
+
+
+type TFunctionalProperty = <T,>(entry: string, prop: T | ((param: {rawValues: {[x: string]: any}, value: any}) => T) ) => T
+
+
+const usePrevious = (value: any) => {
   // The ref object is a generic container whose current property is mutable ...
   // ... and can hold any value, similar to an instance property on a class
   const ref = useRef();
@@ -33,27 +118,30 @@ const usePrevious = (value) => {
   return ref.current;
 }
 
-const BasicWrapper = ({ entry, className, label, help, children, render }) => {
+const BasicWrapper = ({ entry, className, help, children, render, functionalProperty, label }:{ entry: object | string, className?: string, label?: React.ReactNode, help: React.ReactNode /* TODO CHECK */, children: JSX.Element, render?: ({entry, label, error, help, children}: {entry: string, label: React.ReactNode, error: object, help: React.ReactNode, children: React.ReactNode}) => JSX.Element, functionalProperty: (entry: string, prop: React.ReactNode) => React.ReactNode}) => {
   if (typeof entry === 'object') {
     return children
   }
 
+  const computedLabel = functionalProperty(entry, label === null ? null : label || entry)
+
   const id = uuid();
 
   const { formState } = useFormContext();
+  // FIXME not sure it works as intended with more two or more parts
   const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.errors)
   const isDirty = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.dirtyFields)
   const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.touchedFields)
   const errorDisplayed = formState.isSubmitted || isDirty || isTouched
 
   if (render) {
-    return render({ entry, label, error, help, children })
+    return render({ entry, label: computedLabel, error, help, children })
   }
 
   return (
     <div className='mrf-mt_10' style={{ position: 'relative' }}>
-      {label && <label className='mrf-flex mrf-ai_center mrf-mb_5' htmlFor={entry}>
-        <span>{label}</span>
+      {computedLabel && <label className='mrf-flex mrf-ai_center mrf-mb_5' htmlFor={entry}>
+        <span>{computedLabel}</span>
         {help && <>
           <ReactToolTip html={true} place={'bottom'} id={id} />
           <span className='mrf-flex mrf-ai_center' data-html={true} data-tip={help} data-for={id}>
@@ -63,12 +151,12 @@ const BasicWrapper = ({ entry, className, label, help, children, render }) => {
       </label>}
 
       {children}
-      {error && <div className={classNames('mrf-feedback', { ['mrf-txt_red']: errorDisplayed })}>{error.message}</div>}
+      {error && <div className={classNames('mrf-feedback', { ['mrf-txt_red']: !!errorDisplayed })}>{error.message}</div>}
     </div>
   )
 }
 
-const CustomizableInput = props => {
+const CustomizableInput = (props: {field: object, error?: boolean, render?: SchemaRenderType, children: JSX.Element}) => {
   if (props.render) {
     return (
       props.render({ ...props.field, error: props.error })
@@ -77,34 +165,34 @@ const CustomizableInput = props => {
   return props.children
 }
 
-const defaultVal = (value, array, defaultValue, type) => {
+const defaultVal = (value?: any, array?: boolean, defaultValue?: any, type?: any) => {
   if (isDefined(defaultValue)) return defaultValue
-  if (!!array) return []
+  if (array) return []
   return value
 }
 
-const getDefaultValues = (flow, schema, value) => {
-  return (flow || []).reduce((acc, key) => {
+function getDefaultValues(flow: Flow, schema: Schema, value?: any): object {
+  return (flow || []).reduce((acc: object, key: string | FlowObject) => {
     if (typeof key === 'object') {
       return { ...acc, ...getDefaultValues(key.flow, schema, value) }
     }
     const entry = schema[key]
     if (!entry) { return acc }
-    return { ...acc, [key]: defaultVal(value ? value[key] : null, entry.array || entry.isMulti, entry.defaultValue) }
+    return { ...acc, [key]: defaultVal(value ? value[key] : null, entry.array || entry.isMulti || false, entry.defaultValue) }
   }, {})
 }
 
 
-const cleanInputArray = (obj, defaultValues, flow, subSchema) => {
+const cleanInputArray = (obj: {[x: string]: any} = {}, defaultValues: {[x: string]: any} = {}, flow?: Flow, subSchema?: Schema): object => {
   const realFlow = option(flow)
-    .map(f => f.map(v => v.flow || v))
+    .map(f => f.map(v => typeof v === 'object' ? v.flow : v))
     .map(arrayFlatten)
     .getOrElse(Object.keys(subSchema || {}))
 
   return Object.entries(subSchema || {})
     .filter(([key]) => realFlow.includes(key))
     .reduce((acc, [key, step]) => {
-      let v = null;
+      let v: any = null;
       if (obj) {
         v = obj[key];
       }
@@ -116,20 +204,20 @@ const cleanInputArray = (obj, defaultValues, flow, subSchema) => {
 
       if (step.array && !step.render) {
         return {
-          ...acc, [key]: (v || []).map(value => ({
+          ...acc, [key]: (v || []).map((value: any) => ({
             value: typeof value === 'object' && !(value instanceof Date) && !Array.isArray(value) ?
-              cleanInputArray(value, defaultValues, subSchema[key]?.flow, subSchema[key]?.schema || {}) : value
+              cleanInputArray(value, defaultValues, subSchema?.[key]?.flow, subSchema?.[key]?.schema || {}) : value
           }))
         }
       } else if (typeof v === 'object' && !(v instanceof Date) && !Array.isArray(v)) {
-        return { ...acc, [key]: cleanInputArray(v, defaultValues, subSchema[key]?.flow, subSchema[key]?.schema || {}) }
+        return { ...acc, [key]: cleanInputArray(v, defaultValues, subSchema?.[key]?.flow, subSchema?.[key]?.schema || {}) }
       } else {
         return { ...acc, [key]: v === undefined ? (Array.isArray(v) ? [] : step.type === type.object ? {} : null) : v }
       }
     }, obj)
 }
 
-const cleanOutputArray = (obj, subSchema) => {
+const cleanOutputArray = (obj: object, subSchema: Schema): object => {
   return Object.entries(obj).reduce((acc, curr) => {
     const [key, v] = curr;
 
@@ -166,7 +254,7 @@ const cleanOutputArray = (obj, subSchema) => {
   }, {})
 }
 
-export const validate = (flow, schema, value) => {
+export const validate = (flow: string[], schema: Schema, value: object) => {
   const formFlow = flow || Object.keys(schema)
 
   const { shape, dependencies } = getShapeAndDependencies(formFlow, schema);
@@ -177,10 +265,10 @@ export const validate = (flow, schema, value) => {
     })
 }
 
-const Watcher = ({ options, control, schema, onSubmit, handleSubmit }) => {
+const Watcher = ({ options, control, schema, onSubmit, handleSubmit }: { options: Option, control: Control<any, any> | undefined, schema: Schema, onSubmit: (param: any) => void, handleSubmit: ((func: (param: any) => void) => (() => void)) }) => {
   const data = useWatch({ control })
   useHashEffect(() => {
-    if (!!options.autosubmit) {
+    if (options.autosubmit) {
       handleSubmit(() => {
         onSubmit(cleanOutputArray(data, schema))
       })()
@@ -200,10 +288,12 @@ const Watcher = ({ options, control, schema, onSubmit, handleSubmit }) => {
   return null
 }
 
-export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSubmit, onError = () => { }, footer, style = {}, className, options = {}, nostyle }, ref) => {
+export const Form = React.forwardRef(function Form(
+  { schema, flow, value, inputWrapper, onSubmit, onError = () => {/* default is nothing */}, footer, style = {}, className, options = {}, nostyle }:
+  {schema: Schema, flow: Array<string | FlowObject>, value?: object, inputWrapper?: (props: object) => JSX.Element, onSubmit: (obj: object) => void, onError?: () => void /* TODO */, footer?: (props: object) => JSX.Element, style?:object, className?:string, options?: Option, nostyle: boolean}, ref) {
   
   const formFlow = flow || Object.keys(schema)
-  const maybeCustomHttpClient = (url, method) => {
+  const maybeCustomHttpClient = (url: string, method: string) => {
     //todo: if present props.resolve()
     if (options.httpClient) {
       return options.httpClient(url, method)
@@ -221,7 +311,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
 
   //FIXME: get real schema through the switch
 
-  const resolver = (rawData) => {
+  const resolver = (rawData: object) => {
     const { shape, dependencies } = getShapeAndDependencies(formFlow, schema, [], rawData);
     const resolver = yup.object().shape(shape, dependencies);
     return resolver;
@@ -240,20 +330,21 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
   //   setReset(true)
   // }, [reset])
 
+  const { handleSubmit, formState: { errors, dirtyFields }, reset, trigger, getValues, watch } = methods
+
   useEffect(() => {
     trigger();
   }, [trigger, initialReseted])
 
-  const { handleSubmit, formState: { errors, dirtyFields }, reset, trigger, getValues, watch } = methods
 
   useHashEffect(() => {
     reset({ ...cleanInputArray(value, defaultValues, flow, schema) })
   }, [value, schema])
 
 
-  const functionalProperty = (entry, prop) => {
+  const functionalProperty = <T,>(entry: string, prop: T | ((param: {rawValues: {[x: string]: any}, value: any}) => T) ): T => {
     if (typeof prop === 'function') {
-      return prop({ rawValues: getValues(), value: getValues(entry) });
+      return (prop as Function)({ rawValues: getValues(), value: getValues(entry) }); // FIXME why ???
     } else {
       return prop;
     }
@@ -278,14 +369,13 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
         control={methods.control}
         schema={schema}
         onSubmit={onSubmit}
-        handleSubmit={handleSubmit}
-        watch={methods.watch} />
+        handleSubmit={handleSubmit} />
       <form className={className || `mrf-pr_15 mrf-w_100`} onSubmit={handleSubmit(data => {
         const clean = cleanOutputArray(data, schema)
         onSubmit(clean)
       }, onError)}>
         {formFlow.map((entry, idx) => {
-          const step = schema[entry]
+          const step = typeof entry === "object" ? undefined : schema[entry]
 
           if (!step && typeof entry === 'string') {
             console.error(`no step found for the entry "${entry}" in the given schema. Your form might not work properly. Please fix it`)
@@ -293,12 +383,13 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
           }
 
           const visibleStep = option(step)
-            .map(s => s.visible)
-            .map(visible => {
+            .map((s:SchemaEntry) => s.visible)
+            .map((visible:boolean | {ref: string, test: (b: boolean, idx: number) => boolean}) => {
+              let value: any
               switch (typeof visible) {
                 case 'object':
-                  const value = watch(step.visible.ref);
-                  return option(step.visible.test).map(test => test(value, idx)).getOrElse(value)
+                  value = getValues(visible.ref);
+                  return option(visible.test).map(test => test(value, idx)).getOrElse(value)
                 case 'boolean':
                   return visible;
                 default:
@@ -312,7 +403,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
           }
 
           return (
-            <BasicWrapper key={`${entry}-${idx}`} entry={entry} dirtyFields={dirtyFields} label={functionalProperty(entry, step?.label === null ? null : step?.label || entry)} help={step?.help} render={inputWrapper}>
+            <BasicWrapper key={`${entry}-${idx}`} entry={entry} functionalProperty={functionalProperty} label={step?.label} help={step?.help} render={inputWrapper}>
               <Step key={idx} entry={entry} step={step}
                 schema={schema} inputWrapper={inputWrapper}
                 httpClient={maybeCustomHttpClient} functionalProperty={functionalProperty} />
@@ -325,7 +416,7 @@ export const Form = React.forwardRef(({ schema, flow, value, inputWrapper, onSub
   )
 })
 
-const Footer = (props) => {
+const Footer = (props: {actions?: {submit?: {display?: boolean, label?: React.ReactNode}, cancel?: {display?: boolean, action: () => void, label?: React.ReactNode},  reset?: {display?: boolean, label?: React.ReactNode}}, render ?: ({reset, valid}: {reset: () => void, valid: () => void}) => JSX.Element, reset: () => void, valid: () => void}) => {
   if (props.render) {
     return props.render({ reset: props.reset, valid: props.valid })
   }
@@ -334,25 +425,23 @@ const Footer = (props) => {
 
   return (
     <div className='mrf-flex mrf-jc_end mrf-mt_5'>
-      {props.actions?.cancel?.display && <button className='mrf-btn mrf-btn_red' type="button" onClick={() => props.actions?.cancel.action()}>{props.actions?.cancel?.label || 'Cancel'}</button>}
+      {props.actions?.cancel?.display && <button className='mrf-btn mrf-btn_red' type="button" onClick={() => props.actions?.cancel?.action()}>{props.actions?.cancel?.label || 'Cancel'}</button>}
       {props.actions?.reset?.display && <button className='mrf-btn mrf-btn_red' type="button" onClick={props.reset}>{props.actions?.reset?.label || 'Reset'}</button>}
       {isSubmitDisplayed && <button className='mrf-btn mrf-btn_green mrf-ml_10' type="submit">{props.actions?.submit?.label || 'Save'}</button>}
     </div>
   )
 }
 
-const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaultValue, index, functionalProperty, parent, onAfterChange }) => {
+const Step = (props: { entry: string | FlowObject, realEntry?: string, step?: SchemaEntry, schema: Schema, inputWrapper?: (props: object) => JSX.Element, httpClient?: HttpClient, defaultValue?: any, index?: number, functionalProperty: TFunctionalProperty, parent?:string, onAfterChange?: (obj: {entry:string, value: object, rawValues: object, previousValue?: object, getValue: (entry: string) => any, setValue: (entry: string, value: any) => void, onChange: (v: any) => void}) => void }) => {
+  let { entry, realEntry, step, schema, inputWrapper, httpClient, defaultValue, index, functionalProperty, parent, onAfterChange } = props;
   const { formState: { errors, dirtyFields, touchedFields, isSubmitted }, control, trigger, getValues, setValue, watch, register } = useFormContext();
 
   if (entry && typeof entry === 'object') {
-    const errored = entry.flow.some(step => !!errors[step] && (dirtyFields[step] || touchedFields[step]))
+    const errored = extractFlowString(entry).some(step => !!errors[step] && (dirtyFields[step] || touchedFields[step]))
     return (
       <Collapse {...entry} errored={errored}>
         {entry.flow.map((en, entryIdx) => {
-          const stp = schema[en]
-          const err = typeof en === 'object' ? undefined : en.split('.').reduce((object, key) => {
-            return object && object[key];
-          }, errors);
+          const stp = typeof en === "object" ? undefined : schema[en]; // TODO Factorise this logic
 
           if (!stp && typeof en === 'string') {
             console.error(`no step found for the entry "${en}" in the given schema. Your form might not work properly. Please fix it`)
@@ -362,9 +451,10 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
           const visibleStep = option(stp)
             .map(s => s.visible)
             .map(visible => {
+              let value: any;
               switch (typeof visible) {
                 case 'object':
-                  const value = watch(visible.ref);
+                  value = getValues(visible.ref);
                   return option(visible.test).map(test => test(value, index)).getOrElse(value)
                 case 'boolean':
                   return visible;
@@ -379,7 +469,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
           }
 
           return (
-            <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} label={functionalProperty(en, stp?.label === null ? null : stp?.label || en)} help={stp?.help} render={inputWrapper}>
+            <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} functionalProperty={functionalProperty} label={stp?.label} help={stp?.help} render={inputWrapper}>
               <Step entry={en} step={stp} schema={schema}
                 inputWrapper={inputWrapper} httpClient={httpClient}
                 defaultValue={stp?.defaultValue} functionalProperty={functionalProperty} />
@@ -393,11 +483,11 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
   const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], errors)
   const isDirty = entry.split('.').reduce((acc, curr) => acc && acc[curr], dirtyFields)
   const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], touchedFields)
-  const errorDisplayed = !!error && (isSubmitted || isDirty || isTouched)
+  const errorDisplayed = (!!error && (isSubmitted || isDirty || isTouched)) as boolean
 
-  const onAfterChangeFunc = onAfterChange || step.onAfterChange || step.on_after_change
+  step = step!;
 
-  if (onAfterChangeFunc) {
+  if (step.onAfterChange) {
     const data = watch()
 
     const d = entry
@@ -409,37 +499,35 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
     const newData = cleanOutputArray(d, schema)
 
     if (!deepEqual(newData, currentData) || (newData !== undefined && currentData === undefined))
-      onAfterChangeFunc({
+    step.onAfterChange({
         entry,
         value: getValues(entry),
         rawValues: newData,
         previousValue: currentData,
-        getValue: e => getValues(e),
+        getValue: (e:string) => getValues(e),
         setValue,
-        onChange: v => setValue(entry, v)
+        onChange: (v:any) => setValue(entry as string, v)
       })
   }
 
   if (step.array) {
     return (
       <CustomizableInput render={step.render} field={{
-        setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v)
-      }} error={error}>
+        setValue: (key:string, value:any) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: (v:any) => setValue((entry as string), v)
+      }} error={!!error}>
         <ArrayStep
           entry={entry}
           step={step}
-          disabled={functionalProperty(entry, step.disabled)}
+          disabled={functionalProperty(entry, step.disabled || false)}
           component={((props, idx) => {
             return (
               <Step
                 entry={`${entry}.${idx}.value`}
-                onAfterChange={step.onAfterChange || step.on_after_change}
-                step={{ ...(schema[realEntry || entry]), render: step.itemRender, onChange: undefined, array: false }}
+                step={{ ...(schema[realEntry || (entry as string)]), render: step!.itemRender!, onChange: undefined, array: false, onAfterChange: step!.onAfterChange }}
                 schema={schema}
                 inputWrapper={inputWrapper}
                 httpClient={httpClient}
                 defaultValue={props.defaultValue?.value}
-                value={props.value}
                 index={idx}
                 functionalProperty={functionalProperty} />
             )
@@ -453,33 +541,32 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
       switch (step.format) {
         case format.text:
           return (
-            <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
+            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed}>
               <textarea
-                type="text"
-                className={classNames('mrf-input', step.className, { ['mrf-mrf-input__invalid']: errorDisplayed })} />
+                className={classNames('mrf-input', step.className, { 'mrf-mrf-input__invalid': !!errorDisplayed })} />
             </ControlledInput>
           );
         case format.code:
         case format.singleLineCode:
           const Component = step.format === format.code ? CodeInput : SingleLineCode
           return (
-            <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
-              <Component className={classNames(step.className, { ['mrf-input__invalid']: errorDisplayed })} />
+            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed}>
+              <Component /*TODO try to pass className down OR use built in mechanism to display error classNames(step.className, { 'mrf-input__invalid': !!errorDisplayed })}*/ />
             </ControlledInput>
           )
         case format.markdown:
           return (
-            <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
-              <MarkdownInput className={classNames(step.className, { ['mrf-input__invalid']: errorDisplayed })} />
+            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed}>
+              <MarkdownInput className={classNames(step.className, { 'mrf-input__invalid': !!errorDisplayed })} />
             </ControlledInput>
           )
         case format.buttonsSelect:
         case format.select: {
           return (
-            <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
+            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed}>
               <SelectInput
-                className={classNames('mrf-flex_grow_1', step.className, { ['mrf-input__invalid']: errorDisplayed })}
-                disabled={functionalProperty(entry, step.disabled)}
+                className={classNames('mrf-flex_grow_1', step.className, { 'mrf-input__invalid': !!errorDisplayed })}
+                disabled={functionalProperty(entry, step.disabled || false)}
                 {...step.props}
                 possibleValues={step.options}
                 httpClient={httpClient}
@@ -494,10 +581,10 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
         }
         default:
           return (
-            <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
+            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed}>
               <input
                 type={step.format || 'text'}
-                className={classNames('mrf-input', step.className, { ['mrf-input__invalid']: errorDisplayed })}
+                className={classNames('mrf-input', step.className, { 'mrf-input__invalid': !!errorDisplayed })}
               />
             </ControlledInput>
           )
@@ -508,9 +595,9 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
         case format.buttonsSelect:
         case format.select:
           return (
-            <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
+            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed}>
               <SelectInput
-                className={classNames('mrf-content', step.className, { ['mrf-input__invalid']: errorDisplayed })}
+                className={classNames('mrf-content', step.className, { 'mrf-input__invalid': !!errorDisplayed })}
                 {...step.props}
                 possibleValues={step.options}
                 httpClient={httpClient}
@@ -524,10 +611,10 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
             </ControlledInput>
           )
         default:
-          return <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
+          return <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed}>
             <input
               type={step.format || 'number'}
-              className={classNames('mrf-input', step.className, { ['mrf-input__invalid']: errorDisplayed })}
+              className={classNames('mrf-input', step.className, { 'mrf-input__invalid': !!errorDisplayed })}
             />
           </ControlledInput>
       }
@@ -538,7 +625,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
           step={step}
           entry={entry}
           errorDisplayed={errorDisplayed}>
-          <BooleanInput className={classNames(step.className, { ['mrf-input__invalid']: errorDisplayed })} />
+          <BooleanInput /* TODO see how to pass error down className={classNames(step.className, { 'mrf-input__invalid': !!errorDisplayed })}*/ />
         </ControlledInput>
       )
 
@@ -547,9 +634,9 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
         case format.buttonsSelect:
         case format.select:
           return (
-            <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
+            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed}>
               <SelectInput
-                className={classNames('mrf-flex_grow_1', step.className, { ['mrf-input__invalid']: errorDisplayed })}
+                className={classNames('mrf-flex_grow_1', step.className, { 'mrf-input__invalid': !!errorDisplayed })}
                 {...step.props}
                 possibleValues={step.options}
                 httpClient={httpClient}
@@ -563,11 +650,11 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
             </ControlledInput>
           )
         case format.form: //todo: disabled ?
-          const flow = option(step.flow).getOrElse(option(step.schema).map(s => Object.keys(s)).getOrNull());
+          const flow = option(step.flow).getOrElse(option(step.schema).map(s => Object.keys(s)).getOrElse([]));
           return (
-            <CustomizableInput render={step.render} field={{ parent, setValue: (key, value) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: v => setValue(entry, v, { shouldValidate: true }) }}>
+            <CustomizableInput render={step.render} field={{ parent, setValue: (key: string, value: any) => setValue(key, value), rawValues: getValues(), value: getValues(entry), onChange: (v:any) => setValue((entry as string), v, { shouldValidate: true }) }}>
               <NestedForm
-                schema={step.schema} flow={flow} step={step} parent={entry}
+                schema={step.schema!} flow={flow} step={step} parent={entry}
                 inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={getValues(entry) || defaultValue}
                 index={index} functionalProperty={functionalProperty} errorDisplayed={errorDisplayed} />
             </CustomizableInput>
@@ -575,41 +662,39 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
 
         case format.code:
           return (
-            <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed} component={(field, props) => (
+            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} component={(field, props) => (
               <CodeInput
                 {...props}
-                className={classNames(step.className, { ['mrf-input__invalid']: error })}
-                onChange={(e) => {
-                  errorDisplayed = { errorDisplayed }
-                  let v
+                /* TODO className={classNames(step.className, { 'mrf-input__invalid': !!error })}*/
+                onChange={(e: any) => {
+                  let v: any
                   try {
                     v = JSON.parse(e)
                   } catch (err) {
                     v = e
                   }
                   field.onChange(v)
-                  option(step.onChange)
+                  option(step?.onChange)
                     .map(onChange => onChange({ rawValues: getValues(), value: v, setValue }))
                 }}
                 value={field.value === null ? null : ((typeof field.value === 'object') ? JSON.stringify(field.value, null, 2) : field.value)}
               />
-            )}>
-            </ControlledInput>
+            )}/>
           )
         default:
           return (
-            <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
+            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed}>
               <ObjectInput
-                className={classNames(step.className, { ['mrf-input__invalid']: errorDisplayed })}
+                className={classNames(step.className, { 'mrf-input__invalid': !!errorDisplayed })}
               />
             </ControlledInput>
           )
       }
     case type.date:
       return (
-        <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
+        <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed}>
           <DatePicker
-            className={classNames('mrf-datepicker', step.className, { ['mrf-input__invalid']: errorDisplayed })}
+            className={classNames('mrf-datepicker', step.className, { 'mrf-input__invalid': !!errorDisplayed })}
             formatStyle="large"
           />
         </ControlledInput>
@@ -620,25 +705,25 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
           name={entry}
           control={control}
           render={({ field }) => {
-            const FileInput = ({ onChange }) => {
+            const FileInput = ({ onChange }: {onChange?: (files:any[]) => void }) => {
               const [uploading, setUploading] = useState(false);
-              const [input, setInput] = useState(undefined);
+              const [input, setInput] = useState<HTMLInputElement | undefined | null>(undefined);
 
-              const setFiles = (e) => {
-                const files = e.target.files;
+              const setFiles = (e: ChangeEvent<HTMLInputElement>) => {
+                const files = (e.target as HTMLInputElement).files;
                 setUploading(true);
-                onChange([...files])
+                onChange && onChange(files ? [...files] : [])
                 setUploading(false);
               };
 
               const trigger = () => {
-                input.click();
+                input?.click();
               };
 
-              const files = field.value || []
+              const files:File[] = field.value || []
 
               return (
-                <div className={classNames('mrf-flex', 'mrf-ai_center', step.className, { ['mrf-input__invalid']: error })}>
+                <div className={classNames('mrf-flex', 'mrf-ai_center', step?.className, { 'mrf-input__invalid': !!error })}>
                   <input
                     ref={(r) => setInput(r)}
                     type="file"
@@ -649,7 +734,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
                   <button
                     type="button"
                     className='mrf-btn mrf-btn_sm mrf-flex mrf-ai_center'
-                    disabled={uploading || functionalProperty(entry, step.disabled)}
+                    disabled={uploading || functionalProperty((entry as string), step?.disabled || false)}
                     onClick={trigger}>
                     {uploading && <Loader />}
                     {!uploading && <Upload />}
@@ -662,7 +747,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
             };
 
             return (
-              <ControlledInput defaultValue={defaultValue} step={step} entry={entry} errorDisplayed={errorDisplayed}>
+              <ControlledInput step={step!} entry={entry as string} errorDisplayed={errorDisplayed}>
                 <FileInput />
               </ControlledInput>
             )
@@ -672,19 +757,18 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
 
     case type.json:
       return (
-        <ControlledInput defaultValue={defaultValue} step={step} entry={entry} component={(field, props) => (
+        <ControlledInput step={step} entry={entry} component={(field: {value: any, onChange: (v:any) => void}, props: object) => (
           <CodeInput
             {...props}
-            className={classNames({ ['mrf-input__invalid']: error })}
-            onChange={v => {
+            /* TODO className={classNames({ 'mrf-input__invalid': !!error })} */
+            onChange={(v: any) => {
               field.onChange(v)
-              option(step.onChange)
+              option(step?.onChange)
                 .map(onChange => onChange({ rawValues: getValues(), value: v, setValue }))
             }}
             value={field.value}
           />
-        )}>
-        </ControlledInput>
+        )}/>
       )
 
     default:
@@ -694,7 +778,7 @@ const Step = ({ entry, realEntry, step, schema, inputWrapper, httpClient, defaul
 }
 
 
-const ArrayStep = ({ entry, step, component, disabled }) => {
+const ArrayStep = ({ entry, step, component, disabled }: { entry:string, step: SchemaEntry, component: ({key, defaultValue, value}:{key: string, defaultValue: any, value?: any}, ids: number) => JSX.Element, disabled: boolean }) => {
   const { getValues, setValue, control, trigger, formState } = useFormContext();
 
   const values = getValues(entry);
@@ -728,7 +812,7 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
           )
         })}
       <div className='mrf-flex mrf-jc_flex_end'>
-        <button type="button" className={classNames('mrf-btn', 'mrf-btn_blue', 'mrf-btn_sm', 'mrf-mt_5', { ['mrf-input__invalid']: errorDisplayed })} onClick={() => {
+        <button type="button" className={classNames('mrf-btn', 'mrf-btn_blue', 'mrf-btn_sm', 'mrf-mt_5', { ['mrf-input__invalid']: !!errorDisplayed })} onClick={() => {
           const newValue = cleanInputArray({}, getValues(entry), step.flow, step.schema)
           append({ value: step.addableDefaultValue || ((step.type === type.object && newValue) ? newValue : defaultVal()) })
           // trigger(entry);
@@ -741,11 +825,12 @@ const ArrayStep = ({ entry, step, component, disabled }) => {
   )
 }
 
-const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, errorDisplayed, value, step, functionalProperty, index }) => {
-  const { getValues, setValue, watch } = useFormContext();
-  const [collapsed, setCollapsed] = useState(!!step.collapsed);
+const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, errorDisplayed, value, step, functionalProperty, index }:
+  { schema: Schema, flow: Flow, parent: string, inputWrapper?: (props: object) => JSX.Element, maybeCustomHttpClient?: HttpClient, errorDisplayed: boolean, value: any, step: SchemaEntry, functionalProperty: TFunctionalProperty, index?: number }) => {
+  const { getValues, setValue, watch, control,formState: { errors, dirtyFields, touchedFields } } = useFormContext();
+  const [collapsed, setCollapsed] = useState<boolean>(!!step.collapsed);
 
-  useWatch(step?.conditionalSchema?.ref)
+  useWatch({name: step?.conditionalSchema?.ref || "", control})
 
   const schemaAndFlow = option(step.conditionalSchema)
     .map(condiSchema => {
@@ -761,7 +846,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
       })
 
       const schemaAndFlow = option(filterSwitch)
-        .orElse(condiSchema.switch.find(s => s.default))
+        .orElse(condiSchema.switch.find(s => s.default)!)
         .getOrElse({ schema: {}, flow: [] })
 
       return { schema: schemaAndFlow.schema, flow: schemaAndFlow.flow || Object.keys(schemaAndFlow.schema) }
@@ -773,8 +858,10 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
     setValue(parent, def, { shouldValidate: false })
   }, [schemaAndFlow.schema])
 
-  const computedSandF = schemaAndFlow.flow.reduce((acc, entry) => {
-    const step = schemaAndFlow.schema[entry]
+  const computedSandF = schemaAndFlow.flow.reduce((
+    acc: {step: SchemaEntry, visibleStep: boolean, entry: string | FlowObject}[],
+    entry: string | FlowObject) => {
+    const step = (typeof entry === "string") ? schemaAndFlow.schema[entry] : schemaAndFlow.schema[entry.label]
 
     const visibleStep = option(step)
       .map(s => s.visible)
@@ -802,18 +889,64 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
       {!!step.collapsable && schemaAndFlow.flow.length > 1 && !collapsed &&
         <ChevronUp size={30} className='mrf-cursor_pointer' style={{ position: 'absolute', top: -35, right: 0, zIndex: 100 }} strokeWidth="2" onClick={() => setCollapsed(!collapsed)} />}
 
-      {computedSandF.map(({ step, visibleStep, entry }, idx) => {
+      {computedSandF.map(({step, visibleStep, entry}, idx: number) => {
 
         if (!step && typeof entry === 'string') {
           console.error(`no step found for the entry "${entry}" in the given schema. Your form might not work properly. Please fix it`)
           return null;
         }
 
+        if(typeof entry === "object") {
+          const errored = extractFlowString(entry).some(step => !!errors[step] && (dirtyFields[step] || touchedFields[step])) /* FIXME does it works in case of Flow object ? Need to do a "flatMap" to retrieve all leafs string of flows objects */
+          return <Collapse {...entry} errored={errored}>
+            {entry.flow.map((en, entryIdx) => {
+              const stp = typeof en === "object" ? undefined : schema[en]
+
+              if (!stp && typeof en === 'string') {
+                console.error(`no step found for the entry "${en}" in the given schema. Your form might not work properly. Please fix it`)
+                return null;
+              }
+
+              const visibleStep = option(stp)
+                .map(s => s.visible)
+                .map(visible => {
+                  let value: any;
+                  switch (typeof visible) {
+                    case 'object':
+                      value = getValues(visible.ref);
+                      return option(visible.test).map(test => test(value, index)).getOrElse(value)
+                    case 'boolean':
+                      return visible;
+                    default:
+                      return true;
+                  }
+                })
+                .getOrElse(true)
+
+              if (!visibleStep) {
+                return null;
+              }
+
+              return (
+                <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} functionalProperty={functionalProperty} label={step?.label === null ? null : step?.label || entry} help={stp?.help} render={inputWrapper}>
+                  <Step entry={en} step={stp} schema={schema}
+                    inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient}
+                    defaultValue={stp?.defaultValue} functionalProperty={functionalProperty} />
+                </BasicWrapper>
+              )
+            })}
+          </Collapse>
+          // TODO return collapse, then entry will always be a string in below return
+        }
         return (
           <BasicWrapper key={`${entry}.${idx}`}
             className={classNames({ ['mrf-display__none']: (collapsed && !step.visibleOnCollapse) || !visibleStep })}
             entry={`${parent}.${entry}`}
-            label={functionalProperty(entry, step?.label === null ? null : step?.label || entry)} help={step.help} render={inputWrapper}>
+            functionalProperty={functionalProperty}
+            label={step?.label === null ? null : step?.label || entry}
+            help={step.help}
+            render={inputWrapper}
+          >
             <Step
               key={`step.${entry}.${idx}`}
               entry={`${parent}.${entry}`}
@@ -830,4 +963,15 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
       })}
     </div>
   )
+}
+
+
+function extractFlowString(entry: FlowObject): string[] {
+  return entry.flow.map(eitherStringOrObject => {
+    if(typeof eitherStringOrObject === "string") {
+      return eitherStringOrObject;
+    } else {
+      return extractFlowString(eitherStringOrObject)
+    }
+  }).flat()
 }

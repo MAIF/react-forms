@@ -1,11 +1,17 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import classNames from 'classnames';
 
-export const BooleanInput = React.forwardRef(({ onChange, value, readOnly }, ref) => {
+interface PropType {
+  onChange?: (v: boolean)=> void;
+  value?: boolean;
+  readOnly?: boolean;
+}
 
-  const handleClick = (value) => {
+export const BooleanInput = React.forwardRef<HTMLInputElement, PropType>(({ onChange, value, readOnly }, ref) => {
+
+  const handleClick = (value: boolean) => {
     if (!readOnly) {
-      onChange(value)
+      onChange?.(value)
     }
   }
   return (

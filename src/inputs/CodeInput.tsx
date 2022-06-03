@@ -1,4 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { LanguageMode } from './constants';
+// @ts-ignore
 import Editor from './__generated/editor'
 
 export function CodeInput({
@@ -18,14 +20,31 @@ export function CodeInput({
     maxWidth: '-1',
   },
   setRef
+}:{
+  onChange?: (v: string) => void,
+  value?: string,
+  mode?: LanguageMode,
+  tabSize?: number,
+  readOnly?: boolean,
+  showLinesNumber?: boolean,
+  highlightLine?: boolean,
+  themeStyle?: {
+    height: string,
+    minHeight: string,
+    maxHeight: string,
+    width: string,
+    minWidth: string,
+    maxWidth: string,
+  },
+  setRef?: (editor: any) => void
 }) {
-  const ref = useRef()
-  const [editor, setEditor] = useState()
+  const ref = useRef<any>()
+  const [editor, setEditor] = useState<Editor>()
 
   useEffect(() => {
     const e = Editor(ref.current, mode, onChange, value, tabSize, readOnly, showLinesNumber, highlightLine, themeStyle)
 
-    ref.current.addEventListener("keydown", e => {
+    ref.current.addEventListener("keydown", (e: Event) => {
       e.stopImmediatePropagation()
     })
 

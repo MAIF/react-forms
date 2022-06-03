@@ -1,12 +1,12 @@
 import classNames from 'classnames';
-import React, { useContext, useState } from 'react';
+import React, { SyntheticEvent, useState } from 'react';
 import { Eye, EyeOff } from 'react-feather';
 
-export const Collapse = (props) => {
+export const Collapse = (props: {initCollapsed?: boolean, collapsed?: boolean, errored: boolean, label?: React.ReactNode, inline?: any, children: React.ReactNode, lineEnd?: boolean}) => {
   const [collapsed, setCollapsed] = useState(props.initCollapsed || props.collapsed)
 
-  const toggle = (e) => {
-    if (e && e.preventDefault) e.stopPropagation()
+  const toggle = (e: SyntheticEvent) => {
+    if (e) e.stopPropagation()
     setCollapsed(!collapsed)
   };
 

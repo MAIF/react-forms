@@ -1,7 +1,7 @@
 /*global event*/
 /*eslint no-restricted-globals: ["error", "event"]*/
 
-import { EditorState } from '@codemirror/state'
+import { EditorState, Extension } from '@codemirror/state'
 
 import { javascript } from "@codemirror/lang-javascript"
 import { html } from "@codemirror/lang-html"
@@ -28,20 +28,21 @@ import { rectangularSelection } from '@codemirror/rectangular-selection'
 import { defaultHighlightStyle } from '@codemirror/highlight'
 import { lintKeymap } from '@codemirror/lint'
 import { oneDark } from '@codemirror/theme-one-dark'
+import { LanguageMode } from './inputs/constants'
 
 const languages = {
-    javascript: javascript,
-    css: css,
-    json: json,
-    html: html,
-    markdown: markdown
+    javascript,
+    css,
+    json,
+    html,
+    markdown
 }
 
 export default function Editor(
-    parent,
-    mode,
-    onChange,
-    value,
+    parent: Element | DocumentFragment,
+    mode: LanguageMode,
+    onChange: (doc: string) => void,
+    value:{value: any} | any,
     tabSize = 1,
     readOnly = false,
     showLinesNumber = true,
@@ -61,8 +62,8 @@ export default function Editor(
         },
     })
 
-    const setup = [
-        showLinesNumber ? lineNumbers() : lineNumbers({ formatNumber: "" }),
+    const setup: Extension[] = [
+        showLinesNumber ? lineNumbers() : lineNumbers({ formatNumber: () => "" }),
         highlightActiveLineGutter(),
         highlightSpecialChars(),
         history(),
@@ -92,7 +93,7 @@ export default function Editor(
         oneDark,
         theme,
         EditorState.tabSize.of(tabSize), indentUnit.of(" ".repeat(tabSize))
-    ].filter(f => f)
+    ].filter((f): f is Extension => !!f)
 
     const state = EditorState.create({
         extensions: [

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Form, CodeInput, SelectInput } from '@maif/react-forms'
-
+import { Form, CodeInput } from '@maif/react-forms'
+import Select from 'react-select';
 import './App.css';
+import '@maif/react-forms/lib/index.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
 import basic from './schema/basic.json';
@@ -65,14 +66,13 @@ export const Playground = () => {
         <div className="d-flex">
           <div className='col-8' style={{ marginRight: '10px' }}>
             <label htmlFor="selector">Try with a schema</label>
-            <SelectInput
+            <Select
               className="py-2"
-              possibleValues={Object.entries(examples)}
-              transformer={([k, v]) => ({ label: k, value:v })}
+              options={Object.entries(examples).map(([k, v]) => ({ label: k, value: v }))}
               value={selectedSchema}
               onChange={e => {
                 setSelectedSchema(e)
-                setSchema(e)
+                setSchema(e.value)
               }}
             />
             <CodeInput

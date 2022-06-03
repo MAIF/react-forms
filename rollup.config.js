@@ -8,13 +8,14 @@ import { terser } from 'rollup-plugin-terser'
 import copy from 'rollup-plugin-copy'
 import command from 'rollup-plugin-command';
 import scss from 'rollup-plugin-scss'
+import typescript from '@rollup/plugin-typescript';
 
 const isDev = process.env.NODE_ENV !== 'production'
 const isYalcActivated = process.env.YALC === 'activated'
 
 export default [
   {
-    input: "./src/codemirror-editor.js",
+    input: "./src/codemirror-editor.ts",
     inlineDynamicImports: true,
     output: {
       file: "./src/inputs/__generated/editor.js",
@@ -22,6 +23,7 @@ export default [
       strict: false
     },
     plugins: [
+      typescript(),
       babel({
         exclude: [
           'docs/**',
@@ -34,14 +36,15 @@ export default [
       commonjs(),
       isDev ? undefined : terser()
     ].filter(f => f)
-  },
-  {
+  }
+  ,{
     input: pkg.source,
     output: [
       { file: pkg.main, format: 'cjs' },
       { file: pkg.module, format: 'esm' }
     ],
     plugins: [
+      typescript(),
       scss(),
       external(),
       babel({
