@@ -73,7 +73,8 @@ const getDefaultValues = (flow, schema, value) => {
     return {
       ...acc,
       [key]: (value && value[key] !== undefined) ? value[key] :
-        (step.format === format.form && step.type === type.object && !step.array ? { ...getDefaultValues(step.flow || Object.keys(step.schema), step.schema, value) } :
+        ((step.format === format.form && step.type === type.object && !step.array) ?
+          { ...getDefaultValues(step.flow || Object.keys(step.schema || {}), step.schema, value) } :
           defaultVal(value ? value[key] : null, step.array || step.isMulti, step.defaultValue))
     }
   }, {})

@@ -55,7 +55,7 @@ export const buildSubResolver = (props, key, dependencies, rawData) => {
 
         return option(filterSwitch).getOrElse(condiSchema.switch.find(s => s.default))
       }).getOrElse({})
-    const subResolver = getShapeAndDependencies(flow || Object.keys(schema), schema, dependencies, rawData);
+    const subResolver = getShapeAndDependencies(flow || Object.keys(schema || {}), schema, dependencies, rawData);
     return constraints.reduce((resolver, constraint) => {
       return jsonOrFunctionConstraint(constraint, resolver, key, dependencies)
     }, yup.object().shape(subResolver.shape, dependencies))
@@ -76,10 +76,10 @@ const jsonOrFunctionConstraint = (constraint, resolver, key, dependencies) => {
 }
 
 export const getShapeAndDependencies = (flow, schema, dependencies = [], rawData) => {
-  if (!Object.keys(schema).length) {
+  if (!Object.keys(schema || {}).length) {
     return { shape: yup.object().shape({}), dependencies }
   }
-  const shape = (flow || Object.keys(schema))
+  const shape = (flow || Object.keys(schema || {}))
     .reduce((resolvers, key) => {
 
       if (typeof key === 'object') {
