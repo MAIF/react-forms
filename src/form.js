@@ -270,6 +270,8 @@ class FormComponent extends React.Component {
         this.props.onSubmit(this.state.internalValue)
       })
       .catch(err => {
+        this.props.onSubmit(this.state.internalValue) // TODO - bad idea
+
         if (typeof this.props.onError === 'function')
           this.props.onError(err)
         else
@@ -381,12 +383,13 @@ class FormComponent extends React.Component {
           })
           .getOrElse(true)
 
-        if (!visibleStep) {
-          return null;
-        }
+        // if (!visibleStep) {
+        //   return null;
+        // }
 
         return <Style>
           <BasicWrapper
+            className={visibleStep ? '' : classNames.display__none}
             key={`${entry}-${idx}`}
             entry={entry}
             label={this.functionalProperty(entry, step?.label === null ? null : step?.label || entry)}
@@ -516,12 +519,13 @@ class Step extends React.Component {
               })
               .getOrElse(true)
 
-            if (!visibleStep) {
-              return null;
-            }
+            // if (!visibleStep) {
+            //   return null;
+            // }
 
             return <Style>
               <BasicWrapper
+                className={visibleStep ? '' : classNames.display__none}
                 key={`collapse-${en}-${entryIdx}`}
                 entry={en}
                 label={functionalProperty(en, stp?.label === null ? null : stp?.label || en)}
@@ -569,7 +573,7 @@ class Step extends React.Component {
               step={step}
               disabled={functionalProperty(entry, step.disabled)}
               values={getField(entry) || []}
-              remove={idx => onChange(entry, getField(entry).filter((_, i) => i !== idx))}
+              remove={idx => onChange(entry, [...getField(entry).filter((_, i) => i !== idx)])}
               append={newItem => onChange(entry, [...(getField(entry) || []), newItem])}
               component={(({ value, defaultValue, idx, classes }) => {
                 return (
@@ -695,6 +699,7 @@ class Step extends React.Component {
                   flow={option(step.flow).getOrElse(option(step.schema).map(s => Object.keys(s)).getOrNull())}
                   step={step}
                   parent={entry}
+                  grandparent={parent}
                   inputWrapper={inputWrapper}
                   maybeCustomHttpClient={httpClient}
                   index={index}
@@ -824,7 +829,10 @@ class ArrayStep extends React.Component {
           type="button"
           className={classNames(classes.btn, classes.btn_blue, classes.btn_sm, classes.mt_5)}
           disabled={disabled}
-          onClick={() => {
+          onClick={e => {
+            e.preventDefault()
+            e.stopPropagation()
+
             const newValue = getDefaultValues(step.flow, step.schema, {})
             append(step.addableDefaultValue || ((step.type === type.object && newValue) ? newValue : defaultVal()))
             option(step.onChange)
@@ -861,7 +869,15 @@ class NestedForm extends React.Component {
 
   calculateConditionalSchema = () => option(this.props.step.conditionalSchema)
     .map(condiSchema => {
-      const ref = option(condiSchema.ref).map(ref => this.props.getField(ref)).getOrNull();
+      let ref = option(condiSchema.ref)
+        .map(ref => this.props.getField(ref))
+        .getOrNull();
+
+      if (!ref)
+        ref = option(condiSchema.rawRef)
+          .map(ref => this.props.getField(`${this.props.grandparent}.${ref}`))
+          .getOrNull();
+
       const rawData = this.props.value
 
       const filterSwitch = condiSchema.switch.find(s => {
@@ -872,7 +888,13 @@ class NestedForm extends React.Component {
         }
       })
 
-      return option(filterSwitch).getOrElse(condiSchema.switch.find(s => s.default))
+      const schemaAndFlow = option(filterSwitch)
+        .orElse(condiSchema.switch.find(s => s.default))
+        .getOrElse({ schema: {}, flow: [] })
+
+      // console.log(this.props.getField, condiSchema, this.props, ref)
+
+      return { schema: schemaAndFlow.schema, flow: schemaAndFlow.flow || Object.keys(schemaAndFlow.schema) }
     })
     .getOrElse({ schema: this.props.schema, flow: this.props.flow })
 
@@ -940,8 +962,8 @@ class NestedForm extends React.Component {
             return null;
           }
 
-          if ((collapsed && !step.visibleOnCollapse) || !visibleStep)
-            return null
+          // if ((collapsed && !step.visibleOnCollapse) || !visibleStep)
+          //   return null
 
           return <Style key={`${entry}.${idx}`}>
             <BasicWrapper
