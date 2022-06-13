@@ -4,11 +4,12 @@ import { useController, useFormContext } from 'react-hook-form';
 import { ConditionnalSchema, SchemaEntry } from "./form";
 import { option } from './Option';
 import { type } from './type';
-import { isDefined } from './utils';
+import { isDefined, cleanHash } from './utils';
 
 const CustomizableInput = React.memo(
     (props: {
         field: {value: any, [x: string]: any},
+        step: SchemaEntry,
         error: any, errorDisplayed: boolean,
         render?: ((props:{error: any, value: any, [x: string]: any}) => JSX.Element),
         children: JSX.Element,
@@ -24,7 +25,7 @@ const CustomizableInput = React.memo(
         if (next.render || next.conditionalSchema) {
             return false
         }
-        return (prev.field.value === next.field.value && next.errorDisplayed === prev.errorDisplayed)
+        return (prev.field.value === next.field.value && next.errorDisplayed === prev.errorDisplayed  && cleanHash(next.step) === cleanHash(prev.step))
     }
 )
 
@@ -94,7 +95,7 @@ export const ControlledInput = (inputProps: Props) => {
     const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], errors)
 
     return <CustomizableInput
-        render={step.render}
+        render={step.render} step={step}
         field={{ parent, setValue: (key: string, value: any) => setValue(key, value), rawValues: getValues(), ...field }}
         error={error} errorDisplayed={errorDisplayed}>
         {component ? component(field, props) : React.cloneElement(children!, { ...props })}

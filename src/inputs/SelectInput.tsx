@@ -7,7 +7,7 @@ import { isPromise } from '../utils'
 import deepEqual from 'fast-deep-equal';
 import { useFormContext } from 'react-hook-form';
 
-export type SelectOption = {label: string, value: any};
+export type SelectOption = { label: string, value: any };
 
 const valueToSelectOption = (value: any, possibleValues: SelectOption[] = [], isMulti = false): SelectOption | SelectOption[] | null => {
   if (value === null || !value) {
@@ -23,7 +23,7 @@ const valueToSelectOption = (value: any, possibleValues: SelectOption[] = [], is
           else if (typeof v === 'object')
             return Object.values(v)
           return v
-        })().map((x:any) => valueToSelectOption(x, possibleValues, false))
+        })().map((x: any) => valueToSelectOption(x, possibleValues, false))
       })
       .getOrElse([]);
   }
@@ -35,9 +35,9 @@ const valueToSelectOption = (value: any, possibleValues: SelectOption[] = [], is
     });
 };
 
-export const SelectInput =<T extends {[x: string] : any},>(props: {
+export const SelectInput = <T extends { [x: string]: any },>(props: {
   possibleValues: T[],
-  transformer?: ((v: T) => SelectOption) | {label: string, value: string},
+  transformer?: ((v: T) => SelectOption) | { label: string, value: string },
   value?: any,
   defaultValue?: any,
   isMulti?: boolean,
@@ -57,11 +57,11 @@ export const SelectInput =<T extends {[x: string] : any},>(props: {
   const { getValues } = useFormContext()
 
   function transform(v: T): OptionType<SelectOption> {
-    if(!props.transformer) {
+    if (!props.transformer) {
       return None;
     }
 
-    if(typeof props.transformer === 'function') {
+    if (typeof props.transformer === 'function') {
       return option(props.transformer(v));
     } else {
       return Some({ label: v[props.transformer.label], value: v[props.transformer.value] });
@@ -118,18 +118,22 @@ export const SelectInput =<T extends {[x: string] : any},>(props: {
           .then((values: SelectOption[]) => {
             setValues(values);
             setValue(values.find((item) => {
-              if(Array.isArray(value)) {
+              if (Array.isArray(value)) {
                 return (value as SelectOption[]).find(opt => opt.value === item.value)
               } else {
                 return item.value === (value ? (value as SelectOption).value : value)
               }
-              
+
             }) || null);
             setLoading(false);
           });
       }
+    } else {
+      setValues((props.possibleValues || [])
+        .map(v => transformOption(v)))
     }
-  }, [props.optionsFrom])
+
+  }, [props.optionsFrom, props.possibleValues])
 
 
   const onChange = (changes: readonly SelectOption[] | SelectOption | null) => {
