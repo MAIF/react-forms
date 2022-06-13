@@ -1,9 +1,12 @@
-import React, { useContext, useEffect, useState } from 'react';
+import * as React from "react";
+import { useEffect, useState } from 'react';
 import { PlusCircle, MinusCircle } from 'react-feather';
 import deepEqual from 'fast-deep-equal';
 
-export const ObjectInput = (props) => {
-  const [internalState, setInternalState] = useState()
+type InternalState = {[x: string] : {key: string, value: any}};
+
+export const ObjectInput = (props: {value?: object, onChange?: (value: InternalState) => void, defaultKeyValue?: {key: string, value: string}, className: string, disabled?:boolean, placeholderKey?: string, placeholderValue?: string}) => {
+  const [internalState, setInternalState] = useState<InternalState>({})
 
   useEffect(() => {
     setInternalState(Object.fromEntries(
@@ -31,14 +34,14 @@ export const ObjectInput = (props) => {
     }
   }, [props.value])
 
-  const onChange = state => {
-    props.onChange(Object.values(state).reduce((acc, c) => ({
+  const onChange = (state: InternalState) => {
+    props?.onChange?.(Object.values(state).reduce((acc, c) => ({
       ...acc,
       [c.key]: c.value
     }), {}))
   }
 
-  const changeValue = (id, newValue) => {
+  const changeValue = (id: string, newValue: string) => {
     const newState = {
       ...internalState,
       [id]: { key: internalState[id].key, value: newValue }
@@ -47,7 +50,7 @@ export const ObjectInput = (props) => {
     onChange(newState)
   };
 
-  const changeKey = (id, newValue) => {
+  const changeKey = (id: string, newValue: string) => {
     const newState = {
       ...internalState,
       [id]: { key: newValue, value: internalState[id].value }
@@ -77,7 +80,7 @@ export const ObjectInput = (props) => {
     onChange(newState)
   };
 
-  const remove = removedId => {
+  const remove = (removedId: string) => {
     const newState = Object.fromEntries(Object.entries(internalState).filter(([id, _]) => id !== removedId))
     setInternalState(newState)
     onChange(newState)

@@ -1,11 +1,19 @@
-import React from 'react';
+import * as  React from "react";
+import { ChangeEvent, ReactNode } from 'react';
 import { useController, useFormContext } from 'react-hook-form';
+import { ConditionnalSchema, SchemaEntry } from "./form";
 import { option } from './Option';
 import { type } from './type';
 import { isDefined } from './utils';
 
 const CustomizableInput = React.memo(
-    props => {
+    (props: {
+        field: {value: any, [x: string]: any},
+        error: any, errorDisplayed: boolean,
+        render?: ((props:{error: any, value: any, [x: string]: any}) => JSX.Element),
+        children: JSX.Element,
+        conditionalSchema?: ConditionnalSchema
+    }) => {
         if (props.render) {
             return (
                 props.render({ ...props.field, error: props.error })
@@ -17,9 +25,29 @@ const CustomizableInput = React.memo(
             return false
         }
         return (prev.field.value === next.field.value && next.errorDisplayed === prev.errorDisplayed)
-    })
+    }
+)
 
-export const ControlledInput = ({ step, entry, children, component, errorDisplayed }) => {
+interface BaseProps {
+    step: SchemaEntry,
+    entry: string,
+    errorDisplayed?: boolean,
+    component?: (field: {value: any, onChange: (e: ChangeEvent<HTMLInputElement>) => void}, props: object) => JSX.Element,
+    children?: JSX.Element
+}
+
+interface ComponentProps extends BaseProps {
+    component: (field: {value: any, onChange: (e: ChangeEvent<HTMLInputElement>) => void}, props: object) => JSX.Element,
+}
+
+interface ChildrenProps extends BaseProps {
+    children: JSX.Element,
+}
+
+type Props = ComponentProps | ChildrenProps
+
+export const ControlledInput = (inputProps: Props) => {
+    const { step, entry, children, component, errorDisplayed = false } = inputProps;
     const { field } = useController({
         defaultValue: isDefined(step.defaultValue) ? step.defaultValue : null,
         name: entry
@@ -27,7 +55,7 @@ export const ControlledInput = ({ step, entry, children, component, errorDisplay
     
     const { getValues, setValue, formState: { errors } } = useFormContext();
 
-    const functionalProperty = (entry, prop) => {
+    const functionalProperty = (entry: string, prop: any) => {
         if (typeof prop === 'function') {
             return prop({ rawValues: getValues(), value: getValues(entry) });
         } else {
@@ -41,7 +69,7 @@ export const ControlledInput = ({ step, entry, children, component, errorDisplay
         id: entry,
         readOnly: functionalProperty(entry, step.disabled) ? 'readOnly' : null,
         placeholder: step.placeholder,
-        onChange: e => {
+        onChange: (e: ChangeEvent<HTMLInputElement>) => {
             const value = (() => {
                 if (!e) {
                     if (step.type === type.bool ||
@@ -67,8 +95,8 @@ export const ControlledInput = ({ step, entry, children, component, errorDisplay
 
     return <CustomizableInput
         render={step.render}
-        field={{ parent, setValue: (key, value) => setValue(key, value), rawValues: getValues(), ...field }}
+        field={{ parent, setValue: (key: string, value: any) => setValue(key, value), rawValues: getValues(), ...field }}
         error={error} errorDisplayed={errorDisplayed}>
-        {component ? component(field, props) : React.cloneElement(children, { ...props })}
+        {component ? component(field, props) : React.cloneElement(children!, { ...props })}
     </CustomizableInput>
 }
