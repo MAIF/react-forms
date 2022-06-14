@@ -13,8 +13,10 @@
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react"
+    "jsx": "react",
+    "declaration" : true,
+    "emitDeclarationOnly": true,
+    "declarationDir": "./types"
   },
   "include": ["src"]
 }

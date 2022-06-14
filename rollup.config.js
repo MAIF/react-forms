@@ -9,6 +9,7 @@ import copy from 'rollup-plugin-copy'
 import command from 'rollup-plugin-command';
 import scss from 'rollup-plugin-scss'
 import typescript from '@rollup/plugin-typescript';
+import dts from "rollup-plugin-dts";
 
 const isDev = process.env.NODE_ENV !== 'production'
 const isYalcActivated = process.env.YALC === 'activated'
@@ -44,6 +45,7 @@ export default [
       { file: pkg.module, format: 'esm' }
     ],
     plugins: [
+      del({ targets: ['dist/*', 'lib/*', 'examples/node_modules/@maif/react-forms/lib'], verbose: true }),
       typescript(),
       scss(),
       external(),
@@ -55,7 +57,6 @@ export default [
         ],
         babelHelpers: 'bundled'
       }),
-      del({ targets: ['dist/*', 'lib/*', 'examples/node_modules/@maif/react-forms/lib'], verbose: true }),
       isDev ? undefined : terser(),
       copy({
         targets: [
@@ -70,5 +71,11 @@ export default [
       isYalcActivated ? command('yalc push --replace') : undefined
     ].filter(f => f),
     external: Object.keys(pkg.peerDependencies || {})
-  }
+  },
+  {
+    input: "./types/index.d.ts",
+    output: [{ file: "lib/index.d.ts", format: "es" }],
+    plugins: [dts()],
+    external: [/\.css$/u, /\.scss$/u]
+  },
 ];

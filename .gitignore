@@ -36,3 +36,5 @@ src/inputs/__generated/
 examples/node_modules
 tsconfig.tsbuildinfo
 .rollup.cache/
+
+types/
