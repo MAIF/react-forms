@@ -119,16 +119,45 @@ const usePrevious = (value: any) => {
   return ref.current;
 }
 
-const BasicWrapper = ({ entry, className, help, children, render, functionalProperty, label }:{ entry: object | string, className?: string, label?: React.ReactNode, help: React.ReactNode /* TODO CHECK */, children: JSX.Element, render?: ({entry, label, error, help, children}: {entry: string, label: React.ReactNode, error: object, help: React.ReactNode, children: React.ReactNode}) => JSX.Element, functionalProperty: (entry: string, prop: React.ReactNode) => React.ReactNode}) => {
+const BasicWrapper = ({ entry, children, render, functionalProperty, step }:
+  { entry: object | string, 
+    className?: string, 
+    children: JSX.Element, 
+    render?: ({entry, label, error, help, children}: {entry: string, label: React.ReactNode, error: object, help: React.ReactNode, children: React.ReactNode}) => JSX.Element, 
+    functionalProperty: (entry: string, prop: React.ReactNode) => React.ReactNode,
+    step?: SchemaEntry
+  }) => {
+  const { formState, watch } = useFormContext();
+
+  console.debug({entry, step})
   if (typeof entry === 'object') {
     return children
   }
 
-  const computedLabel = functionalProperty(entry, label === null ? null : label || entry)
+  const visibleStep = option(step)
+    .map(s => s.visible)
+    .map(visible => {
+      let value: any;
+      switch (typeof visible) {
+        case 'object':
+          value = watch(visible.ref);
+          return option(visible.test).map(test => test(value)).getOrElse(value)
+        case 'boolean':
+          return visible;
+        default:
+          return true;
+      }
+    })
+    .getOrElse(true)
+
+  if (!visibleStep) {
+    return null;
+  }
+
+  const computedLabel = functionalProperty(entry, step?.label === null ? null : step?.label || entry)
 
   const id = uuid();
 
-  const { formState } = useFormContext();
   // FIXME not sure it works as intended with more two or more parts
   const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.errors)
   const isDirty = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.dirtyFields)
@@ -136,16 +165,16 @@ const BasicWrapper = ({ entry, className, help, children, render, functionalProp
   const errorDisplayed = formState.isSubmitted || isDirty || isTouched
 
   if (render) {
-    return render({ entry, label: computedLabel, error, help, children })
+    return render({ entry, label: computedLabel, error, help: step?.help, children })
   }
 
   return (
     <div className='mrf-mt_10' style={{ position: 'relative' }}>
       {computedLabel && <label className='mrf-flex mrf-ai_center mrf-mb_5' htmlFor={entry}>
         <span>{computedLabel}</span>
-        {help && <>
+        {step?.help && <>
           <ReactToolTip html={true} place={'bottom'} id={id} />
-          <span className='mrf-flex mrf-ai_center' data-html={true} data-tip={help} data-for={id}>
+          <span className='mrf-flex mrf-ai_center' data-html={true} data-tip={step?.help} data-for={id}>
             <HelpCircle style={{ color: 'gray', width: 17, marginLeft: '.5rem', cursor: 'help' }} />
           </span>
         </>}
@@ -365,6 +394,7 @@ export const Form = React.forwardRef(function Form(
     }
   }));
 
+  console.debug({formFlow})
   return (
     <FormProvider {...methods}>
       <Watcher
@@ -385,28 +415,8 @@ export const Form = React.forwardRef(function Form(
             return null;
           }
 
-          const visibleStep = option(step)
-            .map((s:SchemaEntry) => s.visible)
-            .map((visible:boolean | {ref: string, test: (b: boolean, idx: number) => boolean}) => {
-              let value: any
-              switch (typeof visible) {
-                case 'object':
-                  value = getValues(visible.ref);
-                  return option(visible.test).map(test => test(value, idx)).getOrElse(value)
-                case 'boolean':
-                  return visible;
-                default:
-                  return true;
-              }
-            })
-            .getOrElse(true)
-
-          if (!visibleStep) {
-            return null;
-          }
-
           return (
-            <BasicWrapper key={`${entry}-${idx}`} entry={entry} functionalProperty={functionalProperty} label={step?.label} help={step?.help} render={inputWrapper}>
+            <BasicWrapper key={`${entry}-${idx}`} entry={entry} functionalProperty={functionalProperty} render={inputWrapper} step={step}>
               <Step key={idx} entry={entry} step={step}
                 schema={schema} inputWrapper={inputWrapper}
                 httpClient={maybeCustomHttpClient} functionalProperty={functionalProperty} />
@@ -451,28 +461,8 @@ const Step = (props: { entry: string | FlowObject, realEntry?: string, step?: Sc
             return null;
           }
 
-          const visibleStep = option(stp)
-            .map(s => s.visible)
-            .map(visible => {
-              let value: any;
-              switch (typeof visible) {
-                case 'object':
-                  value = getValues(visible.ref);
-                  return option(visible.test).map(test => test(value, index)).getOrElse(value)
-                case 'boolean':
-                  return visible;
-                default:
-                  return true;
-              }
-            })
-            .getOrElse(true)
-
-          if (!visibleStep) {
-            return null;
-          }
-
           return (
-            <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} functionalProperty={functionalProperty} label={stp?.label} help={stp?.help} render={inputWrapper}>
+            <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} functionalProperty={functionalProperty} step={stp} render={inputWrapper}>
               <Step entry={en} step={stp} schema={schema}
                 inputWrapper={inputWrapper} httpClient={httpClient}
                 defaultValue={stp?.defaultValue} functionalProperty={functionalProperty} />
@@ -862,29 +852,14 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
   }, [schemaAndFlow.schema])
 
   const computedSandF = schemaAndFlow.flow.reduce((
-    acc: {step: SchemaEntry, visibleStep: boolean, entry: string | FlowObject}[],
+    acc: {step: SchemaEntry, entry: string | FlowObject}[],
     entry: string | FlowObject) => {
     const step = (typeof entry === "string") ? schemaAndFlow.schema[entry] : schemaAndFlow.schema[entry.label]
 
-    const visibleStep = option(step)
-      .map(s => s.visible)
-      .map(visible => {
-        switch (typeof visible) {
-          case 'object':
-            const value = watch(visible.ref);
-            return option(visible.test).map(test => test(value, index)).getOrElse(value)
-          case 'boolean':
-            return visible;
-          default:
-            return true;
-        }
-      })
-      .getOrElse(true)
-
-    return [...acc, { step, visibleStep, entry }]
+    return [...acc, { step, entry }]
   }, [])
 
-  const bordered = computedSandF.filter(x => x.visibleStep).length >= 1 && step.label !== null;
+  const bordered = computedSandF.length >= 1 && step.label !== null;
   return (
     <div className={classNames({ ['mrf-nestedform__border']: bordered, ['mrf-border__error']: !!errorDisplayed })} style={{ position: 'relative' }}>
       {!!step.collapsable && schemaAndFlow.flow.length > 1 && collapsed &&
@@ -892,7 +867,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
       {!!step.collapsable && schemaAndFlow.flow.length > 1 && !collapsed &&
         <ChevronUp size={30} className='mrf-cursor_pointer' style={{ position: 'absolute', top: -35, right: 0, zIndex: 100 }} strokeWidth="2" onClick={() => setCollapsed(!collapsed)} />}
 
-      {computedSandF.map(({step, visibleStep, entry}, idx: number) => {
+      {computedSandF.map(({step, entry}, idx: number) => {
 
         if (!step && typeof entry === 'string') {
           console.error(`no step found for the entry "${entry}" in the given schema. Your form might not work properly. Please fix it`)
@@ -910,28 +885,8 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
                 return null;
               }
 
-              const visibleStep = option(stp)
-                .map(s => s.visible)
-                .map(visible => {
-                  let value: any;
-                  switch (typeof visible) {
-                    case 'object':
-                      value = getValues(visible.ref);
-                      return option(visible.test).map(test => test(value, index)).getOrElse(value)
-                    case 'boolean':
-                      return visible;
-                    default:
-                      return true;
-                  }
-                })
-                .getOrElse(true)
-
-              if (!visibleStep) {
-                return null;
-              }
-
               return (
-                <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} functionalProperty={functionalProperty} label={step?.label === null ? null : step?.label || entry} help={stp?.help} render={inputWrapper}>
+                <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} functionalProperty={functionalProperty} step={stp} render={inputWrapper}>
                   <Step entry={en} step={stp} schema={schema}
                     inputWrapper={inputWrapper} httpClient={maybeCustomHttpClient}
                     defaultValue={stp?.defaultValue} functionalProperty={functionalProperty} />
@@ -943,11 +898,10 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
         }
         return (
           <BasicWrapper key={`${entry}.${idx}`}
-            className={classNames({ ['mrf-display__none']: (collapsed && !step.visibleOnCollapse) || !visibleStep })}
+            className={classNames({ ['mrf-display__none']: (collapsed && !step.visibleOnCollapse) })}
             entry={`${parent}.${entry}`}
             functionalProperty={functionalProperty}
-            label={step?.label === null ? null : step?.label || entry}
-            help={step.help}
+            step={step}
             render={inputWrapper}
           >
             <Step
