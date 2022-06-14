@@ -98,7 +98,6 @@
     "@codemirror/theme-one-dark": "^0.19.1",
     "@fortawesome/fontawesome-free": "^5.15.3",
     "@hookform/resolvers": "2.4.0",
-    "@maif/react-forms": "^1.0.37-rc.1",
     "@popperjs/core": "^2.11.2",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
