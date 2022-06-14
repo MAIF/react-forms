@@ -36,7 +36,8 @@ interface Option {
   httpClient?: HttpClient;
   watch?: boolean | ((param: any) => void);
   autosubmit?: boolean;
-  actions?: OptionActions
+  actions?: OptionActions,
+  showErrorsOnStart?: boolean
 }
 
 
@@ -333,7 +334,9 @@ export const Form = React.forwardRef(function Form(
   const { handleSubmit, formState: { errors, dirtyFields }, reset, trigger, getValues, watch } = methods
 
   useEffect(() => {
-    trigger();
+    if (!!options.showErrorsOnStart) {
+      trigger();
+    }
   }, [trigger, initialReseted])
 
 
