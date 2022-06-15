@@ -129,7 +129,6 @@ const BasicWrapper = ({ entry, children, render, functionalProperty, step }:
   }) => {
   const { formState, watch } = useFormContext();
 
-  console.debug({entry, step})
   if (typeof entry === 'object') {
     return children
   }
@@ -394,7 +393,6 @@ export const Form = React.forwardRef(function Form(
     }
   }));
 
-  console.debug({formFlow})
   return (
     <FormProvider {...methods}>
       <Watcher
