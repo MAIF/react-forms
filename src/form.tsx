@@ -324,7 +324,7 @@ const Watcher = ({ options, control, schema, onSubmit, handleSubmit }: { options
 
 export const Form = React.forwardRef(function Form(
   { schema, flow, value, inputWrapper, onSubmit, onError = () => {/* default is nothing */}, footer, style = {}, className, options = {}, nostyle }:
-  {schema: Schema, flow: Array<string | FlowObject>, value?: object, inputWrapper?: (props: object) => JSX.Element, onSubmit: (obj: object) => void, onError?: () => void /* TODO */, footer?: (props: object) => JSX.Element, style?:object, className?:string, options?: Option, nostyle: boolean}, ref) {
+  {schema: Schema, flow: Array<string | FlowObject>, value?: object, inputWrapper?: (props: object) => JSX.Element, onSubmit: (obj: object) => void, onError?: () => void /* TODO */, footer?: (props: {reset:() => void, valid: () => void}) => JSX.Element, style?:object, className?:string, options?: Option, nostyle: boolean}, ref) {
   
   console.log("form rendering")
 
