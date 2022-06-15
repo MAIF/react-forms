@@ -100,6 +100,26 @@ export const Example = () => {
   ```javascript
   ({rawValues, value, setValue}) => if (value.length) { setValue('entry', false) }
   ```
+- **onAfterChange**: a callback function to the value change.
+  ```javascript
+  ({entry, value, rawValues, previousValue, getValue, setValue, onChange, informations}) => {
+    const otherEntryVal = getValue('otherEntry')
+    console.debug({entry, value, rawValues, otherEntryVal})
+    setValue('anotherEntry', v + 1)
+    const {path, parent, index} = informations
+    console.debug({path, parent, index})
+  }
+  ```
+  where :
+  - entry [string] is the updated entry of schema
+  - value [any] is the actual value of your entry
+  - previousValue [any] is the previous value of your entry
+  - rawValues [any] is the actual value of antire form
+  - getValue [function] is a function to get value of a form entry
+  - setValue [function] is a function to set value of a form entry
+  - onSave [function] is a function to update actual entry
+  - informations [Information] is an object to get information about the actual entry (path, index and parent informations)
+
 - **render**: a function to completely custom the rendering of form field 
   ```javascript
   ({rawValues, value, onChange, error, setValue, parent}) => <input type="text" className="is-invalid" value={value} onChange={e => onChange(e.target.value)} />

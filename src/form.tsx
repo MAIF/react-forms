@@ -87,7 +87,7 @@ export interface SchemaEntry {
   conditionalSchema: ConditionnalSchema;
   constraints: Array<Constraint | {type: TConstraintType, message?: string}>;
   flow: Array<string|FlowObject>;
-  onAfterChange?: (obj: {entry:string, value: object, rawValues: object, previousValue?: object, getValue: (entry: string) => any, setValue: (entry: string, value: any) => void, onChange: (v: any) => void}) => void;
+  onAfterChange?: (obj: {entry:string, value: object, rawValues: object, previousValue?: object, getValue: (entry: string) => any, setValue: (entry: string, value: any) => void, onChange: (v: any) => void, informations?: Informations} ) => void;
   visibleOnCollapse?: boolean;
   addableDefaultValue: any; /* TODO doc : possible only with array, used to give default value to dynamically added elements */
   collapsed?: boolean; // TODO doc : indicate wether form is closed or not, only for objects with form
@@ -103,6 +103,12 @@ export type Flow = Array<string | FlowObject>
 
 
 type TFunctionalProperty = <T,>(entry: string, prop: T | ((param: {rawValues: {[x: string]: any}, value: any}) => T) ) => T
+
+interface Informations {
+  path: string,
+  parent?: Informations,
+  index?: number
+}
 
 
 const usePrevious = (value: any) => {
@@ -129,7 +135,6 @@ const BasicWrapper = ({ entry, children, render, functionalProperty, step }:
   }) => {
   const { formState, watch } = useFormContext();
 
-  console.debug({entry, step})
   if (typeof entry === 'object') {
     return children
   }
@@ -211,7 +216,6 @@ function getDefaultValues(flow: Flow, schema: Schema, value?: any): object {
     return { ...acc, [key]: defaultVal(value ? value[key] : null, entry.array || entry.isMulti || false, entry.defaultValue) }
   }, {})
 }
-
 
 const cleanInputArray = (obj: {[x: string]: any} = {}, defaultValues: {[x: string]: any} = {}, flow?: Flow, subSchema?: Schema): object => {
   const realFlow = option(flow)
@@ -394,7 +398,6 @@ export const Form = React.forwardRef(function Form(
     }
   }));
 
-  console.debug({formFlow})
   return (
     <FormProvider {...methods}>
       <Watcher
@@ -445,9 +448,21 @@ const Footer = (props: {actions?: {submit?: {display?: boolean, label?: React.Re
   )
 }
 
-const Step = (props: { entry: string | FlowObject, realEntry?: string, step?: SchemaEntry, schema: Schema, inputWrapper?: (props: object) => JSX.Element, httpClient?: HttpClient, defaultValue?: any, index?: number, functionalProperty: TFunctionalProperty, parent?:string, onAfterChange?: (obj: {entry:string, value: object, rawValues: object, previousValue?: object, getValue: (entry: string) => any, setValue: (entry: string, value: any) => void, onChange: (v: any) => void}) => void }) => {
-  let { entry, realEntry, step, schema, inputWrapper, httpClient, defaultValue, index, functionalProperty, parent, onAfterChange } = props;
-  const { formState: { errors, dirtyFields, touchedFields, isSubmitted }, control, trigger, getValues, setValue, watch, register } = useFormContext();
+const Step = (props: { 
+  entry: string | FlowObject, 
+  realEntry?: string, 
+  step?: SchemaEntry, 
+  schema: Schema, 
+  inputWrapper?: (props: object) => JSX.Element, 
+  httpClient?: HttpClient, 
+  defaultValue?: any, 
+  index?: number, 
+  functionalProperty: TFunctionalProperty, 
+  parent?:string,
+  parentInformations?: Informations
+ }) => {
+  let { entry, realEntry, step, schema, inputWrapper, httpClient, defaultValue, index, functionalProperty, parent, parentInformations } = props;
+  const { formState: { errors, dirtyFields, touchedFields, isSubmitted }, control, getValues, setValue, watch } = useFormContext();
 
   if (entry && typeof entry === 'object') {
     const errored = extractFlowString(entry).some(step => !!errors[step] && (dirtyFields[step] || touchedFields[step]))
@@ -465,7 +480,7 @@ const Step = (props: { entry: string | FlowObject, realEntry?: string, step?: Sc
             <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} functionalProperty={functionalProperty} step={stp} render={inputWrapper}>
               <Step entry={en} step={stp} schema={schema}
                 inputWrapper={inputWrapper} httpClient={httpClient}
-                defaultValue={stp?.defaultValue} functionalProperty={functionalProperty} />
+                defaultValue={stp?.defaultValue} functionalProperty={functionalProperty} parentInformations={parentInformations}/>
             </BasicWrapper>
           )
         })}
@@ -477,6 +492,8 @@ const Step = (props: { entry: string | FlowObject, realEntry?: string, step?: Sc
   const isDirty = entry.split('.').reduce((acc, curr) => acc && acc[curr], dirtyFields)
   const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], touchedFields)
   const errorDisplayed = (!!error && (isSubmitted || isDirty || isTouched)) as boolean
+
+  const informations = { path: entry, parent: parentInformations, index } 
 
   step = step!;
 
@@ -495,11 +512,12 @@ const Step = (props: { entry: string | FlowObject, realEntry?: string, step?: Sc
     step.onAfterChange({
         entry,
         value: getValues(entry),
-        rawValues: newData,
+        rawValues: getValues(),
         previousValue: currentData,
         getValue: (e:string) => getValues(e),
         setValue,
-        onChange: (v:any) => setValue(entry as string, v)
+        onChange: (v:any) => setValue(entry as string, v),
+        informations
       })
   }
 
@@ -522,7 +540,8 @@ const Step = (props: { entry: string | FlowObject, realEntry?: string, step?: Sc
                 httpClient={httpClient}
                 defaultValue={props.defaultValue?.value}
                 index={idx}
-                functionalProperty={functionalProperty} />
+                functionalProperty={functionalProperty}
+                parentInformations={informations} />
             )
           })} />
       </CustomizableInput >
@@ -649,7 +668,7 @@ const Step = (props: { entry: string | FlowObject, realEntry?: string, step?: Sc
               <NestedForm
                 schema={step.schema!} flow={flow} step={step} parent={entry}
                 inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={getValues(entry) || defaultValue}
-                index={index} functionalProperty={functionalProperty} errorDisplayed={errorDisplayed} />
+                functionalProperty={functionalProperty} errorDisplayed={errorDisplayed} informations={informations} />
             </CustomizableInput>
           )
 
@@ -818,9 +837,20 @@ const ArrayStep = ({ entry, step, component, disabled }: { entry:string, step: S
   )
 }
 
-const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, errorDisplayed, value, step, functionalProperty, index }:
-  { schema: Schema, flow: Flow, parent: string, inputWrapper?: (props: object) => JSX.Element, maybeCustomHttpClient?: HttpClient, errorDisplayed: boolean, value: any, step: SchemaEntry, functionalProperty: TFunctionalProperty, index?: number }) => {
-  const { getValues, setValue, watch, control,formState: { errors, dirtyFields, touchedFields } } = useFormContext();
+const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, errorDisplayed, value, step, functionalProperty, informations }:
+  { 
+    schema: Schema, 
+    flow: Flow, 
+    parent: string, 
+    inputWrapper?: (props: object) => JSX.Element, 
+    maybeCustomHttpClient?: HttpClient,
+     errorDisplayed: boolean, 
+     value: any, 
+     step: SchemaEntry, 
+     functionalProperty: TFunctionalProperty, 
+     informations?: Informations }) => {
+  
+    const { getValues, setValue, control,formState: { errors, dirtyFields, touchedFields } } = useFormContext();
   const [collapsed, setCollapsed] = useState<boolean>(!!step.collapsed);
 
   useWatch({name: step?.conditionalSchema?.ref || "", control})
@@ -914,7 +944,8 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
               inputWrapper={inputWrapper}
               httpClient={maybeCustomHttpClient}
               defaultValue={value && value[entry]}
-              functionalProperty={functionalProperty} />
+              functionalProperty={functionalProperty}
+              parentInformations={informations} />
           </BasicWrapper>
         )
       })}
