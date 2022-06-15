@@ -584,6 +584,7 @@ const Step = (props: {
                 httpClient={httpClient}
                 isMulti={step.isMulti}
                 createOption={step.createOption}
+                onCreateOption={step.onCreateOption}
                 transformer={step.transformer}
                 buttons={step.format === format.buttonsSelect}
                 optionsFrom={step.optionsFrom}
