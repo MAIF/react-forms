@@ -65,7 +65,7 @@ export const ControlledInput = (inputProps: Props) => {
     }
 
     const props = {
-        ...field,
+        name: field.name,
         ...step.props,
         id: entry,
         readOnly: functionalProperty(entry, step.disabled) ? 'readOnly' : null,
