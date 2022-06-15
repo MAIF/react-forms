@@ -36,12 +36,12 @@ const valueToSelectOption = (value: any, possibleValues: SelectOption[] = [], is
 };
 
 export const SelectInput = <T extends { [x: string]: any },>(props: {
-  possibleValues: T[],
+  possibleValues?: T[],
   transformer?: ((v: T) => SelectOption) | { label: string, value: string },
   value?: any,
   defaultValue?: any,
   isMulti?: boolean,
-  optionsFrom: string | ((param: { rawValues: object, value: any }) => Promise<T[]> | string) | Promise<T[]>,
+  optionsFrom?: string | ((param: { rawValues: object, value: any }) => Promise<T[]> | string) | Promise<T[]>,
   fetchCondition?: () => boolean,
   id?: string,
   httpClient?: (url: string, method: string) => Promise<Response>,

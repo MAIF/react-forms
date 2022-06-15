@@ -78,18 +78,18 @@ export interface SchemaEntry {
   className?: string;
   style?: object;
   onChange?: (param: object) => void;
-  render: SchemaRenderType;
+  render?: SchemaRenderType;
   itemRender?: SchemaRenderType;
-  props: object;
-  options: Array<any|{label: string, value: any}>;
-  optionsFrom: string;
-  transformer: ((v: any) => SelectOption) | {label: string, value: string};
-  conditionalSchema: ConditionnalSchema;
-  constraints: Array<Constraint | {type: TConstraintType, message?: string}>;
-  flow: Array<string|FlowObject>;
+  props?: object;
+  options?: Array<any|{label: string, value: any}>;
+  optionsFrom?: string;
+  transformer?: ((v: any) => SelectOption) | {label: string, value: string};
+  conditionalSchema?: ConditionnalSchema;
+  constraints?: Array<Constraint | {type: TConstraintType, message?: string}>;
+  flow?: Array<string|FlowObject>;
   onAfterChange?: (obj: {entry:string, value: object, rawValues: object, previousValue?: object, getValue: (entry: string) => any, setValue: (entry: string, value: any) => void, onChange: (v: any) => void, informations?: Informations} ) => void;
   visibleOnCollapse?: boolean;
-  addableDefaultValue: any; /* TODO doc : possible only with array, used to give default value to dynamically added elements */
+  addableDefaultValue?: any; /* TODO doc : possible only with array, used to give default value to dynamically added elements */
   collapsed?: boolean; // TODO doc : indicate wether form is closed or not, only for objects with form
   collapsable?: boolean; // TODO doc : indicate wether schema can be collapsed, only for objects with form
 }
@@ -326,6 +326,8 @@ export const Form = React.forwardRef(function Form(
   { schema, flow, value, inputWrapper, onSubmit, onError = () => {/* default is nothing */}, footer, style = {}, className, options = {}, nostyle }:
   {schema: Schema, flow: Array<string | FlowObject>, value?: object, inputWrapper?: (props: object) => JSX.Element, onSubmit: (obj: object) => void, onError?: () => void /* TODO */, footer?: (props: object) => JSX.Element, style?:object, className?:string, options?: Option, nostyle: boolean}, ref) {
   
+  console.log("form rendering")
+
   const formFlow = flow || Object.keys(schema)
   const maybeCustomHttpClient = (url: string, method: string) => {
     //todo: if present props.resolve()
