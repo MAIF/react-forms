@@ -279,6 +279,10 @@
   margin-left: 5px
 }
 
+.mrf-content_switch {
+  appearance: none;
+}
+
 .mrf-content_switch_button_on {
   width: 35px;
   height: 22px;
@@ -287,7 +291,19 @@
   margin-top: 10px;
   background-color: $success-color;
   border: 1px solid $success-hover-color;
-  justify-content: flex-end
+  justify-content: flex-end;
+}
+
+.mrf-content_switch_button_on::before {
+  content: "";
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  background-color: $form-bg-color;
+  border-radius: 20px;
+  border: 1px solid $success-hover-color;
+  box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.3);
+  margin-top: -1px;
 }
 
 .mrf-content_switch_button_off {
@@ -298,7 +314,19 @@
   margin-top: 10px;
   background-color: $error-color;
   border: 1px solid $error-hover-color;
-  justify-content: flex-start
+  justify-content: flex-start;
+}
+
+.mrf-content_switch_button_off::before {
+  content: "";
+  background-color: $form-bg-color;
+  border-radius: 20px;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  border: 1px solid $error-hover-color;
+  box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.3);
+  margin-top: -1px;
 }
 
 .mrf-content_switch_button_null {
@@ -309,37 +337,19 @@
   margin-top: 10px;
   background-color: $neutral-color;
   border: 1px solid $neutral-hover-color;
-  justify-content: flex-start
+  justify-content: flex-start;
 }
 
-.mrf-switch_button_on {
-  cursor: pointer;
-  width: 20px;
-  height: 20px;
-  background-color: $form-bg-color;
-  border-radius: 20px;
-  border: 1px solid $success-hover-color;
-  box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.3)
-}
-
-.mrf-switch_button_off {
+.mrf-content_switch_button_null::before {
+  content: "";
   background-color: $form-bg-color;
   border-radius: 20px;
   cursor: pointer;
   width: 20px;
   height: 20px;
-  border: 1px solid $error-hover-color;
-  box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.3)
-}
-
-.mrf-switch_button_null {
-  background-color: $form-bg-color;
-  border-radius: 20px;
-  cursor: pointer;
-  width: 22px;
-  height: 22px;
   margin-top: -1px;
   margin-left: -1px;
   border: 1px solid $neutral-hover-color;
-  box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.3)
+  box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.3);
+  margin-top: -1px;
 }
