@@ -12,7 +12,7 @@ export const arrayFlatten = <T>(array: T[] | Array<T[]>): T[] => {
   return array as T[];
 }
 
-export function isDefined (value: any): boolean {
+export function isDefined(value: any): boolean {
   return value !== null && value !== undefined
 }
 
@@ -28,7 +28,7 @@ const cleanPromise = <T extends { [x: string]: any } | any[] | string | number |
       } else {
         return [k, v];
       }
-    })) as T ;
+    })) as T;
   }
   return obj;
 };
@@ -40,21 +40,21 @@ export const useHashEffect = (func: () => void, deps: any) => {
   const prevDeps = useRef(deps);
 
   useEffect(() => {
-    if (isFirst.current ) {
+    if (isFirst.current) {
       func();
       isFirst.current = false;
       return;
     }
-    
+
     const depsHash = cleanHash(deps);
     const prevDepsHash = cleanHash(prevDeps.current);
 
     if (depsHash !== prevDepsHash) {
-      prevDeps.current = deps;
+      prevDeps.current = { ...deps };
       func();
     }
 
 
   }, deps) /* FIXME deps or [deps] ? */
-  
+
 }
