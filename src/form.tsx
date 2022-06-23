@@ -333,7 +333,7 @@ const Watcher = React.memo(({ options, control, schema, onSubmit, handleSubmit }
 
 export const Form = React.forwardRef(function Form(
   { schema, flow, value, inputWrapper, onSubmit, onError = () => {/* default is nothing */ }, footer, style = {}, className, options = {}, nostyle }:
-    { schema: Schema, flow: Array<string | FlowObject>, value?: object, inputWrapper?: (props: object) => JSX.Element, onSubmit: (obj: object) => void, onError?: () => void /* TODO */, footer?: (props: { reset: () => void, valid: () => void }) => JSX.Element, style?: object, className?: string, options?: Option, nostyle: boolean }, ref) {
+    { schema: Schema, flow: Array<string | FlowObject>, value?: object, inputWrapper?: (props: object) => JSX.Element, onSubmit: (obj: {[x: string]: any}) => void, onError?: () => void /* TODO */, footer?: (props: { reset: () => void, valid: () => void }) => JSX.Element, style?: object, className?: string, options?: Option, nostyle: boolean }, ref) {
 
   const formFlow = flow || Object.keys(schema)
   const maybeCustomHttpClient = (url: string, method: string) => {
