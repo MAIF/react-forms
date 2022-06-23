@@ -229,15 +229,19 @@ httpClient = {(url, method) => fetch(url, {
 - **actions**: an object to parameter footer buttons key. By default just `submit` button is displayed.
 ```javascript
 <Form 
-  actions={
-    reset: {
-      display: false (value by default)
-      label: 'reset' (value by default)
-    },
-    submit: {
-      display: true (value by default)
-      label: "save" (value by default)
-    }
+  options={
+    autosubmit: true,
+    showErrorsOnStart: true,
+    actions={
+        reset: {
+          display: false (value by default)
+          label: 'reset' (value by default)
+        },
+        submit: {
+          display: true (value by default)
+          label: "save" (value by default)
+        }
+      }
   }
 />
 ```
