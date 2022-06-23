@@ -19,6 +19,7 @@ export function CodeInput({
     minWidth: '-1',
     maxWidth: '-1',
   },
+  className,
   setRef
 }:{
   onChange?: (v: string) => void,
@@ -36,6 +37,7 @@ export function CodeInput({
     minWidth: string,
     maxWidth: string,
   },
+  className?: string,
   setRef?: (editor: any) => void
 }) {
   const ref = useRef<any>()
@@ -73,5 +75,5 @@ export function CodeInput({
     }
   }, [value])
 
-  return <div ref={ref} />
+  return <div className={className} ref={ref} />
 }

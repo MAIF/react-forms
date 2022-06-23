@@ -297,13 +297,11 @@
 .mrf-content_switch_button_on::before {
   content: "";
   cursor: pointer;
-  width: 20px;
-  height: 20px;
+  width: 21px;
+  height: 21px;
   background-color: $form-bg-color;
   border-radius: 20px;
-  border: 1px solid $success-hover-color;
   box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.3);
-  margin-top: -1px;
 }
 
 .mrf-content_switch_button_off {
@@ -322,11 +320,9 @@
   background-color: $form-bg-color;
   border-radius: 20px;
   cursor: pointer;
-  width: 20px;
-  height: 20px;
-  border: 1px solid $error-hover-color;
+  width: 21px;
+  height: 21px;
   box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.3);
-  margin-top: -1px;
 }
 
 .mrf-content_switch_button_null {
@@ -345,11 +341,7 @@
   background-color: $form-bg-color;
   border-radius: 20px;
   cursor: pointer;
-  width: 20px;
-  height: 20px;
-  margin-top: -1px;
-  margin-left: -1px;
-  border: 1px solid $neutral-hover-color;
+  width: 21px;
+  height: 21px;
   box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.3);
-  margin-top: -1px;
 }

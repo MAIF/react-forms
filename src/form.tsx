@@ -333,7 +333,7 @@ const Watcher = React.memo(({ options, control, schema, onSubmit, handleSubmit }
 
 export const Form = React.forwardRef(function Form(
   { schema, flow, value, inputWrapper, onSubmit, onError = () => {/* default is nothing */ }, footer, style = {}, className, options = {}, nostyle }:
-    { schema: Schema, flow: Array<string | FlowObject>, value?: object, inputWrapper?: (props: object) => JSX.Element, onSubmit: (obj: {[x: string]: any}) => void, onError?: () => void /* TODO */, footer?: (props: { reset: () => void, valid: () => void }) => JSX.Element, style?: object, className?: string, options?: Option, nostyle: boolean }, ref) {
+    { schema: Schema, flow: Array<string | FlowObject>, value?: object, inputWrapper?: (props: object) => JSX.Element, onSubmit: (obj: { [x: string]: any }) => void, onError?: () => void /* TODO */, footer?: (props: { reset: () => void, valid: () => void }) => JSX.Element, style?: object, className?: string, options?: Option, nostyle: boolean }, ref) {
 
   const formFlow = flow || Object.keys(schema)
   const maybeCustomHttpClient = (url: string, method: string) => {
@@ -572,7 +572,7 @@ const Step = (props: {
           const Component = step.format === format.code ? CodeInput : SingleLineCode
           return (
             <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed}>
-              <Component /*TODO try to pass className down OR use built in mechanism to display error classNames(step.className, { 'mrf-input__invalid': !!errorDisplayed })}*/ />
+              <Component className={classNames(step?.className, { 'mrf-input__invalid': !!error })}/>
             </ControlledInput>
           )
         case format.markdown:
@@ -647,7 +647,7 @@ const Step = (props: {
           step={step}
           entry={entry}
           errorDisplayed={errorDisplayed}>
-          <BooleanInput /* TODO see how to pass error down className={classNames(step.className, { 'mrf-input__invalid': !!errorDisplayed })}*/ />
+          <BooleanInput className={step.className} errorDisplayed={errorDisplayed} />
         </ControlledInput>
       )
 
@@ -684,24 +684,25 @@ const Step = (props: {
 
         case format.code:
           return (
-            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} component={(field, props) => (
-              <CodeInput
-                {...props}
-                /* TODO className={classNames(step.className, { 'mrf-input__invalid': !!error })}*/
-                onChange={(e: any) => {
-                  let v: any
-                  try {
-                    v = JSON.parse(e)
-                  } catch (err) {
-                    v = e
-                  }
-                  field.onChange(v)
-                  option(step?.onChange)
-                    .map(onChange => onChange({ rawValues: getValues(), value: v, setValue }))
-                }}
-                value={field.value === null ? null : ((typeof field.value === 'object') ? JSON.stringify(field.value, null, 2) : field.value)}
-              />
-            )} />
+            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed}
+              component={(field, props) => (
+                <CodeInput
+                  {...props}
+                  className={classNames(step?.className, { 'mrf-input__invalid': !!error })}
+                  onChange={(e: any) => {
+                    let v: any
+                    try {
+                      v = JSON.parse(e)
+                    } catch (err) {
+                      v = e
+                    }
+                    field.onChange(v)
+                    option(step?.onChange)
+                      .map(onChange => onChange({ rawValues: getValues(), value: v, setValue }))
+                  }}
+                  value={field.value === null ? null : ((typeof field.value === 'object') ? JSON.stringify(field.value, null, 2) : field.value)}
+                />
+              )} />
           )
         default:
           return (
@@ -782,7 +783,7 @@ const Step = (props: {
         <ControlledInput step={step} entry={entry} component={(field: { value: any, onChange: (v: any) => void }, props: object) => (
           <CodeInput
             {...props}
-            /* TODO className={classNames({ 'mrf-input__invalid': !!error })} */
+            className={classNames(step?.className, { 'mrf-input__invalid': !!error })}
             onChange={(v: any) => {
               field.onChange(v)
               option(step?.onChange)
@@ -902,7 +903,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
 
   const bordered = computedSandF.length >= 1 && step.label !== null;
   return (
-    <div className={classNames({ ['mrf-nestedform__border']: bordered, ['mrf-border__error']: !!errorDisplayed })} style={{ position: 'relative' }}>
+    <div className={classNames(step.className, { ['mrf-nestedform__border']: bordered, ['mrf-border__error']: !!errorDisplayed })} style={{ position: 'relative' }}>
       {!!step.collapsable && schemaAndFlow.flow.length > 1 && collapsed &&
         <ChevronDown size={30} className='mrf-cursor_pointer' style={{ position: 'absolute', top: -35, right: 0, zIndex: 100 }} strokeWidth="2" onClick={() => setCollapsed(!collapsed)} />}
       {!!step.collapsable && schemaAndFlow.flow.length > 1 && !collapsed &&
