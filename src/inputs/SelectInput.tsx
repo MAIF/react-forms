@@ -84,13 +84,15 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
   const possibleValues: SelectOption[] = (props.possibleValues || [])
     .map(v => transformOption(v))
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [values, setValues] = useState<SelectOption[]>(possibleValues);
-  const [value, setValue] = useState<readonly SelectOption[] | SelectOption | null>(valueToSelectOption(props.value || props.defaultValue, possibleValues, props.isMulti))
+  const [value, setValue] = useState<readonly SelectOption[] | SelectOption | null>()
 
   useEffect(() => {
-    setValue(valueToSelectOption(props.value, values, props.isMulti))
-  }, [props.value, values])
+    if (!loading && values.length) {
+      setValue(valueToSelectOption(props.value || props.defaultValue, values, props.isMulti))
+    }
+  }, [props.value, values, props.defaultValue, loading])
 
   useEffect(() => {
     if (props.optionsFrom) {
@@ -112,9 +114,7 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
         }
 
         promise
-          .then((values: T[]) => {
-            return values.map(x => transformOption(x))
-          })
+          .then((values: T[]) => values.map(x => transformOption(x)))
           .then((values: SelectOption[]) => {
             setValues(values);
             setValue(values.find((item) => {
@@ -131,6 +131,7 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
     } else {
       setValues((props.possibleValues || [])
         .map(v => transformOption(v)))
+      setTimeout(() => setLoading(false), 250)
     }
 
   }, [props.optionsFrom, props.possibleValues])
@@ -199,7 +200,7 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
         name={`${props.label}-search`}
         isLoading={loading}
         value={value}
-        isDisabled={props.disabled}
+        isDisabled={loading || props.disabled}
         placeholder={props.placeholder}
         onChange={onChange}
         options={values}
@@ -216,7 +217,7 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
         isLoading={loading}
         value={value}
         defaultValue={value}
-        isDisabled={props.disabled}
+        isDisabled={loading || props.disabled}
         placeholder={props.placeholder}
         options={values}
         onChange={onChange}
