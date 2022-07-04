@@ -88,9 +88,9 @@ export const Example = () => {
   ```
 - **isMulti**: if `select` format is choosen, `isMulti` property is to render a multiselect component
 - **defaultKeyValue**: if `object` format is choosen, this default key/value is set for all added entries
-- **visible**: a boolean option to hide/display form field. It can be an object with `ref` property to get a value by reference an a key `test` as a function to test it. if there is no `test` key, it's base just on boolean value of the reference.
-- **disabled**: A boolean option to enable/disable form field
-- **label**: The label of form field (you can pass `null` to not render a label)
+- **visible**: a boolean or [functional boolean](#functional-properties) option to hide/display form field.
+- **disabled**: A boolean or [functional boolean](#functional-properties) option to enable/disable form field
+- **label**: A string or [functional string](#functional-properties) to labelize of form field (you can pass `null` to not render a label)
 - **placeholder**: the placeholder of form field
 - **defaultValue**: A default value to fill field by default
 - **help**: the text display hover a help button
@@ -114,11 +114,11 @@ export const Example = () => {
   - entry [string] is the updated entry of schema
   - value [any] is the actual value of your entry
   - previousValue [any] is the previous value of your entry
-  - rawValues [any] is the actual value of antire form
+  - rawValues [any] is the actual value of entire form
   - getValue [function] is a function to get value of a form entry
   - setValue [function] is a function to set value of a form entry
   - onSave [function] is a function to update actual entry
-  - informations [Information] is an object to get information about the actual entry (path, index and parent informations)
+  - informations [Information] is an object to get informations about the actual entry (path, index and parent informations)
 
 - **render**: a function to completely custom the rendering of form field 
   ```javascript
@@ -188,6 +188,14 @@ export const Example = () => {
   }
   ```
 - **constraints**: a JSON array of constraints. see [constraints section](#constraints)
+
+### Functional properties
+Some schema properties can be basic value or function which return basic value. This function has an object as param with these following properties :
+- **rawValues**: the actual value of antire form
+- **value**: the actual value of the actual entry
+- **error**: the error of the entry (undefined if there is no error)
+- **informations**: an object to get informations about the actual entry (path, index and parent informations)
+- **getValue**: a function to get value of a form entry
 
 
 ## Form properties
