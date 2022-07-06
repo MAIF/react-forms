@@ -7,7 +7,13 @@ import Editor from './__generated/editor'
 
 import '@fortawesome/fontawesome-free/css/all.css';
 import 'highlight.js/styles/monokai.css';
-import hljs from 'highlight.js';
+import hljs from 'highlight.js/lib/core';
+
+['javascript', 'json', 'markdown', 'css'].forEach((langName) => {
+  // Using require() here because import() support hasn't landed in Webpack yet
+  const langModule = require(`highlight.js/lib/languages/${langName}`);
+  hljs.registerLanguage(langName, langModule);
+});
 
 import { CodeInput } from './CodeInput';
 

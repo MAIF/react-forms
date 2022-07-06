@@ -1,5 +1,5 @@
 import * as  React from "react";
-import { ChangeEvent, ReactNode } from 'react';
+import { ChangeEvent } from 'react';
 import { useController, useFormContext } from 'react-hook-form';
 import { ConditionnalSchema, Informations, SchemaEntry, SchemaRenderType } from "./form";
 import { option } from './Option';
@@ -94,7 +94,7 @@ export const ControlledInput = (inputProps: Props) => {
             option(step.onChange)
                 .map(onChange => onChange({ rawValues: getValues(), value, setValue }))
         },
-        value: field.value
+        value: field.value,
     }
 
     return <CustomizableInput

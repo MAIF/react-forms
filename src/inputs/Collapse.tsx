@@ -1,6 +1,9 @@
 import classNames from 'classnames';
 import React, { SyntheticEvent, useState } from 'react';
-import { Eye, EyeOff } from 'react-feather';
+// @ts-ignore
+import EyeOff from 'react-feather/dist/icons/eye-off.js';
+// @ts-ignore
+import Eye from 'react-feather/dist/icons/eye.js';
 
 export const Collapse = (props: {initCollapsed?: boolean, collapsed?: boolean, errored: boolean, label?: React.ReactNode, inline?: any, children: React.ReactNode, lineEnd?: boolean}) => {
   const [collapsed, setCollapsed] = useState(props.initCollapsed || props.collapsed)

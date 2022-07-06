@@ -10,7 +10,9 @@ export const format = {
   hidden: "hidden",
   form: "form",
   buttonsSelect: "buttons",
-  singleLineCode: "singleLineCode"
+  singleLineCode: "singleLineCode",
+  datetime: "datetime-local",
+  time: "time"
 } as const
 
 

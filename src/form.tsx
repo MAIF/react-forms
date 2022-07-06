@@ -1,14 +1,30 @@
-import React, { useEffect, useState, useRef, useImperativeHandle, useContext, RefObject, FormEvent, ChangeEvent, useCallback } from 'react'
+import React, { useEffect, useState, useRef, useImperativeHandle, ChangeEvent, useCallback } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup';
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
-import { HelpCircle, Loader, Upload, ChevronDown, ChevronUp, Trash2 } from 'react-feather';
-import { useForm, useFormContext, Controller, useFieldArray, FormProvider, useWatch, FieldValue, Control, UnpackNestedValue, FieldPathValue } from 'react-hook-form';
-import { DatePicker } from 'react-rainbow-components';
+// @ts-ignore
+import HelpCircle from 'react-feather/dist/icons/help-circle.js';
+// @ts-ignore
+import Loader from 'react-feather/dist/icons/loader.js';
+// @ts-ignore
+import Upload from 'react-feather/dist/icons/upload.js';
+// @ts-ignore
+import ChevronDown from 'react-feather/dist/icons/chevron-down.js';
+// @ts-ignore
+import ChevronUp from 'react-feather/dist/icons/chevron-up.js';
+// @ts-ignore
+import Trash2 from 'react-feather/dist/icons/trash-2.js';
+import { useForm, useFormContext, Controller, useFieldArray, FormProvider, useWatch, Control } from 'react-hook-form';
 import ReactToolTip from 'react-tooltip';
 import { v4 as uuid } from 'uuid';
 import * as yup from "yup";
-import debounce from "lodash.debounce"
+import debounce from "lodash.debounce";
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import TextField from '@mui/material/TextField';
 
 import { type, Type } from './type';
 import { format, Format } from './format';
@@ -17,10 +33,9 @@ import { getShapeAndDependencies } from './resolvers/index';
 import { option } from './Option'
 import { ControlledInput } from './controlledInput.js';
 import { arrayFlatten, isDefined, useHashEffect } from './utils';
+import { Constraint, TConstraintType } from './constraints';
 
 import './style/style.scss'
-import { Constraint, TConstraintType } from './constraints';
-import { info } from 'console';
 
 interface OptionActionItem {
   display?: boolean;
@@ -157,8 +172,6 @@ const BasicWrapper = ({ entry, children, render, functionalProperty, step, infor
   const computedLabel = functionalProperty(entry, step?.label === null ? null : step?.label || entry, informations)
 
   const id = uuid();
-
-  
 
   if (render) {
     return render({ entry, label: computedLabel, error, help: step?.help, children })
@@ -376,7 +389,7 @@ export const Form = React.forwardRef(function Form(
   }, [value, schema])
 
 
-  const functionalProperty = <T,>(entry: string, prop: T | ((param: { rawValues: { [x: string]: any }, value: any, informations?: Informations, getValue: (key: string) => any }) => T), informations?: Informations, error?: {[x: string]: any}): T => {
+  const functionalProperty = <T,>(entry: string, prop: T | ((param: { rawValues: { [x: string]: any }, value: any, informations?: Informations, getValue: (key: string) => any }) => T), informations?: Informations, error?: { [x: string]: any }): T => {
     if (typeof prop === 'function') {
       return (prop as Function)({ rawValues: getValues(), value: getValues(entry), informations, getValue: (key: string) => getValues(key), error });
     } else {
@@ -500,7 +513,7 @@ const CollapsedStep = (props: {
           <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} functionalProperty={functionalProperty} step={stp} render={inputWrapper} informations={informations}>
             <Step entry={en} step={stp} schema={schema}
               inputWrapper={inputWrapper} httpClient={httpClient}
-              defaultValue={stp?.defaultValue} functionalProperty={functionalProperty} informations={informations}/>
+              defaultValue={stp?.defaultValue} functionalProperty={functionalProperty} informations={informations} />
           </BasicWrapper>
         )
       })}
@@ -752,14 +765,54 @@ const Step = (props: {
           )
       }
     case type.date:
-      return (
-        <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations}>
-          <DatePicker
-            className={classNames('mrf-datepicker', step.className, { 'mrf-input__invalid': !!errorDisplayed })}
-            formatStyle="large"
-          />
-        </ControlledInput>
-      )
+      switch (step.format) {
+        case format.datetime:
+          console.debug('datetime')
+          return (
+            <ControlledInput step={step} entry={entry} informations={informations}
+              component={(field: { value: any, onChange: (v: any) => void }) => {
+                return (
+                  <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DateTimePicker
+                      value={field.value}
+                      onChange={field.onChange}
+                      renderInput={(params) => <TextField {...params} />}
+                    />
+                  </LocalizationProvider>
+                )
+              }} />
+          )
+        case format.time:
+          return (
+            <ControlledInput step={step} entry={entry} informations={informations}
+              component={(field: { value: any, onChange: (v: any) => void }) => {
+                return (
+                  <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <TimePicker
+                      value={field.value}
+                      onChange={field.onChange}
+                      renderInput={(params) => <TextField {...params} />}
+                    />
+                  </LocalizationProvider>
+                )
+              }} />
+          )
+        default:
+          return (
+            <ControlledInput step={step} entry={entry} informations={informations}
+              component={(field: { value: any, onChange: (v: any) => void }) => {
+                return (
+                  <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DatePicker
+                      value={field.value}
+                      onChange={field.onChange}
+                      renderInput={(params) => <TextField {...params} />}
+                    />
+                  </LocalizationProvider>
+                )
+              }} />
+          )
+      }
     case type.file:
       return (
         <Controller
