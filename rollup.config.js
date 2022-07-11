@@ -41,7 +41,8 @@ export default [
   ,{
     input: pkg.source,
     output: [
-      { file: pkg.main, format: 'cjs' }
+      { file: pkg.main, format: 'cjs' },
+      { file: pkg.module, format: 'esm' }
     ],
     plugins: [
       del({ targets: ['dist/*', 'lib/*', 'examples/node_modules/@maif/react-forms/lib'], verbose: true }),
