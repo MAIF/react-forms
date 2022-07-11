@@ -3,7 +3,6 @@
   "description": "Build react safe forms as fast as possible",
   "version": "1.2.4",
   "main": "lib/index.js",
-  "module": "lib/esm/index.js",
   "types": "lib/index.d.ts",
   "source": "src/index.ts",
   "author": "MAIF team",
