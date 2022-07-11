@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import showdown from 'showdown';
 import classNames from 'classnames';
-// @ts-ignore
-import Editor from './__generated/editor'
 
 
 import '@fortawesome/fontawesome-free/css/all.css';
@@ -37,7 +35,7 @@ interface Range {
 
 export const MarkdownInput = (props: {value?: string, preview?: boolean, className: string, readOnly?: boolean, onChange?: (value: string) => void}) => {
   const [preview, setPreview] = useState<boolean>(props.preview || false);
-  const ref = useRef<Editor>()
+  const ref = useRef<any>()
 
   useEffect(() => {
     if (preview) {

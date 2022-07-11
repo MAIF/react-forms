@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { LanguageMode } from './constants';
 // @ts-ignore
-import Editor from './__generated/editor'
+import Editor from '../codemirror-editor'
 
 export function SingleLineCode({
     onChange,
@@ -40,9 +40,9 @@ export function SingleLineCode({
     const ref = useRef<any>()
 
     useEffect(() => {
-        Editor(ref.current, mode, (v: string) => {
+        Editor(ref.current, mode, tabSize, readOnly, showLinesNumber, highlightLine, themeStyle, (v: string) => {
             onChange?.(v.replace(/\n/g, ""))
-        }, value, tabSize, readOnly, showLinesNumber, highlightLine, themeStyle)
+        }, value)
 
         ref.current.addEventListener("keydown", (e: Event) => {
             e.stopImmediatePropagation()
