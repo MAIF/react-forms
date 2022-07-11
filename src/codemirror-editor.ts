@@ -41,8 +41,7 @@ const languages = {
 export default function Editor(
     parent: Element | DocumentFragment,
     mode: LanguageMode,
-    onChange: (doc: string) => void,
-    value:{value: any} | any,
+    
     tabSize = 1,
     readOnly = false,
     showLinesNumber = true,
@@ -54,7 +53,9 @@ export default function Editor(
         width: '-1',
         minWidth: '-1',
         maxWidth: '-1',
-    }
+    },
+    onChange?: (doc: string) => void,
+    value?:{value: any} | any,
 ) {
     const theme = EditorView.theme({
         '&': {
@@ -102,7 +103,7 @@ export default function Editor(
                 try {
                     if (vu.docChanged) {
                         const doc = vu.state.doc.toString();
-                        onChange(doc)
+                        onChange?.(doc)
                     }
                 } catch (_) {
 

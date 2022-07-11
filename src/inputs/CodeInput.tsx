@@ -1,7 +1,7 @@
 import React, { KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { LanguageMode } from './constants';
 // @ts-ignore
-import Editor from './__generated/editor'
+import Editor from '../codemirror-editor'
 
 export function CodeInput({
   onChange,
@@ -41,10 +41,10 @@ export function CodeInput({
   setRef?: (editor: any) => void
 }) {
   const ref = useRef<any>()
-  const [editor, setEditor] = useState<Editor>()
+  const [editor, setEditor] = useState<any>()
 
   useEffect(() => {
-    const e = Editor(ref.current, mode, onChange, value, tabSize, readOnly, showLinesNumber, highlightLine, themeStyle)
+    const e = Editor(ref.current, mode, tabSize, readOnly, showLinesNumber, highlightLine, themeStyle, onChange, value, )
 
     ref.current.addEventListener("keydown", (e: Event) => {
       e.stopImmediatePropagation()
