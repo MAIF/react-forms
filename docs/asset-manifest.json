@@ -1,24 +1,28 @@
 {
   "files": {
-    "main.css": "/react-forms/static/css/main.8693c9f3.chunk.css",
-    "main.js": "/react-forms/static/js/main.b78382fc.chunk.js",
-    "main.js.map": "/react-forms/static/js/main.b78382fc.chunk.js.map",
-    "runtime-main.js": "/react-forms/static/js/runtime-main.c7c19921.js",
-    "runtime-main.js.map": "/react-forms/static/js/runtime-main.c7c19921.js.map",
-    "static/css/2.ce9bf67c.chunk.css": "/react-forms/static/css/2.ce9bf67c.chunk.css",
-    "static/js/2.fb573b03.chunk.js": "/react-forms/static/js/2.fb573b03.chunk.js",
-    "static/js/2.fb573b03.chunk.js.map": "/react-forms/static/js/2.fb573b03.chunk.js.map",
+    "main.css": "/react-forms/static/css/main.9c420d90.css",
+    "main.js": "/react-forms/static/js/main.f026fd5a.js",
+    "static/media/fa-solid-900.svg": "/react-forms/static/media/fa-solid-900.7a8b4f130182d19a2d7c.svg",
+    "static/media/fa-brands-400.svg": "/react-forms/static/media/fa-brands-400.2f517e09eb2ca6650ff5.svg",
+    "static/media/fa-solid-900.eot": "/react-forms/static/media/fa-solid-900.9bbb245e67a133f6e486.eot",
+    "static/media/fa-solid-900.ttf": "/react-forms/static/media/fa-solid-900.be9ee23c0c6390141475.ttf",
+    "static/media/fa-regular-400.svg": "/react-forms/static/media/fa-regular-400.4689f52cc96215721344.svg",
+    "static/media/fa-brands-400.eot": "/react-forms/static/media/fa-brands-400.23f19bb08961f37aaf69.eot",
+    "static/media/fa-brands-400.ttf": "/react-forms/static/media/fa-brands-400.527940b104eb2ea366c8.ttf",
+    "static/media/fa-solid-900.woff": "/react-forms/static/media/fa-solid-900.eeccf4f66002c6f2ba24.woff",
+    "static/media/fa-brands-400.woff": "/react-forms/static/media/fa-brands-400.2285773e6b4b172f07d9.woff",
+    "static/media/fa-solid-900.woff2": "/react-forms/static/media/fa-solid-900.1551f4f60c37af51121f.woff2",
+    "static/media/fa-brands-400.woff2": "/react-forms/static/media/fa-brands-400.d878b0a6a1144760244f.woff2",
+    "static/media/fa-regular-400.eot": "/react-forms/static/media/fa-regular-400.77206a6bb316fa0aded5.eot",
+    "static/media/fa-regular-400.ttf": "/react-forms/static/media/fa-regular-400.491974d108fe4002b2aa.ttf",
+    "static/media/fa-regular-400.woff": "/react-forms/static/media/fa-regular-400.bb58e57c48a3e911f15f.woff",
+    "static/media/fa-regular-400.woff2": "/react-forms/static/media/fa-regular-400.7a3337626410ca2f4071.woff2",
     "index.html": "/react-forms/index.html",
-    "static/css/2.ce9bf67c.chunk.css.map": "/react-forms/static/css/2.ce9bf67c.chunk.css.map",
-    "static/css/main.8693c9f3.chunk.css.map": "/react-forms/static/css/main.8693c9f3.chunk.css.map",
-    "static/js/2.fb573b03.chunk.js.LICENSE.txt": "/react-forms/static/js/2.fb573b03.chunk.js.LICENSE.txt",
-    "static/media/all.css": "/react-forms/static/media/fa-solid-900.eeccf4f6.woff"
+    "main.9c420d90.css.map": "/react-forms/static/css/main.9c420d90.css.map",
+    "main.f026fd5a.js.map": "/react-forms/static/js/main.f026fd5a.js.map"
   },
   "entrypoints": [
-    "static/js/runtime-main.c7c19921.js",
-    "static/css/2.ce9bf67c.chunk.css",
-    "static/js/2.fb573b03.chunk.js",
-    "static/css/main.8693c9f3.chunk.css",
-    "static/js/main.b78382fc.chunk.js"
+    "static/css/main.9c420d90.css",
+    "static/js/main.f026fd5a.js"
   ]
 }
