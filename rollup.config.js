@@ -15,8 +15,7 @@ const isYalcActivated = process.env.YALC === 'activated'
 export default [{
     input: pkg.source,
     output: [
-      { file: pkg.main, format: 'cjs' },
-      { file: pkg.module, format: 'esm' }
+      { file: pkg.main, format: 'esm' }
     ],
     plugins: [
 //      visualizer(),
