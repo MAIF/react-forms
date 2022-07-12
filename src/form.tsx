@@ -386,7 +386,7 @@ export const Form = React.forwardRef(function Form(
 
   useHashEffect(() => {
     reset({ ...cleanInputArray(value, defaultValues, flow, schema) })
-  }, [value, schema, flow, defaultValues])
+  }, [value, schema, flow])
 
 
   const functionalProperty = <T,>(entry: string, prop: T | ((param: { rawValues: { [x: string]: any }, value: any, informations?: Informations, getValue: (key: string) => any }) => T), informations?: Informations, error?: { [x: string]: any }): T => {
