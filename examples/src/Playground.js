@@ -25,19 +25,58 @@ const examples = {
   dynamicForm,
 };
 
+function setSearchParam(key, value) {
+  const searchParams = new URLSearchParams(window.location.search);
+  searchParams.set(key, value);
+  const newRelativePathQuery =
+    window.location.pathname + "?" + searchParams.toString();
+  window.history.pushState(null, "", newRelativePathQuery);
+}
+
+function clearSearchParam(key) {
+  const searchParams = new URLSearchParams(window.location.search);
+  searchParams.delete(key);
+  const newRelativePathQuery =
+    window.location.pathname + "?" + searchParams.toString();
+  window.history.pushState(null, "", newRelativePathQuery);
+}
+
+function readSearchparam(key) {
+  let param = undefined;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    param = decodeURIComponent(params.get(key));
+  } catch (e) {}
+
+  return param !== "null" ? param : undefined;
+}
+
 export const Playground = () => {
-  const [schema, setSchema] = useState(JSON.stringify(basic, 0, 2));
+  const maybeSchema = readSearchparam("schema");
+  const maybeFlow = readSearchparam("flow");
+  const [schema, setSchema] = useState(maybeSchema || basic);
   const [realSchema, setRealSchema] = useState(basic);
   const [error, setError] = useState(undefined);
   const [value, setValue] = useState();
   const [selectedSchema, setSelectedSchema] = useState({
     value: basic,
-    label: "basic",
+    label: maybeSchema || maybeFlow ? "loaded from url" : "basic",
   });
-  const [flow, setFlow] = useState(undefined);
+  const [flow, setFlow] = useState(
+    maybeFlow ? JSON.parse(maybeFlow) : undefined
+  );
   const ref = useRef();
   const childRef = useRef();
   const formRef = useRef();
+  const codeInputRef = useRef();
+  useEffect(() => {
+    if (codeInputRef.current.hasFocus) {
+      setSearchParam(
+        "schema",
+        typeof schema === "object" ? JSON.stringify(schema) : schema
+      );
+    }
+  }, [schema]);
 
   useEffect(() => {
     if (childRef.current) childRef.current.reset();
@@ -82,6 +121,9 @@ export const Playground = () => {
             }))}
             value={selectedSchema}
             onChange={(e) => {
+              clearSearchParam("schema");
+              clearSearchParam("flow");
+              setFlow(undefined);
               setSelectedSchema(e);
               setSchema(e.value);
             }}
@@ -90,9 +132,9 @@ export const Playground = () => {
             mode="javascript"
             onChange={(e) => {
               try {
+                setSchema(JSON.parse(e));
+              } catch (_) {
                 setSchema(e);
-              } catch (err) {
-                console.log(err);
               }
             }}
             value={
@@ -100,6 +142,7 @@ export const Playground = () => {
                 ? JSON.stringify(schema, null, 2)
                 : schema
             }
+            setRef={(ref) => (codeInputRef.current = ref)}
           />
           <label>Flow</label>
           <CodeInput
@@ -109,14 +152,18 @@ export const Playground = () => {
                 const maybeFlow = JSON.parse(e);
                 if (childRef.current) childRef.current.reset();
                 if (Array.isArray(maybeFlow)) {
+                  setSearchParam("flow", JSON.stringify(maybeFlow));
                   setFlow(maybeFlow);
                 } else {
+                  clearSearchParam("flow");
                   setFlow(undefined);
                 }
               } catch (err) {
+                clearSearchParam("flow");
                 setFlow(undefined);
               }
             }}
+            value={JSON.stringify(flow)}
           />
           <label>Default value</label>
           <CodeInput
