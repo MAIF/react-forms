@@ -1,0 +1,31 @@
+name: Update playground
+
+on:
+  workflow_run:
+    workflows: ["Release react-forms"]
+    types:
+      - completed
+
+jobs:
+  update-playground:
+    name: Update playground
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Update react form in playground
+        run: |
+          cd examples
+          npm install @maif/react-forms@latest --save
+        env:
+          CI: "false"
+      - name: Commit files
+        run: |
+          git config --local user.email "github-actions@users.noreply.github.com"
+          git config --local user.name "github-actions"
+          git add --all
+          git commit -am "Update react-form version for playground"
+      - name: Push playground
+        uses: ad-m/github-push-action@master
+        with:
+          branch: main
+          github_token: ${{ secrets.GITHUB_TOKEN}}
