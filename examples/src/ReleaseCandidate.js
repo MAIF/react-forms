@@ -11,7 +11,6 @@ import { Form } from "@maif/react-forms";
 
 const Listener = ({ control, onDataChange }) => {
     const data = useWatch({ control });
-
     onDataChange(data);
 
     return null;
