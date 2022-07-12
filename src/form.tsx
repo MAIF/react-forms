@@ -142,7 +142,7 @@ const usePrevious = (value: any) => {
   return ref.current;
 }
 
-const BasicWrapper = ({ entry, children, render, functionalProperty, step, informations }:
+const BasicWrapper = ({ entry, children, render, functionalProperty, step, informations, className }:
   {
     entry: object | string,
     className?: string,
@@ -178,7 +178,7 @@ const BasicWrapper = ({ entry, children, render, functionalProperty, step, infor
   }
 
   return (
-    <div className='mrf-mt_10' style={{ position: 'relative' }}>
+    <div className={`mrf-mt_10  ${className || ""}`} style={{ position: 'relative' }}>
       {computedLabel && <label className='mrf-flex mrf-ai_center mrf-mb_5' htmlFor={entry}>
         <span>{computedLabel}</span>
         {step?.help && <>
