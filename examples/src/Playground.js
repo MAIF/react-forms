@@ -26,6 +26,7 @@ const examples = {
 };
 
 export const Playground = () => {
+  console.log("playground render");
   const [schema, setSchema] = useState(JSON.stringify(basic, 0, 2));
   const [realSchema, setRealSchema] = useState(basic);
   const [error, setError] = useState(undefined);
@@ -114,7 +115,6 @@ export const Playground = () => {
                 }
               } catch (err) {
                 setFlow(undefined);
-                console.log(err);
               }
             }}
           />
