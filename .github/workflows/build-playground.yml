@@ -17,8 +17,8 @@ jobs:
       - name: Build playground
         run: |
           cd examples
-          yarn
-          yarn build
+          npm ci
+          npm run build
         env:
           CI: "false"
       - name: Commit files
