@@ -107,6 +107,7 @@ export const Playground = () => {
             onChange={(e) => {
               try {
                 const maybeFlow = JSON.parse(e);
+                if (childRef.current) childRef.current.reset();
                 if (Array.isArray(maybeFlow)) {
                   setFlow(maybeFlow);
                 } else {
