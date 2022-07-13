@@ -53,7 +53,10 @@ function readSearchparam(key) {
 }
 
 export const Playground = () => {
-  const maybeSchema = readSearchparam("schema");
+  let maybeSchema = readSearchparam("schema");
+  try {
+    maybeSchema = JSON.parse(maybeSchema);
+  } catch (_) {}
   const maybeFlow = readSearchparam("flow");
   const [schema, setSchema] = useState(maybeSchema || basic);
   const [realSchema, setRealSchema] = useState(basic);
@@ -76,6 +79,7 @@ export const Playground = () => {
       try {
         maybeFormattedSchema = JSON.parse(schema);
       } catch (_) {}
+
       const strParam =
         typeof maybeFormattedSchema === "object"
           ? JSON.stringify(maybeFormattedSchema)
