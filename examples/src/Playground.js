@@ -71,9 +71,15 @@ export const Playground = () => {
   const codeInputRef = useRef();
   useEffect(() => {
     if (codeInputRef.current.hasFocus) {
+      let maybeFormattedSchema = schema;
+      try {
+        maybeFormattedSchema = JSON.parse(schema);
+      } catch (_) {}
       setSearchParam(
         "schema",
-        typeof schema === "object" ? JSON.stringify(schema) : schema
+        typeof maybeFormattedSchema === "object"
+          ? JSON.stringify(maybeFormattedSchema)
+          : maybeFormattedSchema
       );
     }
   }, [schema]);
@@ -131,11 +137,7 @@ export const Playground = () => {
           <CodeInput
             mode="javascript"
             onChange={(e) => {
-              try {
-                setSchema(JSON.parse(e));
-              } catch (_) {
-                setSchema(e);
-              }
+              setSchema(e);
             }}
             value={
               typeof schema === "object"
