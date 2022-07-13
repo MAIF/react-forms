@@ -4,6 +4,7 @@ import Select from "react-select";
 import "./App.css";
 import "@maif/react-forms/lib/index.css";
 import "bootstrap/dist/css/bootstrap.min.css";
+import lzString from "lz-string";
 
 import basic from "./schema/basic.json";
 import formArray from "./schema/formArray";
@@ -27,7 +28,7 @@ const examples = {
 
 function setSearchParam(key, value) {
   const searchParams = new URLSearchParams(window.location.search);
-  searchParams.set(key, value);
+  searchParams.set(key, lzString.compressToEncodedURIComponent(value));
   const newRelativePathQuery =
     window.location.pathname + "?" + searchParams.toString();
   window.history.pushState(null, "", newRelativePathQuery);
@@ -45,7 +46,7 @@ function readSearchparam(key) {
   let param = undefined;
   try {
     const params = new URLSearchParams(window.location.search);
-    param = decodeURIComponent(params.get(key));
+    param = lzString.decompressFromEncodedURIComponent(params.get(key));
   } catch (e) {}
 
   return param !== "null" ? param : undefined;
@@ -75,12 +76,12 @@ export const Playground = () => {
       try {
         maybeFormattedSchema = JSON.parse(schema);
       } catch (_) {}
-      setSearchParam(
-        "schema",
+      const strParam =
         typeof maybeFormattedSchema === "object"
           ? JSON.stringify(maybeFormattedSchema)
-          : maybeFormattedSchema
-      );
+          : maybeFormattedSchema;
+
+      setSearchParam("schema", strParam);
     }
   }, [schema]);
 
