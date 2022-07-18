@@ -1,6 +1,7 @@
 import * as  React from "react";
 import { ChangeEvent } from 'react';
 import { useController, useFormContext } from 'react-hook-form';
+import { BasicWrapper } from "./basicWrapper";
 import { ConditionnalSchema, Informations, SchemaEntry, SchemaRenderType } from "./form";
 import { option } from './Option';
 import { type } from './type';
@@ -8,13 +9,14 @@ import { isDefined, cleanHash } from './utils';
 
 const CustomizableInput = React.memo(
     (props: {
-        field: { rawValues?: any, value?: any, onChange?: (param: object) => void, error?: boolean, getValue: (entry: string) => any, setValue?: (key: string, data: any) => void},
+        field: { rawValues?: any, value?: any, onChange?: (param: object) => void, error?: boolean, getValue: (entry: string) => any, setValue?: (key: string, data: any) => void },
         step: SchemaEntry,
         error: any, errorDisplayed: boolean,
         render?: SchemaRenderType,
         children: JSX.Element,
         conditionalSchema?: ConditionnalSchema,
-        informations?: Informations
+        informations?: Informations,
+        deactivateReactMemo: boolean
     }) => {
         if (props.render) {
             return (
@@ -23,10 +25,10 @@ const CustomizableInput = React.memo(
         }
         return props.children
     }, (prev, next) => {
-        if (next.render || next.conditionalSchema) {
-            return false
+        if (next.deactivateReactMemo) {
+            return false;
         }
-        return (prev.field.value === next.field.value && next.errorDisplayed === prev.errorDisplayed  && cleanHash(next.step) === cleanHash(prev.step))
+        return (prev.field.value === next.field.value && next.errorDisplayed === prev.errorDisplayed && cleanHash(next.step) === cleanHash(prev.step))
     }
 )
 
@@ -34,13 +36,15 @@ interface BaseProps {
     step: SchemaEntry,
     entry: string,
     errorDisplayed?: boolean,
-    component?: (field: {value: any, onChange: (e: ChangeEvent<HTMLInputElement>) => void}, props: object) => JSX.Element,
+    component?: (field: { value: any, onChange: (e: ChangeEvent<HTMLInputElement>) => void }, props: object) => JSX.Element,
     children?: JSX.Element,
-    informations?: Informations
+    informations?: Informations,
+    deactivateReactMemo: boolean,
+    inputWrapper?: (props: object) => JSX.Element,
 }
 
 interface ComponentProps extends BaseProps {
-    component: (field: {value: any, onChange: (e: ChangeEvent<HTMLInputElement>) => void}, props: object) => JSX.Element,
+    component: (field: { value: any, onChange: (e: ChangeEvent<HTMLInputElement>) => void }, props: object) => JSX.Element,
 }
 
 interface ChildrenProps extends BaseProps {
@@ -50,12 +54,12 @@ interface ChildrenProps extends BaseProps {
 type Props = ComponentProps | ChildrenProps
 
 export const ControlledInput = (inputProps: Props) => {
-    const { step, entry, children, component, errorDisplayed = false, informations } = inputProps;
+    const { step, entry, children, component, errorDisplayed = false, informations, deactivateReactMemo, inputWrapper } = inputProps;
     const { field } = useController({
         defaultValue: isDefined(step.defaultValue) ? step.defaultValue : null,
         name: entry
     })
-    
+
     const { getValues, setValue, formState: { errors } } = useFormContext();
 
     const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], errors)
@@ -63,7 +67,7 @@ export const ControlledInput = (inputProps: Props) => {
 
     const functionalProperty = (entry: string, prop: any) => {
         if (typeof prop === 'function') {
-            return prop({ rawValues: getValues(), value: getValues(entry), informations, error, getValue: (key:string) => getValues(key) });
+            return prop({ rawValues: getValues(), value: getValues(entry), informations, error, getValue: (key: string) => getValues(key) });
         } else {
             return prop;
         }
@@ -97,10 +101,12 @@ export const ControlledInput = (inputProps: Props) => {
         value: field.value,
     }
 
-    return <CustomizableInput
-        render={step.render} step={step}
-        field={{ setValue: (key: string, value: any) => setValue(key, value), rawValues: getValues(), getValue: (key:string) => getValues(key), ...field }}
-        error={error} errorDisplayed={errorDisplayed} informations={informations}>
-        {component ? component(field, props) : React.cloneElement(children!, { ...props })}
-    </CustomizableInput>
+    return <BasicWrapper key={`collapse-${entry}`} entry={entry} functionalProperty={functionalProperty} step={step} render={inputWrapper} informations={informations}>
+        <CustomizableInput
+            render={step.render} step={step}
+            field={{ setValue: (key: string, value: any) => setValue(key, value), rawValues: getValues(), getValue: (key: string) => getValues(key), ...field }}
+            error={error} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo}>
+            {component ? component(field, props) : React.cloneElement(children!, { ...props })}
+        </CustomizableInput>
+    </BasicWrapper>
 }

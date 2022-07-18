@@ -1,9 +1,7 @@
-import React, { useEffect, useState, useRef, useImperativeHandle, ChangeEvent, useCallback } from 'react'
+import React, { useEffect, useState, useRef, useImperativeHandle, ChangeEvent, useCallback, useMemo } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup';
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
-// @ts-ignore
-import HelpCircle from 'react-feather/dist/icons/help-circle.js';
 // @ts-ignore
 import Loader from 'react-feather/dist/icons/loader.js';
 // @ts-ignore
@@ -15,8 +13,7 @@ import ChevronUp from 'react-feather/dist/icons/chevron-up.js';
 // @ts-ignore
 import Trash2 from 'react-feather/dist/icons/trash-2.js';
 import { useForm, useFormContext, Controller, useFieldArray, FormProvider, useWatch, Control } from 'react-hook-form';
-import ReactToolTip from 'react-tooltip';
-import { v4 as uuid } from 'uuid';
+
 import * as yup from "yup";
 import debounce from "lodash.debounce";
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -32,10 +29,11 @@ import { BooleanInput, Collapse, SelectInput, ObjectInput, CodeInput, MarkdownIn
 import { getShapeAndDependencies } from './resolvers/index';
 import { option } from './Option'
 import { ControlledInput } from './controlledInput.js';
-import { arrayFlatten, isDefined, useHashEffect } from './utils';
+import { arrayFlatten, cleanHash, isDefined, useHashEffect } from './utils';
 import { Constraint, TConstraintType } from './constraints';
 
 import './style/style.scss'
+import { setDefaultResultOrder } from 'dns/promises';
 
 interface OptionActionItem {
   display?: boolean;
@@ -119,7 +117,7 @@ interface FlowObject {
 export type Flow = Array<string | FlowObject>
 
 
-type TFunctionalProperty = <T, >(entry: string, prop: T | ((param: { rawValues: { [x: string]: any }, value: any, informations?: Informations, error?: { [x: string]: any } }) => T), informations?: Informations, error?: { [x: string]: any }) => T
+export type TFunctionalProperty = <T, >(entry: string, prop: T | ((param: { rawValues: { [x: string]: any }, value: any, informations?: Informations, error?: { [x: string]: any } }) => T), informations?: Informations, error?: { [x: string]: any }) => T
 
 export interface Informations {
   path: string,
@@ -140,59 +138,6 @@ const usePrevious = (value: any) => {
 
   // Return previous value (happens before update in useEffect above)
   return ref.current;
-}
-
-const BasicWrapper = ({ entry, children, render, functionalProperty, step, informations, className }:
-  {
-    entry: object | string,
-    className?: string,
-    children: JSX.Element,
-    render?: ({ entry, label, error, help, children }: { entry: string, label: React.ReactNode, error: object, help: React.ReactNode, children: React.ReactNode }) => JSX.Element,
-    functionalProperty: TFunctionalProperty,
-    step?: SchemaEntry,
-    informations?: Informations
-  }) => {
-  const { formState } = useFormContext();
-
-  if (typeof entry === 'object') {
-    return children
-  }
-
-  // FIXME not sure it works as intended with more two or more parts
-  const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.errors)
-  const isDirty = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.dirtyFields)
-  const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.touchedFields)
-  const errorDisplayed = formState.isSubmitted || isDirty || isTouched
-
-  const visibleStep = functionalProperty(entry, step?.visible === undefined ? true : step.visible, informations, error)
-  if (!visibleStep) {
-    return null;
-  }
-
-  const computedLabel = functionalProperty(entry, step?.label === null ? null : step?.label || entry, informations)
-
-  const id = uuid();
-
-  if (render) {
-    return render({ entry, label: computedLabel, error, help: step?.help, children })
-  }
-
-  return (
-    <div className={`mrf-mt_10  ${className || ""}`} style={{ position: 'relative' }}>
-      {computedLabel && <label className='mrf-flex mrf-ai_center mrf-mb_5' htmlFor={entry}>
-        <span>{computedLabel}</span>
-        {step?.help && <>
-          <ReactToolTip html={true} place={'bottom'} id={id} />
-          <span className='mrf-flex mrf-ai_center' data-html={true} data-tip={step?.help} data-for={id}>
-            <HelpCircle style={{ color: 'gray', width: 17, marginLeft: '.5rem', cursor: 'help' }} />
-          </span>
-        </>}
-      </label>}
-
-      {children}
-      {error && <div className={classNames('mrf-feedback', { ['mrf-txt_red']: !!errorDisplayed })}>{error.message}</div>}
-    </div>
-  )
 }
 
 const CustomizableInput = (props: { rawValues?: any, value?: any, onChange?: (param: object) => void, error?: boolean, getValue: (entry: string) => any, informations?: Informations, setValue?: (key: string, data: any) => void, render?: SchemaRenderType, children: JSX.Element }) => {
@@ -443,12 +388,10 @@ export const Form = React.forwardRef(function Form(
 
           const informations = { path: entry }
           return (
-            <BasicWrapper key={`${entry}-${idx}`} entry={entry} functionalProperty={functionalProperty} render={inputWrapper} step={step} informations={informations}>
-              <Step key={idx} entry={entry} step={step}
-                schema={schema} inputWrapper={inputWrapper}
-                httpClient={maybeCustomHttpClient} functionalProperty={functionalProperty}
-                informations={informations} />
-            </BasicWrapper>
+            <Step key={idx} entry={entry} step={step}
+              schema={schema} inputWrapper={inputWrapper}
+              httpClient={maybeCustomHttpClient} functionalProperty={functionalProperty}
+              informations={informations} />
           )
         })}
         <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(data => onSubmit(cleanOutputArray(data, schema)), onError)} actions={options.actions} />
@@ -510,11 +453,9 @@ const CollapsedStep = (props: {
         const informations = { path: en }
 
         return (
-          <BasicWrapper key={`collapse-${en}-${entryIdx}`} entry={en} functionalProperty={functionalProperty} step={stp} render={inputWrapper} informations={informations}>
-            <Step entry={en} step={stp} schema={schema}
-              inputWrapper={inputWrapper} httpClient={httpClient}
-              defaultValue={stp?.defaultValue} functionalProperty={functionalProperty} informations={informations} />
-          </BasicWrapper>
+          <Step entry={en} step={stp} schema={schema}
+            inputWrapper={inputWrapper} httpClient={httpClient}
+            defaultValue={stp?.defaultValue} functionalProperty={functionalProperty} informations={informations} />
         )
       })}
     </Collapse>
@@ -524,7 +465,7 @@ const CollapsedStep = (props: {
 const Step = (props: {
   entry: string,
   realEntry?: string,
-  step?: SchemaEntry,
+  step: SchemaEntry,
   schema: Schema,
   inputWrapper?: (props: object) => JSX.Element,
   httpClient?: HttpClient,
@@ -535,6 +476,8 @@ const Step = (props: {
 }) => {
   let { entry, realEntry, step, schema, inputWrapper, httpClient, defaultValue, index, functionalProperty, informations } = props;
   const { formState: { errors, dirtyFields, touchedFields, isSubmitted }, control, getValues, setValue, watch } = useFormContext();
+
+  const [render, setRender] = useState(cleanHash(getValues()));
 
   const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], errors)
   const isDirty = entry.split('.').reduce((acc, curr) => acc && acc[curr], dirtyFields)
@@ -567,36 +510,55 @@ const Step = (props: {
       })
   }
 
+  const deactivateReactMemo = useMemo(() => {
+    const isVisibleIsFunction = typeof step.visible === 'function';
+    const isDisableIsFunction = typeof step.disabled === 'function';
+    const isLabelIsFunction = typeof step.label === 'function';
+
+    return isVisibleIsFunction || isDisableIsFunction || isLabelIsFunction || !!step.render || !!step.conditionalSchema
+
+  }, [cleanHash(schema)]);
+
+  if (deactivateReactMemo) {
+    const test = watch()
+    const hash = cleanHash(test)
+    if (hash !== render) {
+      setRender(hash)
+    }
+  }
+
   if (step.array) {
     return (
-      <CustomizableInput
-        render={step.render}
-        rawValues={getValues()}
-        value={getValues(entry)}
-        onChange={(v: any) => setValue((entry as string), v)}
-        setValue={(key: string, value: any) => setValue(key, value)}
-        getValue={(key: string) => getValues(key)}
-        informations={informations}
-        error={!!error}>
-        <ArrayStep
-          entry={entry}
-          step={step}
-          disabled={functionalProperty(entry, step.disabled || false, informations, error)}
-          component={((props, idx) => {
-            return (
-              <Step
-                entry={`${entry}.${idx}.value`}
-                step={{ ...(schema[realEntry || (entry as string)]), render: step!.itemRender!, onChange: undefined, array: false, onAfterChange: step!.onAfterChange }}
-                schema={schema}
-                inputWrapper={inputWrapper}
-                httpClient={httpClient}
-                defaultValue={props.defaultValue?.value}
-                index={idx}
-                functionalProperty={functionalProperty}
-                informations={{ path: entry, parent: informations, index: idx }} />
-            )
-          })} />
-      </CustomizableInput >
+      <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
+        <CustomizableInput
+          render={step.render}
+          rawValues={getValues()}
+          value={getValues(entry)}
+          onChange={(v: any) => setValue((entry as string), v)}
+          setValue={(key: string, value: any) => setValue(key, value)}
+          getValue={(key: string) => getValues(key)}
+          informations={informations}
+          error={!!error}>
+          <ArrayStep
+            entry={entry}
+            step={step}
+            disabled={functionalProperty(entry, step.disabled || false, informations, error)}
+            component={((props, idx) => {
+              return (
+                <Step
+                  entry={`${entry}.${idx}.value`}
+                  step={{ ...(schema[realEntry || (entry as string)]), label: null, render: step!.itemRender!, onChange: undefined, array: false, onAfterChange: step!.onAfterChange }}
+                  schema={schema}
+                  inputWrapper={inputWrapper}
+                  httpClient={httpClient}
+                  defaultValue={props.defaultValue?.value}
+                  index={idx}
+                  functionalProperty={functionalProperty}
+                  informations={{ path: entry, parent: informations, index: idx }} />
+              )
+            })} />
+        </CustomizableInput >
+      </ControlledInput>
     )
   }
 
@@ -605,7 +567,7 @@ const Step = (props: {
       switch (step.format) {
         case format.text:
           return (
-            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations}>
+            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
               <textarea
                 className={classNames('mrf-input', step.className, { 'mrf-mrf-input__invalid': !!errorDisplayed })} />
             </ControlledInput>
@@ -614,20 +576,20 @@ const Step = (props: {
         case format.singleLineCode:
           const Component = step.format === format.code ? CodeInput : SingleLineCode
           return (
-            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations}>
+            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
               <Component className={classNames(step?.className, { 'mrf-input__invalid': !!error })} />
             </ControlledInput>
           )
         case format.markdown:
           return (
-            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations}>
+            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
               <MarkdownInput className={classNames(step.className, { 'mrf-input__invalid': !!errorDisplayed })} />
             </ControlledInput>
           )
         case format.buttonsSelect:
         case format.select: {
           return (
-            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations}>
+            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
               <SelectInput
                 className={classNames('mrf-flex_grow_1', step.className, { 'mrf-input__invalid': !!errorDisplayed })}
                 disabled={functionalProperty(entry, step.disabled || false, informations, error)}
@@ -646,7 +608,7 @@ const Step = (props: {
         }
         default:
           return (
-            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations}>
+            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
               <input
                 type={step.format || 'text'}
                 className={classNames('mrf-input', step.className, { 'mrf-input__invalid': !!errorDisplayed })}
@@ -660,7 +622,7 @@ const Step = (props: {
         case format.buttonsSelect:
         case format.select:
           return (
-            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations}>
+            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
               <SelectInput
                 className={classNames('mrf-content', step.className, { 'mrf-input__invalid': !!errorDisplayed })}
                 {...step.props}
@@ -676,7 +638,7 @@ const Step = (props: {
             </ControlledInput>
           )
         default:
-          return <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations}>
+          return <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
             <input
               type={step.format || 'number'}
               className={classNames('mrf-input', step.className, { 'mrf-input__invalid': !!errorDisplayed })}
@@ -690,7 +652,9 @@ const Step = (props: {
           step={step}
           entry={entry}
           errorDisplayed={errorDisplayed}
-          informations={informations}>
+          informations={informations}
+          deactivateReactMemo={deactivateReactMemo}
+          inputWrapper={inputWrapper}>
           <BooleanInput className={step.className} errorDisplayed={errorDisplayed} />
         </ControlledInput>
       )
@@ -700,7 +664,7 @@ const Step = (props: {
         case format.buttonsSelect:
         case format.select:
           return (
-            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations}>
+            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
               <SelectInput
                 className={classNames('mrf-flex_grow_1', step.className, { 'mrf-input__invalid': !!errorDisplayed })}
                 {...step.props}
@@ -718,24 +682,26 @@ const Step = (props: {
         case format.form: //todo: disabled ?
           const flow = option(step.flow).getOrElse(option(step.schema).map(s => Object.keys(s)).getOrElse([]));
           return (
-            <CustomizableInput render={step.render}
-              rawValues={getValues()}
-              value={getValues(entry)}
-              onChange={(v: any) => setValue((entry as string), v, { shouldValidate: true })}
-              setValue={(key: string, value: any) => setValue(key, value)}
-              getValue={(key: string) => getValues(key)}
-              informations={informations}
-            >
-              <NestedForm
-                schema={step.schema!} flow={flow} step={step} parent={entry}
-                inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={getValues(entry) || defaultValue}
-                functionalProperty={functionalProperty} errorDisplayed={errorDisplayed} informations={informations} />
-            </CustomizableInput>
+            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
+              <CustomizableInput render={step.render}
+                rawValues={getValues()}
+                value={getValues(entry)}
+                onChange={(v: any) => setValue((entry as string), v, { shouldValidate: true })}
+                setValue={(key: string, value: any) => setValue(key, value)}
+                getValue={(key: string) => getValues(key)}
+                informations={informations}
+              >
+                <NestedForm
+                  schema={step.schema!} flow={flow} step={step} parent={entry}
+                  inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={getValues(entry) || defaultValue}
+                  functionalProperty={functionalProperty} errorDisplayed={errorDisplayed} informations={informations} />
+              </CustomizableInput>
+            </ControlledInput>
           )
 
         case format.code:
           return (
-            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations}
+            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}
               component={(field, props) => (
                 <CodeInput
                   {...props}
@@ -757,7 +723,7 @@ const Step = (props: {
           )
         default:
           return (
-            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations}>
+            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
               <ObjectInput
                 className={classNames(step.className, { 'mrf-input__invalid': !!errorDisplayed })}
               />
@@ -769,7 +735,7 @@ const Step = (props: {
         case format.datetime:
           console.debug('datetime')
           return (
-            <ControlledInput step={step} entry={entry} informations={informations}
+            <ControlledInput step={step} entry={entry} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}
               component={(field: { value: any, onChange: (v: any) => void }) => {
                 return (
                   <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -784,7 +750,7 @@ const Step = (props: {
           )
         case format.time:
           return (
-            <ControlledInput step={step} entry={entry} informations={informations}
+            <ControlledInput step={step} entry={entry} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}
               component={(field: { value: any, onChange: (v: any) => void }) => {
                 return (
                   <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -799,7 +765,7 @@ const Step = (props: {
           )
         default:
           return (
-            <ControlledInput step={step} entry={entry} informations={informations}
+            <ControlledInput step={step} entry={entry} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}
               component={(field: { value: any, onChange: (v: any) => void }) => {
                 return (
                   <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -861,7 +827,7 @@ const Step = (props: {
             };
 
             return (
-              <ControlledInput step={step!} entry={entry as string} errorDisplayed={errorDisplayed} informations={informations}>
+              <ControlledInput step={step!} entry={entry as string} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
                 <FileInput />
               </ControlledInput>
             )
@@ -871,7 +837,7 @@ const Step = (props: {
 
     case type.json:
       return (
-        <ControlledInput step={step} entry={entry} informations={informations}
+        <ControlledInput step={step} entry={entry} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}
           component={(field: { value: any, onChange: (v: any) => void }, props: object) => (
             <CodeInput
               {...props}
@@ -1020,26 +986,17 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
         }
 
         return (
-          <BasicWrapper key={`${entry}.${idx}`}
-            className={classNames({ ['mrf-display__none']: (collapsed && !step.visibleOnCollapse) })}
+          <Step
+            key={`step.${entry}.${idx}`}
             entry={`${parent}.${entry}`}
+            realEntry={entry}
+            step={schemaAndFlow.schema[entry]}
+            schema={schemaAndFlow.schema}
+            inputWrapper={inputWrapper}
+            httpClient={maybeCustomHttpClient}
+            defaultValue={value && value[entry]}
             functionalProperty={functionalProperty}
-            step={step}
-            render={inputWrapper}
-            informations={{ path: entry, parent: informations }}
-          >
-            <Step
-              key={`step.${entry}.${idx}`}
-              entry={`${parent}.${entry}`}
-              realEntry={entry}
-              step={schemaAndFlow.schema[entry]}
-              schema={schemaAndFlow.schema}
-              inputWrapper={inputWrapper}
-              httpClient={maybeCustomHttpClient}
-              defaultValue={value && value[entry]}
-              functionalProperty={functionalProperty}
-              informations={{ path: entry, parent: informations }} />
-          </BasicWrapper>
+            informations={{ path: entry, parent: informations }} />
         )
       })}
     </div>
