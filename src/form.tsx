@@ -33,7 +33,6 @@ import { arrayFlatten, cleanHash, isDefined, useHashEffect } from './utils';
 import { Constraint, TConstraintType } from './constraints';
 
 import './style/style.scss'
-import { setDefaultResultOrder } from 'dns/promises';
 
 interface OptionActionItem {
   display?: boolean;
@@ -857,7 +856,6 @@ const Step = (props: {
   }
 
 }
-
 
 const ArrayStep = ({ entry, step, component, disabled }: { entry: string, step: SchemaEntry, component: ({ key, defaultValue, value }: { key: string, defaultValue: any, value?: any }, ids: number) => JSX.Element, disabled: boolean }) => {
   const { getValues, setValue, control, trigger, formState } = useFormContext();
