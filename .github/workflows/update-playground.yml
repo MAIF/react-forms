@@ -1,4 +1,4 @@
-name: Update playground
+name: Build playground
 
 on:
   workflow_run:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   update-playground:
-    name: Update playground
+    name: Build playground
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
@@ -16,28 +16,6 @@ jobs:
         run: |
           cd examples
           npm install @maif/react-forms@latest --save
-        env:
-          CI: "false"
-      - name: Commit files
-        run: |
-          git config --local user.email "github-actions@users.noreply.github.com"
-          git config --local user.name "github-actions"
-          git add --all
-          git commit -am "Update react-form version for playground"
-      - name: Push playground
-        uses: ad-m/github-push-action@master
-        with:
-          branch: main
-          github_token: ${{ secrets.GITHUB_TOKEN}}
-  build-playground:
-    name: Build playground
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@master
-      #build playground
-      - name: Build playground
-        run: |
-          cd examples
           npm install
           npm run build
         env:
@@ -47,7 +25,7 @@ jobs:
           git config --local user.email "github-actions@users.noreply.github.com"
           git config --local user.name "github-actions"
           git add --all
-          git commit -am "Update playground"
+          git commit -am "Update react-form version for playground"
       - name: Push playground
         uses: ad-m/github-push-action@master
         with:
