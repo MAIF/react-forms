@@ -539,7 +539,14 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
       {!!step.collapsable && schemaAndFlow.flow.length > 1 && !collapsed &&
         <ChevronUp size={30} className='mrf-cursor_pointer' style={{ position: 'absolute', top: -35, right: 0, zIndex: 100 }} strokeWidth="2" onClick={() => setCollapsed(!collapsed)} />}
 
-      {computedSandF.map(({ step, entry }, idx: number) => {
+      {collapsed && !!step.collapsable && typeof step.collapsable === 'function' && step.collapsable({rawValues: getValues(), getValue: (key: string) => getValues(key), value})}
+
+      {(typeof step.collapsable !== 'function' || !collapsed) && computedSandF.map(({ step, entry }, idx: number) => {
+        if (collapsed && !step.visibleOnCollapse) {
+          return null;
+        }
+
+
         if (typeof entry === 'object') {
           return (
             <CollapsedStep key={idx}

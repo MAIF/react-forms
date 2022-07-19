@@ -77,7 +77,12 @@ export const Example = () => {
   - `email`: if the type is `string`, display an email input
   - `password`: if the type is `string`, display a password input
   - `hidden`: if the type is `string`, add an hidden input in your form
-  - `form`: if the type is `object`, display a form in your form draw with given schema and flow. The form drawn is  collapsable, by default on the first input but with `visibleOnCollapse` you can choose which field will be visble or not.
+  - `form`: if the type is `object`, display a form in your form draw with given schema and flow. The form drawn is `collapsable`, you can choose which field will be visble or not by setting up the `visibleOnCollapse` props on subschema element properties. `collapsable` can be a boolean or a function to render JSX (with `rawValues`, `value` & `getValue` params)
+```javascript
+  {
+    collapsable: ({rawValue, value, getValue}) => <span>{value.firstname} {value.name}</span>
+  }
+```
 - **array**: boolean value to display multiple fields with "add" and "remove" buttons (`false` by default)
 - **createOption**: if `select` format is choosen, `createOption` property is to render a Creatable component
 - **onCreateOption**: if `select` format is choosen, `onCreateOption` property is a function called before new option creation
