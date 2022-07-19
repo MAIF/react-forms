@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 // @ts-ignore
 import PlusCircle from 'react-feather/dist/icons/plus-circle.js';
 // @ts-ignore
-import MinusCircle from 'react-feather/dist/icons/plus-circle.js';
+import MinusCircle from 'react-feather/dist/icons/minus-circle.js';
 import deepEqual from 'fast-deep-equal';
 
 type InternalState = {[x: string] : {key: string, value: any}};
