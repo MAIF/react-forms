@@ -1,0 +1,94 @@
+import { Constraint, TConstraintType } from "../constraints";
+import { SelectOption } from "../inputs";
+import { Type } from '../type';
+import { Format } from '../format';
+
+export interface OptionActionItem {
+  display?: boolean;
+  label?: string;
+}
+
+export interface OptionActions {
+  reset?: OptionActionItem;
+  submit?: OptionActionItem;
+}
+
+export type HttpClient = (url: string, method: string) => Promise<Response>;
+
+export interface Option {
+  httpClient?: HttpClient;
+  watch?: boolean | ((param: any) => void);
+  autosubmit?: boolean;
+  actions?: OptionActions;
+  showErrorsOnStart?: boolean;
+}
+
+
+export interface Schema {
+  [key: string]: SchemaEntry;
+}
+
+export type SchemaRenderType = ({ rawValues, value, onChange, error, setValue, getValue, informations }: { rawValues?: any, value?: any, onChange?: (param: object) => void, error?: boolean, getValue: (entry: string) => any, informations?: Informations, setValue?: (key: string, data: any) => void }) => JSX.Element
+
+export interface ConditionnalSchemaElement {
+  default?: boolean;
+  condition?: ({ rawValues, ref }: { rawValues: { [x: string]: any }, ref: any }) => boolean | any;
+  schema: Schema;
+  flow: Array<FlowObject | string>
+}
+
+
+export interface ConditionnalSchema {
+  ref: string;
+  switch: ConditionnalSchemaElement[];
+}
+
+export interface SchemaEntry {
+  schema?: Schema;
+  type: Type;
+  format?: Format;
+  array?: boolean;
+  createOption?: boolean;
+  onCreateOption?: (option: string) => any; // TODO specify option style
+  isMulti?: boolean;
+  defaultKeyValue?: object;
+  visible?: boolean | ((prop: { rawValues: { [x: string]: any }, value: any, informations?: Informations }) => boolean);
+  disabled?: boolean | ((prop: { rawValues: { [x: string]: any }, value: any, informations?: Informations }) => boolean);
+  label?: React.ReactNode | ((prop: { rawValues: { [x: string]: any }, value: any, informations?: Informations }) => React.ReactNode);
+  placeholder?: string;
+  defaultValue?: any;
+  help?: string;
+  className?: string;
+  style?: object;
+  onChange?: (param: object) => void;
+  render?: SchemaRenderType;
+  itemRender?: SchemaRenderType;
+  props?: object;
+  options?: Array<any | { label: string, value: any }>;
+  optionsFrom?: string;
+  transformer?: ((v: any) => SelectOption) | { label: string, value: string };
+  conditionalSchema?: ConditionnalSchema;
+  constraints?: Array<Constraint | { type: TConstraintType, message?: string }>;
+  flow?: Array<string | FlowObject>;
+  onAfterChange?: (obj: { entry: string, value: object, rawValues: object, previousValue?: object, getValue: (entry: string) => any, setValue: (entry: string, value: any) => void, onChange: (v: any) => void, informations?: Informations }) => void;
+  visibleOnCollapse?: boolean;
+  addableDefaultValue?: any; /* TODO doc : possible only with array, used to give default value to dynamically added elements */
+  collapsed?: boolean; // TODO doc : indicate wether form is closed or not, only for objects with form
+  collapsable?: boolean; // TODO doc : indicate wether schema can be collapsed, only for objects with form
+}
+
+export interface FlowObject {
+  label: string;
+  flow: Flow;
+  collapse: boolean;
+}
+
+export type Flow = Array<string | FlowObject>
+
+export type TFunctionalProperty = <T, >(entry: string, prop: T | ((param: { rawValues: { [x: string]: any }, value: any, informations?: Informations, error?: { [x: string]: any } }) => T), informations?: Informations, error?: { [x: string]: any }) => T
+
+export interface Informations {
+  path: string,
+  parent?: Informations,
+  index?: number
+}

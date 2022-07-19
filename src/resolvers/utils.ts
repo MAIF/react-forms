@@ -2,7 +2,7 @@ import * as yup from 'yup';
 import { type } from '../type';
 import { option } from '../Option'
 import { Constraint, jsonConstraints, TConstraintType } from '../constraints';
-import { Flow, Schema, SchemaEntry } from '../form';
+import { Flow, Schema, SchemaEntry } from '../form/types';
 import { ObjectShape } from 'yup/lib/object';
 
 const resolvers = {

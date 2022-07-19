@@ -28,7 +28,7 @@ import { rectangularSelection } from '@codemirror/rectangular-selection'
 import { defaultHighlightStyle } from '@codemirror/highlight'
 import { lintKeymap } from '@codemirror/lint'
 import { oneDark } from '@codemirror/theme-one-dark'
-import { LanguageMode } from './inputs/constants'
+import { LanguageMode } from '../inputs/constants'
 
 const languages = {
     javascript,

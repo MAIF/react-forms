@@ -2,10 +2,10 @@ import * as  React from "react";
 import { ChangeEvent } from 'react';
 import { useController, useFormContext } from 'react-hook-form';
 import { BasicWrapper } from "./basicWrapper";
-import { ConditionnalSchema, Informations, SchemaEntry, SchemaRenderType } from "./form";
-import { option } from './Option';
-import { type } from './type';
-import { isDefined, cleanHash } from './utils';
+import { option } from '../Option';
+import { type } from '../type';
+import { isDefined, cleanHash } from '../utils';
+import { ConditionnalSchema, Informations, SchemaEntry, SchemaRenderType } from "./types";
 
 const CustomizableInput = React.memo(
     (props: {

@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import { v4 as uuid } from 'uuid';
 // @ts-ignore
 import HelpCircle from 'react-feather/dist/icons/help-circle.js';
-import { Informations, SchemaEntry, TFunctionalProperty } from "./form";
+import { Informations, SchemaEntry, TFunctionalProperty } from "./types";
 
 export const BasicWrapper = ({ entry, children, render, functionalProperty, step, informations, className }:
   {

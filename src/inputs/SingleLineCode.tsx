@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { LanguageMode } from './constants';
 // @ts-ignore
-import Editor from '../codemirror-editor'
+import Editor from '../form/codemirror-editor'
 
 export function SingleLineCode({
     onChange,
