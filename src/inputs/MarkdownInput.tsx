@@ -33,7 +33,7 @@ interface Range {
   to: any;
 }
 
-export const MarkdownInput = (props: {value?: string, preview?: boolean, className: string, readOnly?: boolean, onChange?: (value: string) => void}) => {
+export const MarkdownInput = (props: { value?: string, preview?: boolean, className: string, readOnly?: boolean, onChange?: (value: string) => void, actions?: (inject: (text: string) => void) => JSX.Element }) => {
   const [preview, setPreview] = useState<boolean>(props.preview || false);
   const ref = useRef<any>()
 
@@ -47,57 +47,57 @@ export const MarkdownInput = (props: {value?: string, preview?: boolean, classNa
     {
       name: 'Add header',
       icon: 'heading',
-      inject: (range ?:Range) => !range ? '#' : [{ from: range.from, insert: "# " }]
+      inject: (range: Range) => [{ from: range.from, insert: "# " }]
     },
     {
       name: 'Add bold text',
       icon: 'bold',
-      inject: (range ?:Range) => !range ? '**  **' : [{ from: range.from, insert: "**" }, { from: range.to, insert: '**' }]
+      inject: (range: Range) => [{ from: range.from, insert: "**" }, { from: range.to, insert: '**' }]
     },
     {
       name: 'Add italic text',
       icon: 'italic',
-      inject: (range ?:Range) => !range ? '* *' : [{ from: range.from, insert: '*' }, { from: range.to, insert: '*' }]
+      inject: (range: Range) => [{ from: range.from, insert: '*' }, { from: range.to, insert: '*' }]
     },
     {
       name: 'Add strikethrough text',
       icon: 'strikethrough',
-      inject: (range ?:Range) => !range ? '~~ ~~' : [{ from: range.from, insert: '~~' }, { from: range.to, insert: '~~' }]
+      inject: (range: Range) => [{ from: range.from, insert: '~~' }, { from: range.to, insert: '~~' }]
     },
     {
       name: 'Add link',
       icon: 'link',
-      inject: (range ?:Range) => !range ? '[ ](url)' : [{ from: range.from, insert: '[' }, { from: range.to, insert: '](url)' }]
+      inject: (range: Range) => [{ from: range.from, insert: '[' }, { from: range.to, insert: '](url)' }]
     },
     {
       name: 'Add code',
       icon: 'code',
-      inject: (range ?:Range) => !range ? '```\n\n```\n' : [{ from: range.from, insert: '```\n' }, { from: range.to, insert: '\n```\n' }]
+      inject: (range: Range) => [{ from: range.from, insert: '```\n' }, { from: range.to, insert: '\n```\n' }]
     },
     {
       name: 'Add quotes',
       icon: 'quote-right',
-      inject: (range ?:Range) => !range ? '> ' : [{ from: range.from, insert: '> ' }]
+      inject: (range: Range) => [{ from: range.from, insert: '> ' }]
     },
     {
       name: 'Add image',
       icon: 'image',
-      inject: (range ?:Range) => !range ? '![ ](image-url)' : [{ from: range.from, insert: '![' }, { from: range.to, insert: '](image-url)' }]
+      inject: (range: Range) => [{ from: range.from, insert: '![' }, { from: range.to, insert: '](image-url)' }]
     },
     {
       name: 'Add unordered list',
       icon: 'list-ul',
-      inject: (range ?:Range) => !range ? '* ' : [{ from: range.from, insert: '* ' }]
+      inject: (range: Range) => [{ from: range.from, insert: '* ' }]
     },
     {
       name: 'Add ordered list',
       icon: 'list-ol',
-      inject: (range ?:Range) => !range ? '1. ' : [{ from: range.from, insert: '1. ' }]
+      inject: (range: Range) => [{ from: range.from, insert: '1. ' }]
     },
     {
       name: 'Add check list',
       icon: 'tasks',
-      inject: (range ?:Range) => !range ? '* [ ] ' : [{ from: range.from, insert: '* [ ] ' }]
+      inject: (range: Range) => [{ from: range.from, insert: '* [ ] ' }]
     }
   ];
 
@@ -109,36 +109,38 @@ export const MarkdownInput = (props: {value?: string, preview?: boolean, classNa
   };
 
   const injectButtons = () => {
-    return commands.map((command, idx) => {
-      return (
-        <button
-          type="button"
-          className={classNames('mrf-btn_for_descriptionToolbar')}
-          aria-label={command.name}
-          title={command.name}
-          key={`toolbar-btn-${idx}`}
-          onClick={() => {
-            const editor = ref.current
-            const selections = editor.state.selection.ranges
-            if (selections.length === 1 && selections[0].from === selections[0].to)
-              editor.dispatch({
-                changes: {
-                  from: 0,
-                  to: editor.state.doc.length,
-                  insert: editor.state.doc.toString() + command.inject()
-                }
-              })
-            else {
-              editor.dispatch(editor.state.changeByRange((range: Range) => ({
-                changes: command.inject(range),
-                range
-              })))
-            }
-          }}>
-          <i className={`fas fa-${command.icon}`} />
-        </button>
-      );
-    });
+    return (
+      <>
+        {commands.map((command, idx) => {
+          return (
+            <button
+              type="button"
+              className={classNames('mrf-btn_for_descriptionToolbar')}
+              aria-label={command.name}
+              title={command.name}
+              key={`toolbar-btn-${idx}`}
+              onClick={() => {
+                const editor = ref.current
+                editor.dispatch(editor.state.changeByRange((range: Range) => ({
+                  changes: command.inject(range),
+                  range
+                })))
+                editor.focus()
+              }}>
+              <i className={`fas fa-${command.icon}`} />
+            </button>
+          );
+        })}
+        {props.actions && props.actions((text) => {
+          const editor = ref.current
+          editor.dispatch(editor.state.changeByRange((range: Range) => ({
+            changes: [{ from: range.from, insert: text }],
+            range
+          })))
+          editor.focus()
+        })}
+      </>
+    )
   };
 
   return <div className={classNames(props.className)}>
@@ -168,7 +170,7 @@ export const MarkdownInput = (props: {value?: string, preview?: boolean, classNa
       <div className='mrf-flex mrf-flexWrap'>{injectButtons()}</div>
     </div>}
     {!preview && (
-      <CodeInput {...props} setRef={e => ref.current = e} />
+      <CodeInput {...props} mode={'markdown'} setRef={e => ref.current = e} />
     )}
     {preview && (
       <div

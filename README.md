@@ -72,17 +72,28 @@ export const Example = () => {
   - `buttonsSelect`: display a buttons group, drawn with the same options than the format `select`
   - `code`: if the type is `string`, display a code input (draw with [react-ace](https://github.com/securingsincity/react-ace)) (add a props.setRef to get ace editor ref)
   - `singleLineCode`: renders text input with syntax highlighting (draw with [react-ace](https://github.com/securingsincity/react-ace)) (add a props.setRef to get ace editor ref)
-  - `markdown`: if the type is `string`, display a markdown input
+  - `markdown`: if the type is `string`, display a markdown input. You can add buttons into toolbar by inject a JSX.element thanks to the `actions` property from `props` taking on params the insert function.
+    ```javascript
+      {
+        text: {
+          type: type.string,
+          format: format.markdown,
+          props: {
+            actions: (insert) => <button type="button" onClick={() => insert("foo")}>inject foo</button>
+          }
+        }
+      }
+    ```
   - `textarea`: if the type is `string`, display a textarea
   - `email`: if the type is `string`, display an email input
   - `password`: if the type is `string`, display a password input
   - `hidden`: if the type is `string`, add an hidden input in your form
   - `form`: if the type is `object`, display a form in your form draw with given schema and flow. The form drawn is `collapsable`, you can choose which field will be visble or not by setting up the `visibleOnCollapse` props on subschema element properties. `collapsable` can be a boolean or a function to render JSX (with `rawValues`, `value` & `getValue` params)
-```javascript
-  {
-    collapsable: ({rawValue, value, getValue}) => <span>{value.firstname} {value.name}</span>
-  }
-```
+    ```javascript
+      {
+        collapsable: ({rawValue, value, getValue}) => <span>{value.firstname} {value.name}</span>
+      }
+    ```
 - **array**: boolean value to display multiple fields with "add" and "remove" buttons (`false` by default). You can define `addabledefaultvalue` to ensure the default value for the new input.
 - **createOption**: if `select` format is choosen, `createOption` property is to render a Creatable component
 - **onCreateOption**: if `select` format is choosen, `onCreateOption` property is a function called before new option creation
