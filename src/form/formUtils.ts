@@ -63,6 +63,7 @@ export const cleanInputArray = (value: { [x: string]: any } = {}, defaultValues:
         v = maybeDefaultValue;
       }
 
+
       if (step.array && !step.render) {
         return {
           ...acc, [key]: (v || []).map((value: any) => ({
@@ -73,13 +74,17 @@ export const cleanInputArray = (value: { [x: string]: any } = {}, defaultValues:
       } else if (typeof v === 'object' && !(v instanceof Date) && !Array.isArray(v)) {
         return { ...acc, [key]: cleanInputArray(value?.[key], defaultValues?.[key], subSchema?.[key]?.flow, subSchema?.[key]?.schema || {}) }
       } else {
-        return { ...acc, [key]: v === undefined ? (Array.isArray(v) ? [] : step.type === type.object ? {} : null) : v }
+        return { ...acc, [key]: v === undefined ? (Array.isArray(v) ? [] : null) : v }
       }
     }, value)
 }
 
-export const cleanOutputArray = (obj: object, subSchema: Schema): object => {
-  return Object.entries(obj).reduce((acc, curr) => {
+export const cleanOutputArray = (obj: any, subSchema: Schema): any => {
+  if (!obj || typeof obj !== 'object' || obj instanceof (Date) || Array.isArray(obj)) {
+    return obj
+  }
+
+  return Object.entries(obj as object).reduce((acc, curr) => {
     const [key, v] = curr;
 
     if (Array.isArray(v)) {

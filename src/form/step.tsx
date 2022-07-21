@@ -352,7 +352,11 @@ export const Step = (props: {
                   <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <DateTimePicker
                       value={field.value}
-                      onChange={field.onChange}
+                      onChange={value => {
+                        field.onChange(value)
+                        option(step.onChange)
+                          .map(onChange => onChange({ rawValues: getValues(), value, setValue }))
+                      }}
                       renderInput={(params) => <TextField {...params} />}
                     />
                   </LocalizationProvider>
@@ -367,7 +371,11 @@ export const Step = (props: {
                   <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <TimePicker
                       value={field.value}
-                      onChange={field.onChange}
+                      onChange={value => {
+                        field.onChange(value)
+                        option(step.onChange)
+                          .map(onChange => onChange({ rawValues: getValues(), value, setValue }))
+                      }}
                       renderInput={(params) => <TextField {...params} />}
                     />
                   </LocalizationProvider>
@@ -382,7 +390,11 @@ export const Step = (props: {
                   <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <DatePicker
                       value={field.value}
-                      onChange={field.onChange}
+                      onChange={value => {
+                        field.onChange(value)
+                        option(step.onChange)
+                          .map(onChange => onChange({ rawValues: getValues(), value, setValue }))
+                      }}
                       renderInput={(params) => <TextField {...params} />}
                     />
                   </LocalizationProvider>
