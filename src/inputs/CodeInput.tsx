@@ -44,7 +44,7 @@ export function CodeInput({
   const [editor, setEditor] = useState<any>()
 
   useEffect(() => {
-    const e = Editor(ref.current, mode, tabSize, readOnly, showLinesNumber, highlightLine, themeStyle, onChange, value, )
+    const e = Editor(ref.current, mode, tabSize, readOnly, showLinesNumber, highlightLine, themeStyle, onChange, value)
 
     ref.current.addEventListener("keydown", (e: Event) => {
       e.stopImmediatePropagation()

@@ -139,18 +139,20 @@ export const Playground = () => {
               setSchema(e.value);
             }}
           />
-          <CodeInput
-            mode="javascript"
-            onChange={(e) => {
-              setSchema(e);
-            }}
-            value={
-              typeof schema === "object"
-                ? JSON.stringify(schema, null, 2)
-                : schema
-            }
-            setRef={(ref) => (codeInputRef.current = ref)}
-          />
+          <div id="schema-container">
+            <CodeInput
+              mode="javascript"
+              onChange={(e) => {
+                setSchema(e);
+              }}
+              value={
+                typeof schema === "object"
+                  ? JSON.stringify(schema, null, 2)
+                  : schema
+              }
+              setRef={(ref) => (codeInputRef.current = ref)}
+            />
+          </div>
           <label>Flow</label>
           <CodeInput
             mode="json"
@@ -188,14 +190,17 @@ export const Playground = () => {
         <div className="col-4 px-2">
           <label>Generated form</label>
           {error && <span style={{ color: "tomato" }}>{error}</span>}
-          <div style={{ backgroundColor: "#ececec", padding: "10px 15px" }}>
+          <div id="form-container" style={{ backgroundColor: "#ececec", padding: "10px 15px" }}>
             <WrapperError ref={childRef}>
               <Form
                 ref={formRef}
                 schema={realSchema}
                 value={value}
                 flow={flow || Object.keys(realSchema)}
-                onSubmit={(d) => console.log(JSON.stringify(d, null, 4))}
+                onSubmit={(d) => {
+                  localStorage.setItem("value", JSON.stringify(d))
+                  console.log(JSON.stringify(d, null, 4))}
+                }
                 options={{
                   watch: (unsaved) => {
                     ref?.current?.dispatch({

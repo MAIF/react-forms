@@ -75,6 +75,7 @@ export const Form = React.forwardRef(function Form(
 
   const functionalProperty = <T,>(entry: string, prop: T | ((param: { rawValues: { [x: string]: any }, value: any, informations?: Informations, getValue: (key: string) => any }) => T), informations?: Informations, error?: { [x: string]: any }): T => {
     if (typeof prop === 'function') {
+      
       return (prop as Function)({ rawValues: getValues(), value: getValues(entry), informations, getValue: (key: string) => getValues(key), error });
     } else {
       return prop;
