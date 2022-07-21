@@ -46,7 +46,8 @@ export const Form = React.forwardRef(function Form(
   const methods = useForm({
     resolver: (data, context, options) => yupResolver(resolver(data))(data, context, options),
     shouldFocusError: false,
-    mode: 'onChange'
+    mode: 'onChange',
+    defaultValues: cleanInputArray(value, defaultValues, flow, schema)
   });
 
   const [initialReseted, setReset] = useState(false)
@@ -92,16 +93,18 @@ export const Form = React.forwardRef(function Form(
 
   return (
     <FormProvider {...methods}>
-      <Watcher
+      {!!options.watch && <Watcher
         options={options}
         control={methods.control}
         schema={schema}
         onSubmit={onSubmit}
-        handleSubmit={handleSubmit} />
-      <form className={className || `mrf-pr_15 mrf-w_100`} onSubmit={handleSubmit(data => {
-        const clean = cleanOutputArray(data, schema)
-        onSubmit(clean)
-      }, onError)}>
+        handleSubmit={handleSubmit} />}
+      <form
+        className={className || `mrf-pr_15 mrf-w_100`}
+        onSubmit={handleSubmit(data => {
+          const clean = cleanOutputArray(data, schema)
+          onSubmit(clean)
+        }, onError)}>
         {formFlow.map((entry, idx) => {
           if (typeof entry === 'object') {
             return (

@@ -7,7 +7,7 @@ import { useFormContext, useFieldArray } from "react-hook-form";
 import { SchemaEntry } from "./types";
 import { option } from '../Option';
 import { type } from '../type';
-import { cleanInputArray, defaultVal } from './formUtils';
+import { defaultVal, getDefaultValues } from './formUtils';
 
 export const ArrayStep = ({ entry, step, component, disabled }: { entry: string, step: SchemaEntry, component: ({ key, defaultValue, value }: { key: string, defaultValue: any, value?: any }, ids: number) => JSX.Element, disabled: boolean }) => {
   const { getValues, setValue, control, trigger, formState } = useFormContext();
@@ -44,8 +44,8 @@ export const ArrayStep = ({ entry, step, component, disabled }: { entry: string,
         })}
       <div className='mrf-flex mrf-jc_flex_end'>
         <button type="button" className={classNames('mrf-btn', 'mrf-btn_blue', 'mrf-btn_sm', 'mrf-mt_5', { ['mrf-input__invalid']: !!errorDisplayed })} onClick={() => {
-          const newValue = cleanInputArray({}, getValues(entry), step.flow, step.schema)
-          append({ value: step.addableDefaultValue || ((step.type === type.object && newValue) ? newValue : defaultVal()) })
+          const defaultValues = step.type === type.object ? getDefaultValues(step.flow, step.schema) : defaultVal()
+          append({ value: step.addableDefaultValue || defaultValues })
           // trigger(entry);
           option(step.onChange)
             .map(onChange => onChange({ rawValues: getValues(), value: getValues(entry), setValue }))

@@ -83,7 +83,7 @@ export const Example = () => {
     collapsable: ({rawValue, value, getValue}) => <span>{value.firstname} {value.name}</span>
   }
 ```
-- **array**: boolean value to display multiple fields with "add" and "remove" buttons (`false` by default)
+- **array**: boolean value to display multiple fields with "add" and "remove" buttons (`false` by default). You can define `addabledefaultvalue` to ensure the default value for the new input.
 - **createOption**: if `select` format is choosen, `createOption` property is to render a Creatable component
 - **onCreateOption**: if `select` format is choosen, `onCreateOption` property is a function called before new option creation
   ```javascript

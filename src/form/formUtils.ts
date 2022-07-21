@@ -27,18 +27,24 @@ export const defaultVal = (value?: any, array?: boolean, defaultValue?: any, typ
   return value
 }
 
-export function getDefaultValues(flow: Flow, schema: Schema, value?: any): object {
-  return (flow || []).reduce((acc: object, key: string | FlowObject) => {
+export function getDefaultValues(flow?: Flow, schema?: Schema, value?: any): object {
+  if (!schema){
+    return {};
+  }
+  return (flow || Object.keys(schema)).reduce((acc: object, key: string | FlowObject) => {
     if (typeof key === 'object') {
       return { ...acc, ...getDefaultValues(key.flow, schema, value) }
     }
     const entry = schema[key]
     if (!entry) { return acc }
+    if (entry.schema && !entry.array) {
+      return {...acc, [key]: entry.defaultValue || getDefaultValues(entry.flow, entry.schema)}
+    }
     return { ...acc, [key]: defaultVal(value ? value[key] : null, entry.array || entry.isMulti || false, entry.defaultValue) }
   }, {})
 }
 
-export const cleanInputArray = (obj: { [x: string]: any } = {}, defaultValues: { [x: string]: any } = {}, flow?: Flow, subSchema?: Schema): object => {
+export const cleanInputArray = (value: { [x: string]: any } = {}, defaultValues: { [x: string]: any } = {}, flow?: Flow, subSchema?: Schema): object => {
   const realFlow = option(flow)
     .map(f => f.map(v => typeof v === 'object' ? v.flow : v))
     .map(arrayFlatten)
@@ -48,8 +54,8 @@ export const cleanInputArray = (obj: { [x: string]: any } = {}, defaultValues: {
     .filter(([key]) => realFlow.includes(key))
     .reduce((acc, [key, step]) => {
       let v: any = null;
-      if (obj) {
-        v = obj[key];
+      if (value) {
+        v = value[key];
       }
 
       const maybeDefaultValue = defaultValues[key]
@@ -65,11 +71,11 @@ export const cleanInputArray = (obj: { [x: string]: any } = {}, defaultValues: {
           }))
         }
       } else if (typeof v === 'object' && !(v instanceof Date) && !Array.isArray(v)) {
-        return { ...acc, [key]: cleanInputArray(v, defaultValues, subSchema?.[key]?.flow, subSchema?.[key]?.schema || {}) }
+        return { ...acc, [key]: cleanInputArray(value?.[key], defaultValues?.[key], subSchema?.[key]?.flow, subSchema?.[key]?.schema || {}) }
       } else {
         return { ...acc, [key]: v === undefined ? (Array.isArray(v) ? [] : step.type === type.object ? {} : null) : v }
       }
-    }, obj)
+    }, value)
 }
 
 export const cleanOutputArray = (obj: object, subSchema: Schema): object => {

@@ -17,7 +17,7 @@ import ChevronDown from 'react-feather/dist/icons/chevron-down.js';
 import ChevronUp from 'react-feather/dist/icons/chevron-up.js';
 
 import { BooleanInput, CodeInput, Collapse, MarkdownInput, ObjectInput, SelectInput, SingleLineCode } from "../inputs"
-import { cleanHash, useHashEffect } from "../utils"
+import { cleanHash, isDefined } from "../utils"
 import { cleanOutputArray, extractFlowString, getDefaultValues, usePrevious } from "./formUtils"
 import { Flow, FlowObject, HttpClient, Informations, Schema, SchemaEntry, SchemaRenderType, TFunctionalProperty } from "./types"
 import { ControlledInput } from "./controlledInput";
@@ -149,35 +149,25 @@ export const Step = (props: {
 
   if (step.array) {
     return (
-      <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
-        <CustomizableInput
-          render={step.render}
-          rawValues={getValues()}
-          value={getValues(entry)}
-          onChange={(v: any) => setValue((entry as string), v)}
-          setValue={(key: string, value: any) => setValue(key, value)}
-          getValue={(key: string) => getValues(key)}
-          informations={informations}
-          error={!!error}>
-          <ArrayStep
-            entry={entry}
-            step={step}
-            disabled={functionalProperty(entry, step.disabled || false, informations, error)}
-            component={((props, idx) => {
-              return (
-                <Step
-                  entry={`${entry}.${idx}.value`}
-                  step={{ ...(schema[realEntry || (entry as string)]), label: null, render: step!.itemRender!, onChange: undefined, array: false, onAfterChange: step!.onAfterChange }}
-                  schema={schema}
-                  inputWrapper={inputWrapper}
-                  httpClient={httpClient}
-                  defaultValue={props.defaultValue?.value}
-                  index={idx}
-                  functionalProperty={functionalProperty}
-                  informations={{ path: entry, parent: informations, index: idx }} />
-              )
-            })} />
-        </CustomizableInput >
+      <ControlledInput step={step} entry={entry} realEntry={realEntry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
+        <ArrayStep
+          entry={entry}
+          step={step}
+          disabled={functionalProperty(entry, step.disabled || false, informations, error)}
+          component={((props, idx) => {
+            return (
+              <Step
+                entry={`${entry}.${idx}.value`}
+                step={{ ...(schema[realEntry || (entry as string)]), label: null, render: step!.itemRender!, onChange: undefined, array: false, onAfterChange: step!.onAfterChange }}
+                schema={schema}
+                inputWrapper={inputWrapper}
+                httpClient={httpClient}
+                defaultValue={props.defaultValue?.value}
+                index={idx}
+                functionalProperty={functionalProperty}
+                informations={{ path: entry, parent: informations, index: idx }} />
+            )
+          })} />
       </ControlledInput>
     )
   }
@@ -187,7 +177,7 @@ export const Step = (props: {
       switch (step.format) {
         case format.text:
           return (
-            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
+            <ControlledInput step={step} entry={entry} realEntry={realEntry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
               <textarea
                 className={classNames('mrf-input', step.className, { 'mrf-mrf-input__invalid': !!errorDisplayed })} />
             </ControlledInput>
@@ -196,20 +186,20 @@ export const Step = (props: {
         case format.singleLineCode:
           const Component = step.format === format.code ? CodeInput : SingleLineCode
           return (
-            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
+            <ControlledInput step={step} entry={entry} realEntry={realEntry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
               <Component className={classNames(step?.className, { 'mrf-input__invalid': !!error })} />
             </ControlledInput>
           )
         case format.markdown:
           return (
-            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
+            <ControlledInput step={step} entry={entry} realEntry={realEntry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
               <MarkdownInput className={classNames(step.className, { 'mrf-input__invalid': !!errorDisplayed })} />
             </ControlledInput>
           )
         case format.buttonsSelect:
         case format.select: {
           return (
-            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
+            <ControlledInput step={step} entry={entry} realEntry={realEntry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
               <SelectInput
                 className={classNames('mrf-flex_grow_1', step.className, { 'mrf-input__invalid': !!errorDisplayed })}
                 disabled={functionalProperty(entry, step.disabled || false, informations, error)}
@@ -228,7 +218,7 @@ export const Step = (props: {
         }
         default:
           return (
-            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
+            <ControlledInput step={step} entry={entry} realEntry={realEntry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
               <input
                 type={step.format || 'text'}
                 className={classNames('mrf-input', step.className, { 'mrf-input__invalid': !!errorDisplayed })}
@@ -242,7 +232,7 @@ export const Step = (props: {
         case format.buttonsSelect:
         case format.select:
           return (
-            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
+            <ControlledInput step={step} entry={entry} realEntry={realEntry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
               <SelectInput
                 className={classNames('mrf-content', step.className, { 'mrf-input__invalid': !!errorDisplayed })}
                 {...step.props}
@@ -258,7 +248,7 @@ export const Step = (props: {
             </ControlledInput>
           )
         default:
-          return <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
+          return <ControlledInput step={step} entry={entry} realEntry={realEntry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
             <input
               type={step.format || 'number'}
               className={classNames('mrf-input', step.className, { 'mrf-input__invalid': !!errorDisplayed })}
@@ -270,7 +260,7 @@ export const Step = (props: {
       return (
         <ControlledInput
           step={step}
-          entry={entry}
+          entry={entry} realEntry={realEntry} 
           errorDisplayed={errorDisplayed}
           informations={informations}
           deactivateReactMemo={deactivateReactMemo}
@@ -280,11 +270,13 @@ export const Step = (props: {
       )
 
     case type.object:
+      const value = getValues(entry)
+      const defaultValue = isDefined(step.defaultValue) ? step.defaultValue : getDefaultValues(step.flow, step.schema)
       switch (step.format) {
         case format.buttonsSelect:
         case format.select:
           return (
-            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
+            <ControlledInput step={{ ...step, defaultValue: value || defaultValue }} entry={entry} realEntry={realEntry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
               <SelectInput
                 className={classNames('mrf-flex_grow_1', step.className, { 'mrf-input__invalid': !!errorDisplayed })}
                 {...step.props}
@@ -302,7 +294,7 @@ export const Step = (props: {
         case format.form: //todo: disabled ?
           const flow = option(step.flow).getOrElse(option(step.schema).map(s => Object.keys(s)).getOrElse([]));
           return (
-            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
+            <ControlledInput step={{ ...step, defaultValue: value || defaultValue }} entry={entry} realEntry={realEntry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
               <CustomizableInput render={step.render}
                 rawValues={getValues()}
                 value={getValues(entry)}
@@ -321,7 +313,7 @@ export const Step = (props: {
 
         case format.code:
           return (
-            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}
+            <ControlledInput step={{ ...step, defaultValue: value || defaultValue }} entry={entry} realEntry={realEntry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}
               component={(field, props) => (
                 <CodeInput
                   {...props}
@@ -343,7 +335,7 @@ export const Step = (props: {
           )
         default:
           return (
-            <ControlledInput step={step} entry={entry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
+            <ControlledInput step={{ ...step, defaultValue: value || defaultValue }} entry={entry} realEntry={realEntry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
               <ObjectInput
                 className={classNames(step.className, { 'mrf-input__invalid': !!errorDisplayed })}
               />
@@ -353,9 +345,8 @@ export const Step = (props: {
     case type.date:
       switch (step.format) {
         case format.datetime:
-          console.debug('datetime')
           return (
-            <ControlledInput step={step} entry={entry} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}
+            <ControlledInput step={step} entry={entry} realEntry={realEntry} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}
               component={(field: { value: any, onChange: (v: any) => void }) => {
                 return (
                   <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -370,7 +361,7 @@ export const Step = (props: {
           )
         case format.time:
           return (
-            <ControlledInput step={step} entry={entry} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}
+            <ControlledInput step={step} entry={entry} realEntry={realEntry} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}
               component={(field: { value: any, onChange: (v: any) => void }) => {
                 return (
                   <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -385,7 +376,7 @@ export const Step = (props: {
           )
         default:
           return (
-            <ControlledInput step={step} entry={entry} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}
+            <ControlledInput step={step} entry={entry} realEntry={realEntry} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}
               component={(field: { value: any, onChange: (v: any) => void }) => {
                 return (
                   <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -447,7 +438,7 @@ export const Step = (props: {
             };
 
             return (
-              <ControlledInput step={step!} entry={entry as string} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
+              <ControlledInput step={step!} entry={entry as string} realEntry={realEntry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
                 <FileInput />
               </ControlledInput>
             )
@@ -457,7 +448,7 @@ export const Step = (props: {
 
     case type.json:
       return (
-        <ControlledInput step={step} entry={entry} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}
+        <ControlledInput step={step} entry={entry} realEntry={realEntry} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}
           component={(field: { value: any, onChange: (v: any) => void }, props: object) => (
             <CodeInput
               {...props}
@@ -518,10 +509,10 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
     })
     .getOrElse({ schema, flow })
 
-  useHashEffect(() => {
-    const def = getDefaultValues(schemaAndFlow.flow, schemaAndFlow.schema, getValues(parent));
-    setValue(parent, def, { shouldValidate: false })
-  }, [schemaAndFlow.schema])
+  // useHashEffect(() => {
+  //   const def = getDefaultValues(schemaAndFlow.flow, schemaAndFlow.schema, getValues(parent));
+  //   setValue(parent, def, { shouldValidate: false })
+  // }, [schemaAndFlow.schema])
 
   const computedSandF = schemaAndFlow.flow.reduce((
     acc: { step: SchemaEntry, entry: string | FlowObject }[],
@@ -539,7 +530,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
       {!!step.collapsable && schemaAndFlow.flow.length > 1 && !collapsed &&
         <ChevronUp size={30} className='mrf-cursor_pointer' style={{ position: 'absolute', top: -35, right: 0, zIndex: 100 }} strokeWidth="2" onClick={() => setCollapsed(!collapsed)} />}
 
-      {collapsed && !!step.collapsable && typeof step.collapsable === 'function' && step.collapsable({rawValues: getValues(), getValue: (key: string) => getValues(key), value})}
+      {collapsed && !!step.collapsable && typeof step.collapsable === 'function' && step.collapsable({ rawValues: getValues(), getValue: (key: string) => getValues(key), value })}
 
       {(typeof step.collapsable !== 'function' || !collapsed) && computedSandF.map(({ step, entry }, idx: number) => {
         if (collapsed && !step.visibleOnCollapse) {

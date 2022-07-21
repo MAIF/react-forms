@@ -7,9 +7,10 @@ import { v4 as uuid } from 'uuid';
 import HelpCircle from 'react-feather/dist/icons/help-circle.js';
 import { Informations, SchemaEntry, TFunctionalProperty } from "./types";
 
-export const BasicWrapper = ({ entry, children, render, functionalProperty, step, informations, className }:
+export const BasicWrapper = ({ entry, realEntry, children, render, functionalProperty, step, informations, className }:
   {
     entry: object | string,
+    realEntry?: string,
     className?: string,
     children: JSX.Element,
     render?: ({ entry, label, error, help, children }: { entry: string, label: React.ReactNode, error: object, help: React.ReactNode, children: React.ReactNode }) => JSX.Element,
@@ -35,7 +36,7 @@ export const BasicWrapper = ({ entry, children, render, functionalProperty, step
     return null;
   }
 
-  const computedLabel = functionalProperty(entry, step?.label === null ? null : step?.label || entry, informations)
+  const computedLabel = functionalProperty(entry, step?.label === null ? null : step?.label || realEntry || entry, informations)
 
   const id = uuid();
 

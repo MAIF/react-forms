@@ -4,7 +4,7 @@ import { useController, useFormContext } from 'react-hook-form';
 import { BasicWrapper } from "./basicWrapper";
 import { option } from '../Option';
 import { type } from '../type';
-import { isDefined, cleanHash } from '../utils';
+import { cleanHash } from '../utils';
 import { ConditionnalSchema, Informations, SchemaEntry, SchemaRenderType } from "./types";
 
 const CustomizableInput = React.memo(
@@ -35,6 +35,7 @@ const CustomizableInput = React.memo(
 interface BaseProps {
     step: SchemaEntry,
     entry: string,
+    realEntry?: string,
     errorDisplayed?: boolean,
     component?: (field: { value: any, onChange: (e: ChangeEvent<HTMLInputElement>) => void }, props: object) => JSX.Element,
     children?: JSX.Element,
@@ -54,12 +55,11 @@ interface ChildrenProps extends BaseProps {
 type Props = ComponentProps | ChildrenProps
 
 export const ControlledInput = (inputProps: Props) => {
-    const { step, entry, children, component, errorDisplayed = false, informations, deactivateReactMemo, inputWrapper } = inputProps;
+    const { step, entry, realEntry, children, component, errorDisplayed = false, informations, deactivateReactMemo, inputWrapper } = inputProps;
     const { field } = useController({
-        defaultValue: isDefined(step.defaultValue) ? step.defaultValue : null,
+        // defaultValue: isDefined(step.defaultValue) ? step.defaultValue : null,
         name: entry
     })
-
     const { getValues, setValue, formState: { errors } } = useFormContext();
 
     const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], errors)
@@ -101,7 +101,7 @@ export const ControlledInput = (inputProps: Props) => {
         value: field.value,
     }
 
-    return <BasicWrapper key={`collapse-${entry}`} entry={entry} functionalProperty={functionalProperty} step={step} render={inputWrapper} informations={informations}>
+    return <BasicWrapper key={`collapse-${entry}`} entry={entry} realEntry={realEntry} functionalProperty={functionalProperty} step={step} render={inputWrapper} informations={informations}>
         <CustomizableInput
             render={step.render} step={step}
             field={{ setValue: (key: string, value: any) => setValue(key, value), rawValues: getValues(), getValue: (key: string) => getValues(key), ...field }}
