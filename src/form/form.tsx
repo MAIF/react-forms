@@ -57,7 +57,9 @@ export const Form = React.forwardRef(function Form(
   //   setReset(true)
   // }, [reset])
 
-  const { handleSubmit, reset, trigger, getValues } = methods
+  const { handleSubmit, reset, trigger } = methods
+  const { getValues }: { getValues: (param?: string | string[]) => any } = methods //todo:check after react-hook-form update if type is good
+
 
   useEffect(() => {
     if (!!options.showErrorsOnStart) {
