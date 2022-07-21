@@ -297,8 +297,8 @@
 .mrf-content_switch_button_on::before {
   content: "";
   cursor: pointer;
-  width: 21px;
-  height: 21px;
+  width: 20px;
+  height: 20px;
   background-color: $form-bg-color;
   border-radius: 20px;
   box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.3);
@@ -320,8 +320,8 @@
   background-color: $form-bg-color;
   border-radius: 20px;
   cursor: pointer;
-  width: 21px;
-  height: 21px;
+  width: 20px;
+  height: 20px;
   box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.3);
 }
 
@@ -341,7 +341,7 @@
   background-color: $form-bg-color;
   border-radius: 20px;
   cursor: pointer;
-  width: 21px;
+  width: 20px;
   height: 20px;
   box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.3);
 }
