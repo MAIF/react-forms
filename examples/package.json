@@ -18,7 +18,7 @@
     "eject": "react-scripts eject",
     "predeploy": "yarn run build",
     "deploy": "gh-pages -d build",
-    "dev": "npm link .. && cd ../ && npm link ./examples/node_modules/react && cd examples && npm start"
+    "start:test": "npm unlink .. && cd .. && npm run build && cd examples && npm link .. && cd ../ && npm link ./examples/node_modules/react && cd examples && BROWSER=none npm start"
   },
   "eslintConfig": {
     "extends": [

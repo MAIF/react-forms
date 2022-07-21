@@ -34,11 +34,10 @@
     "build": "tsc --emitDeclarationOnly && NODE_ENV=production rollup -c",
     "dev": "tsc --emitDeclarationOnly && rollup -c -w",
     "test": "jest && npm run cypress:headless",
-    "sandbox": "cd examples && npm run dev",
+    "sandbox": "cd examples && npm run start:test",
     "cypress:run-headless": "cypress run",
     "cypress:open": "cypress open",
     "cypress:headless": "start-server-and-test sandbox http-get://127.0.0.1:3000/react-forms cypress:run-headless",
-    "cypress:dev": "start-server-and-test sandbox http-get://127.0.0.1:3000/react-forms cypress:open",
     "tdd": "jest --watch"
   },
   "jest": {
