@@ -204,6 +204,14 @@ export const Example = () => {
   }
   ```
 - **constraints**: a JSON array of constraints. see [constraints section](#constraints)
+- **item**: In case of the entry is an array, some properties will be applied to the array step but not to the sub-items. In this particular case, you can use `item` property to add following properties (with same signature than the schema properties) to sub-items:
+  - **disabled**
+  - **visible**
+  - **label**
+  - **onChange**
+  - **onAfterChange**
+  - **render**
+  - **array**
 
 ### Functional properties
 Some schema properties can be basic value or function which return basic value. This function has an object as param with these following properties :

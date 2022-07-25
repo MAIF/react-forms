@@ -140,6 +140,7 @@ export const Step = (props: {
   }, [cleanHash(schema)]);
 
   if (deactivateReactMemo) {
+    //todo:get a possible deps array to avoid non relevent render
     const test = watch()
     const hash = cleanHash(test)
     if (hash !== render) {
@@ -158,14 +159,22 @@ export const Step = (props: {
             return (
               <Step
                 entry={`${entry}.${idx}.value`}
-                step={{ ...(schema[realEntry || (entry as string)]), label: null, render: step!.itemRender!, onChange: undefined, array: false, onAfterChange: step!.onAfterChange }}
+                step={{ 
+                  ...(schema[realEntry || (entry as string)]), 
+                  label: step.item?.label || null, 
+                  render: step.item?.render, 
+                  onChange: step.item?.onChange, 
+                  array: step.item?.array || false, 
+                  onAfterChange: step.item?.onAfterChange, 
+                  visible: step.item?.visible, 
+                  disabled: step.item?.disabled }}
                 schema={schema}
                 inputWrapper={inputWrapper}
                 httpClient={httpClient}
                 defaultValue={props.defaultValue?.value}
                 index={idx}
                 functionalProperty={functionalProperty}
-                informations={{ path: entry, parent: informations, index: idx }} />
+                informations={{ path: undefined, parent: informations, index: idx }} />
             )
           })} />
       </ControlledInput>
@@ -495,7 +504,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
     informations?: Informations
   }) => {
 
-  const { getValues, setValue, control, formState: { errors, dirtyFields, touchedFields } } = useFormContext();
+  const { getValues, control } = useFormContext();
   const [collapsed, setCollapsed] = useState<boolean>(!!step.collapsed);
 
   useWatch({ name: step?.conditionalSchema?.ref || "", control })

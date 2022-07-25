@@ -74,8 +74,16 @@ export interface SchemaEntry {
   visibleOnCollapse?: boolean;
   addableDefaultValue?: any; /* TODO doc : possible only with array, used to give default value to dynamically added elements */
   collapsed?: boolean; // TODO doc : indicate wether form is closed or not, only for objects with form
-  collapsable?: boolean | ((param: { rawValues: { [x: string]: any }, value: any, getValue: (key: string) => any  }) => JSX.Element); // TODO doc : indicate wether schema can be collapsed, only for objects with form
-
+  collapsable?: boolean | ((param: { rawValues: { [x: string]: any }, value: any, getValue: (key: string) => any }) => JSX.Element); // TODO doc : indicate wether schema can be collapsed, only for objects with form
+  item?: ({
+    disabled?: boolean | ((prop: { rawValues: { [x: string]: any }, value: any, informations?: Informations }) => boolean);
+    visible?: boolean | ((prop: { rawValues: { [x: string]: any }, value: any, informations?: Informations }) => boolean);
+    label?: React.ReactNode | ((prop: { rawValues: { [x: string]: any }, value: any, informations?: Informations }) => React.ReactNode);
+    onChange?: (param: object) => void;
+    onAfterChange?: (obj: { entry: string, value: object, rawValues: object, previousValue?: object, getValue: (entry: string) => any, setValue: (entry: string, value: any) => void, onChange: (v: any) => void, informations?: Informations }) => void;
+    render?: SchemaRenderType;
+    array?: boolean;
+  });
 }
 
 export interface FlowObject {
@@ -89,7 +97,7 @@ export type Flow = Array<string | FlowObject>
 export type TFunctionalProperty = <T, >(entry: string, prop: T | ((param: { rawValues: { [x: string]: any }, value: any, informations?: Informations, error?: { [x: string]: any } }) => T), informations?: Informations, error?: { [x: string]: any }) => T
 
 export interface Informations {
-  path: string,
+  path?: string,
   parent?: Informations,
   index?: number
 }
