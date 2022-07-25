@@ -141,7 +141,7 @@ export const Step = (props: {
 
   if (deactivateReactMemo) {
     //todo:get a possible deps array to avoid non relevent render
-    const test = watch()
+    const test = step.deps ? watch(step.deps) : watch()
     const hash = cleanHash(test)
     if (hash !== render) {
       setRender(hash)

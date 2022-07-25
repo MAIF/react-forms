@@ -204,6 +204,27 @@ export const Example = () => {
   }
   ```
 - **constraints**: a JSON array of constraints. see [constraints section](#constraints)
+- **deps**: In case of the entry need some form values, thestepwill be re-render after all change. To avoid some perf issues, it would be nice to declare a deps array to listen. The array must contains the root path
+  ```javascript
+  const schema = {
+    one: { type: type.string },
+    foo: {
+      type: type.object,
+      format:format.form,
+      schema: {
+        foo: { type: type.string },
+        bar: { type: type.string },
+      }
+    },
+    two: { type: type.string },
+    three: {
+      type: type.string,
+      deps: ['one', 'foo.bar'],
+      visible: ({ rawValues }) => rawValues.one === '1' || rawValues.foo.bar === 'foo'
+    },
+  }
+
+  ```
 - **item**: In case of the entry is an array, some properties will be applied to the array step but not to the sub-items. In this particular case, you can use `item` property to add following properties (with same signature than the schema properties) to sub-items:
   - **disabled**
   - **visible**

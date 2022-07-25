@@ -75,6 +75,7 @@ export interface SchemaEntry {
   addableDefaultValue?: any; /* TODO doc : possible only with array, used to give default value to dynamically added elements */
   collapsed?: boolean; // TODO doc : indicate wether form is closed or not, only for objects with form
   collapsable?: boolean | ((param: { rawValues: { [x: string]: any }, value: any, getValue: (key: string) => any }) => JSX.Element); // TODO doc : indicate wether schema can be collapsed, only for objects with form
+  deps?: Array<string>;
   item?: ({
     disabled?: boolean | ((prop: { rawValues: { [x: string]: any }, value: any, informations?: Informations }) => boolean);
     visible?: boolean | ((prop: { rawValues: { [x: string]: any }, value: any, informations?: Informations }) => boolean);
