@@ -239,7 +239,7 @@ Some schema properties can be basic value or function which return basic value. 
 - **rawValues**: the actual value of antire form
 - **value**: the actual value of the actual entry
 - **error**: the error of the entry (undefined if there is no error)
-- **informations**: an object to get informations about the actual entry (path, index and parent informations)
+- **informations**: an object to get informations about the actual entry (path, key, index and parent informations)
 - **getValue**: a function to get value of a form entry
 
 

@@ -70,7 +70,7 @@ export const CollapsedStep = (props: {
           return null;
         }
 
-        const informations = { path: en }
+        const informations = { path: en, key: en }
 
         return (
           <Step entry={en} step={stp} schema={schema}
@@ -141,7 +141,9 @@ export const Step = (props: {
 
   if (deactivateReactMemo) {
     //todo:get a possible deps array to avoid non relevent render
-    const test = step.deps ? watch(step.deps) : watch()
+
+    const deps = (typeof step.deps === 'function') ? step.deps(informations) : step.deps
+    const test = watch(deps)
     const hash = cleanHash(test)
     if (hash !== render) {
       setRender(hash)
@@ -167,14 +169,16 @@ export const Step = (props: {
                   array: step.item?.array || false, 
                   onAfterChange: step.item?.onAfterChange, 
                   visible: step.item?.visible, 
-                  disabled: step.item?.disabled }}
+                  disabled: step.item?.disabled,
+                  deps: step.item?.deps
+                 }}
                 schema={schema}
                 inputWrapper={inputWrapper}
                 httpClient={httpClient}
                 defaultValue={props.defaultValue?.value}
                 index={idx}
                 functionalProperty={functionalProperty}
-                informations={{ path: undefined, parent: informations, index: idx }} />
+                informations={{ path: `${informations?.path}.${idx}.value`, parent: informations, index: idx }} />
             )
           })} />
       </ControlledInput>
@@ -587,7 +591,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
             httpClient={maybeCustomHttpClient}
             defaultValue={value && value[entry]}
             functionalProperty={functionalProperty}
-            informations={{ path: entry, parent: informations }} />
+            informations={{ path: `${informations?.path}.${entry}`, key: entry, parent: informations }} />
         )
       })}
     </div>

@@ -128,7 +128,7 @@ export const Form = React.forwardRef(function Form(
             return null;
           }
 
-          const informations = { path: entry }
+          const informations = { path: entry, key: entry }
           return (
             <Step key={idx} entry={entry} step={step}
               schema={schema} inputWrapper={inputWrapper}
