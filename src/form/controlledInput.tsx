@@ -39,7 +39,7 @@ interface BaseProps {
     errorDisplayed?: boolean,
     component?: (field: { value: any, onChange: (e: ChangeEvent<HTMLInputElement>) => void }, props: object) => JSX.Element,
     children?: JSX.Element,
-    informations?: Informations,
+    informations: Informations,
     deactivateReactMemo: boolean,
     inputWrapper?: (props: object) => JSX.Element,
 }
@@ -62,7 +62,8 @@ export const ControlledInput = (inputProps: Props) => {
     })
     const { getValues, setValue, formState: { errors } } = useFormContext();
 
-    const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], errors)
+    //@ts-ignore
+    const error: { [x: string]: any } = entry.split('.').reduce((acc, curr) => acc && acc[curr], errors)
 
 
     const functionalProperty = (entry: string, prop: any) => {

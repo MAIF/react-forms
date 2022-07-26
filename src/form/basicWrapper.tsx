@@ -1,5 +1,5 @@
 import React from "react";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useFormState } from "react-hook-form";
 import ReactToolTip from 'react-tooltip';
 import classNames from 'classnames';
 import { v4 as uuid } from 'uuid';
@@ -16,7 +16,7 @@ export const BasicWrapper = ({ entry, realEntry, children, render, functionalPro
     render?: ({ entry, label, error, help, children }: { entry: string, label: React.ReactNode, error: object, help: React.ReactNode, children: React.ReactNode }) => JSX.Element,
     functionalProperty: TFunctionalProperty,
     step?: SchemaEntry,
-    informations?: Informations
+    informations: Informations
   }) => {
   const { formState } = useFormContext();
 
@@ -25,7 +25,8 @@ export const BasicWrapper = ({ entry, realEntry, children, render, functionalPro
   }
 
   // FIXME not sure it works as intended with more two or more parts
-  const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.errors)
+// @ts-ignore
+  const error: {[x: string]: any} = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.errors)
   const isDirty = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.dirtyFields)
   const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.touchedFields)
   const errorDisplayed = formState.isSubmitted || isDirty || isTouched

@@ -99,7 +99,7 @@ export type Flow = Array<string | FlowObject>
 export type TFunctionalProperty = <T, >(entry: string, prop: T | ((param: { rawValues: { [x: string]: any }, value: any, informations?: Informations, error?: { [x: string]: any } }) => T), informations?: Informations, error?: { [x: string]: any }) => T
 
 export interface Informations {
-  path?: string,
+  path: string,
   key?: string,
   parent?: Informations,
   index?: number

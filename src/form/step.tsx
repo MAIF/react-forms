@@ -94,12 +94,14 @@ export const Step = (props: {
   functionalProperty: TFunctionalProperty,
   informations: Informations
 }) => {
-  let { entry, realEntry, step, schema, inputWrapper, httpClient, defaultValue, index, functionalProperty, informations } = props;
-  const { formState: { errors, dirtyFields, touchedFields, isSubmitted }, control, getValues, setValue, watch } = useFormContext();
+  let { entry, realEntry, step, schema, inputWrapper, httpClient, functionalProperty, informations } = props;
+  const methods = useFormContext();
+  const { formState: { errors, dirtyFields, touchedFields, isSubmitted }, control, getValues, setValue } = methods;
+  const { watch }: { watch: (param?: string | string[]) => any } = methods;
 
   const [render, setRender] = useState(cleanHash(getValues()));
 
-  const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], errors)
+  const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], errors as { [x: string]: any })
   const isDirty = entry.split('.').reduce((acc, curr) => acc && acc[curr], dirtyFields)
   const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], touchedFields)
   const errorDisplayed = (!!error && (isSubmitted || isDirty || isTouched)) as boolean
@@ -143,7 +145,7 @@ export const Step = (props: {
     //todo:get a possible deps array to avoid non relevent render
 
     const deps = (typeof step.deps === 'function') ? step.deps(informations) : step.deps
-    const test = watch(deps)
+    const test = deps ? watch(deps) : watch()
     const hash = cleanHash(test)
     if (hash !== render) {
       setRender(hash)

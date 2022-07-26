@@ -13,7 +13,8 @@ export const ArrayStep = ({ entry, step, component, disabled }: { entry: string,
   const { getValues, setValue, control, trigger, formState } = useFormContext();
 
   const values = getValues(entry);
-  const error = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.errors)
+  //@ts-ignore
+  const error: { [x: string]: any } = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.errors)
   const isDirty = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.dirtyFields)
   const isTouched = entry.split('.').reduce((acc, curr) => acc && acc[curr], formState.touchedFields)
   const errorDisplayed = !!error && (formState.isSubmitted || isDirty || isTouched)
