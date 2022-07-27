@@ -10,6 +10,7 @@ export interface OptionActionItem {
 
 export interface OptionActions {
   reset?: OptionActionItem;
+  cancel?: OptionActionItem & { action: () => void };
   submit?: OptionActionItem;
 }
 
