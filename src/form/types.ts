@@ -66,7 +66,7 @@ export interface SchemaEntry {
   itemRender?: SchemaRenderType;
   props?: object;
   options?: Array<any | { label: string, value: any }>;
-  optionsFrom?: string;
+  optionsFrom?: string | ((param: { rawValues: object, value: any }) => Promise<any[]> | string) | Promise<any[]>;
   transformer?: ((v: any) => SelectOption) | { label: string, value: string };
   conditionalSchema?: ConditionnalSchema;
   constraints?: Array<Constraint | { type: TConstraintType, message?: string }>;

@@ -136,14 +136,13 @@ export const Step = (props: {
     const isVisibleIsFunction = typeof step.visible === 'function';
     const isDisableIsFunction = typeof step.disabled === 'function';
     const isLabelIsFunction = typeof step.label === 'function';
+    const deps = (typeof step.deps === 'function') ? step.deps(informations) : step.deps
 
-    return isVisibleIsFunction || isDisableIsFunction || isLabelIsFunction || !!step.render || !!step.conditionalSchema
+    return !!deps || isVisibleIsFunction || isDisableIsFunction || isLabelIsFunction || !!step.render || !!step.conditionalSchema
 
   }, [cleanHash(schema)]);
 
   if (deactivateReactMemo) {
-    //todo:get a possible deps array to avoid non relevent render
-
     const deps = (typeof step.deps === 'function') ? step.deps(informations) : step.deps
     const test = deps ? watch(deps) : watch()
     const hash = cleanHash(test)

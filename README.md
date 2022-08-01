@@ -152,7 +152,10 @@ export const Example = () => {
   ```
 - **props**: a json object merged with default props. For exemple, if format `select` is setup, you can add all [props](https://react-select.com/props) to customize react-select
 - **options**: An array of options for the select field (if format `select` is setup)
-- **optionsFrom**: A url to fetch array of options for the select field (if format `select` is setup)
+- **optionsFrom**: this property is setup to get options with a promise (if format `select` is selected). It offer multiple possibility to get its:
+   - A url to fetch array of options for the select field. The array can be transform by the `transformer` provided
+   - A promise returning an array, which can be transform by the `transformer` provided
+   - a function returning a promise (see up) or directly an array of value
 - **transformer**: A function to transform options to a valid format for react select, by default the code try to do it himself.
   ```javascript
   {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import classNames from 'classnames';
 import CreatableSelect from 'react-select/creatable';
 import Select from 'react-select';
@@ -41,7 +41,7 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
   value?: any,
   defaultValue?: any,
   isMulti?: boolean,
-  optionsFrom?: string | ((param: { rawValues: object, value: any }) => Promise<T[]> | string) | Promise<T[]>,
+  optionsFrom?: string | ((param: { rawValues: object, value: any, getValue: (k: string) => any }) => Promise<T[]> | string) | Promise<T[]>,
   fetchCondition?: () => boolean,
   id?: string,
   httpClient?: (url: string, method: string) => Promise<Response>,
@@ -95,7 +95,7 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
   }, [props.value, values, props.defaultValue, loading])
 
   useEffect(() => {
-    if (props.optionsFrom) {
+    if (props.optionsFrom && (typeof props.optionsFrom === 'function' || !values.length)) {
       const cond = option(props.fetchCondition)
         .map(cond => cond())
         .getOrElse(true);
@@ -104,10 +104,10 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
         setLoading(true);
 
         let promise: Promise<T[]>;
-        if (isPromise(props.optionsFrom)) { /* FIXME undocumented behaviour ? */
+        if (isPromise(props.optionsFrom)) {
           promise = props.optionsFrom as Promise<T[]>
-        } else if (typeof props.optionsFrom === 'function') { /* FIXME undocumented behaviour ? */
-          const result = props.optionsFrom({ rawValues: getValues(), value: getValues(props.id!) })
+        } else if (typeof props.optionsFrom === 'function') {
+          const result = props.optionsFrom({ rawValues: getValues(), value: getValues(props.id!), getValue: (k: string) => getValues(k) })
           promise = isPromise(result) ? result as Promise<T[]> : props.httpClient!(result as string, 'GET').then(r => r.json())
         } else {
           promise = props.httpClient!(props.optionsFrom as string, 'GET').then(r => r.json())
@@ -134,7 +134,7 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
       setTimeout(() => setLoading(false), 250)
     }
 
-  }, [props.optionsFrom, props.possibleValues])
+  }, [props.optionsFrom, props.possibleValues, props.onChange]) //FIXME: I'mnot sure that adding onchange is a good idea to recompute 
 
 
   const onChange = (changes: readonly SelectOption[] | SelectOption | null) => {
