@@ -102,7 +102,8 @@ export const Form = React.forwardRef(function Form(
         control={methods.control}
         schema={schema}
         onSubmit={onSubmit}
-        handleSubmit={handleSubmit} />}
+        handleSubmit={handleSubmit}
+        onError={onError} />}
       <form
         className={className || `mrf-pr_15 mrf-w_100`}
         onSubmit={handleSubmit(data => {

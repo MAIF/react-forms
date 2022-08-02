@@ -6,12 +6,10 @@ import { useHashEffect } from "../utils";
 import { cleanOutputArray } from "./formUtils";
 import { Schema, Option } from "./types";
 
-export const Watcher = React.memo(({ options, control, schema, onSubmit, handleSubmit }: { options?: Option, control: Control<any, any> | undefined, schema: Schema, onSubmit: (param: any) => void, handleSubmit: ((func: (param: any) => void) => (() => void)) }) => {
+export const Watcher = React.memo(({ options, control, schema, onSubmit, handleSubmit, onError }: { options?: Option, control: Control<any, any> | undefined, schema: Schema, onSubmit: (param: any) => void, handleSubmit: ((func: (param: any) => void, onError: () => void) => (() => void)), onError:() => void }) => {
   const data = useWatch({ control })
 
-  const realSubmit = (d: any) => handleSubmit(() => {
-    onSubmit(d);
-  })()
+  const realSubmit = (d: any) => handleSubmit(() => onSubmit(cleanOutputArray(d, schema)), onError)()
 
   const debouncedSubmit = useCallback(debounce(realSubmit, 250, { leading: true }), [])
 
