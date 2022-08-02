@@ -13,6 +13,7 @@ import { CollapsedStep, Step } from './step';
 import { Footer } from './footer';
 
 import '../style/style.scss';
+import { option } from '../Option';
 
 export const Form = React.forwardRef(function Form(
   { schema, flow, value, inputWrapper, onSubmit, onError = () => {/* default is nothing */ }, footer, style = {}, className, options = {} }:
@@ -96,7 +97,7 @@ export const Form = React.forwardRef(function Form(
 
   return (
     <FormProvider {...methods}>
-      {!!options.watch && <Watcher
+      {(!!options.watch || !!options.autosubmit) && <Watcher
         options={options}
         control={methods.control}
         schema={schema}
