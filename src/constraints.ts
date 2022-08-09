@@ -88,7 +88,7 @@ export const blacklist = (arrayOfValues: any[], message = `This value can't incl
   return !arrayOfValues.some(f => (value || '').includes(f))
 })
 
-export const ref = (ref: string) => yup.ref(ref)
+export const ref = <T>(ref: string) => yup.ref<T>(ref)
 const maybeRef = <T,>(x: Reference<T> | any) => x?.ref ? ref(x.ref) : x
 
 
