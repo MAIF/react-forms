@@ -1,6 +1,6 @@
 import React, { useEffect, useImperativeHandle, useState } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { FormProvider, useForm } from 'react-hook-form';
+import { FormProvider, useForm, UseFormReturn } from 'react-hook-form';
 import * as yup from "yup";
 
 
@@ -14,9 +14,28 @@ import { Footer } from './footer';
 
 import '../style/style.scss';
 
-export const Form = React.forwardRef(function Form(
-  { schema, flow, value, inputWrapper, onSubmit, onError = () => {/* default is nothing */ }, footer, style = {}, className, options = {} }:
-    { schema: Schema, flow?: Array<string | FlowObject>, value?: object, inputWrapper?: (props: object) => JSX.Element, onSubmit: (obj: { [x: string]: any }) => void, onError?: () => void, footer?: (props: { reset: () => void, valid: () => void }) => JSX.Element, style?: object, className?: string, options?: Option }, ref) {
+type FormProps = {
+  schema: Schema,
+  flow?: Array<string | FlowObject>,
+  value?: object,
+  inputWrapper?: (props: object) => JSX.Element,
+  onSubmit: (obj: { [x: string]: any }) => void,
+  onError?: () => void,
+  footer?: (props: { reset: () => void, valid: () => void }) => JSX.Element,
+  style?: object,
+  className?: string,
+  options?: Option
+}
+
+export interface FormRef {
+  handleSubmit: () => void,
+  trigger: () => void,
+  methods: UseFormReturn & { data: () => any}
+}
+
+
+export const Form = React.forwardRef<FormRef, FormProps>(function Form(
+  { schema, flow, value, inputWrapper, onSubmit, onError = () => {/* default is nothing */ }, footer, style = {}, className, options = {} }, ref) {
 
   const formFlow = flow || Object.keys(schema)
   const maybeCustomHttpClient = (url: string, method: string) => {
@@ -75,7 +94,7 @@ export const Form = React.forwardRef(function Form(
 
   const functionalProperty = <T,>(entry: string, prop: T | ((param: { rawValues: { [x: string]: any }, value: any, informations?: Informations, getValue: (key: string) => any }) => T), informations?: Informations, error?: { [x: string]: any }): T => {
     if (typeof prop === 'function') {
-      
+
       return (prop as Function)({ rawValues: getValues(), value: getValues(entry), informations, getValue: (key: string) => getValues(key), error });
     } else {
       return prop;
