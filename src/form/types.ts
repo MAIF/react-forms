@@ -92,7 +92,7 @@ export interface SchemaEntry {
 export interface FlowObject {
   label: string;
   flow: Flow;
-  collapse: boolean;
+  collapsed: boolean;
 }
 
 export type Flow = Array<string | FlowObject>
