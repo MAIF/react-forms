@@ -13,11 +13,10 @@ import { CollapsedStep, Step } from './step';
 import { Footer } from './footer';
 
 import '../style/style.scss';
-import { option } from '../Option';
 
 export const Form = React.forwardRef(function Form(
   { schema, flow, value, inputWrapper, onSubmit, onError = () => {/* default is nothing */ }, footer, style = {}, className, options = {} }:
-    { schema: Schema, flow: Array<string | FlowObject>, value?: object, inputWrapper?: (props: object) => JSX.Element, onSubmit: (obj: { [x: string]: any }) => void, onError?: () => void, footer?: (props: { reset: () => void, valid: () => void }) => JSX.Element, style?: object, className?: string, options?: Option }, ref) {
+    { schema: Schema, flow?: Array<string | FlowObject>, value?: object, inputWrapper?: (props: object) => JSX.Element, onSubmit: (obj: { [x: string]: any }) => void, onError?: () => void, footer?: (props: { reset: () => void, valid: () => void }) => JSX.Element, style?: object, className?: string, options?: Option }, ref) {
 
   const formFlow = flow || Object.keys(schema)
   const maybeCustomHttpClient = (url: string, method: string) => {
