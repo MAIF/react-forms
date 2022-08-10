@@ -1,12 +1,19 @@
 import debounce from "lodash.debounce";
 import React, { useCallback } from "react";
-import { Control, useWatch } from "react-hook-form";
+import { Control, UseFormHandleSubmit, useWatch } from "react-hook-form";
 
 import { useHashEffect } from "../utils";
 import { cleanOutputArray } from "./formUtils";
 import { Schema, Option } from "./types";
 
-export const Watcher = React.memo(({ options, control, schema, onSubmit, handleSubmit, onError }: { options?: Option, control: Control<any, any> | undefined, schema: Schema, onSubmit: (param: any) => void, handleSubmit: ((func: (param: any) => void, onError: () => void) => (() => void)), onError:() => void }) => {
+type WatcherProps = {
+  options?: Option,
+  control: Control<any, any> | undefined,
+  schema: Schema, onSubmit: (param: any) => void,
+  handleSubmit: UseFormHandleSubmit<object>,
+  onError: (errors: Object, e?: React.BaseSyntheticEvent) => void
+}
+export const Watcher = React.memo(({ options, control, schema, onSubmit, handleSubmit, onError }: WatcherProps) => {
   const data = useWatch({ control })
 
   const realSubmit = (d: any) => handleSubmit(() => onSubmit(cleanOutputArray(d, schema)), onError)()

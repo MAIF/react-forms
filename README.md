@@ -253,7 +253,6 @@ Some schema properties can be basic value or function which return basic value. 
 - **value** (optional): default value
 - **inputWrapper** (optional): A custom component to wrap all input of the form
 - **className** (optional): A custom class name for the form
-- **style** (optional): A custom json style object for the form
 - **footer** (optional):  a component to override the footer provided
 ```javascripts
 {({ reset, valid }) => {

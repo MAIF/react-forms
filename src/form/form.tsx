@@ -20,9 +20,8 @@ type FormProps = {
   value?: object,
   inputWrapper?: (props: object) => JSX.Element,
   onSubmit: (obj: { [x: string]: any }) => void,
-  onError?: () => void,
+  onError?: (errors: Object, e?: React.BaseSyntheticEvent) => void,
   footer?: (props: { reset: () => void, valid: () => void }) => JSX.Element,
-  style?: object,
   className?: string,
   options?: Option
 }
@@ -34,8 +33,8 @@ export interface FormRef {
 }
 
 
-export const Form = React.forwardRef<FormRef, FormProps>(function Form(
-  { schema, flow, value, inputWrapper, onSubmit, onError = () => {/* default is nothing */ }, footer, style = {}, className, options = {} }, ref) {
+export const Form = React.forwardRef<FormRef, FormProps>((props, ref) => {
+  const { schema, flow, value, inputWrapper, onSubmit, onError = () => { }, footer, className, options = {} } = props
 
   const formFlow = flow || Object.keys(schema)
   const maybeCustomHttpClient = (url: string, method: string) => {
