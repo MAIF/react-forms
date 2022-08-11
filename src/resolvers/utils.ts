@@ -28,6 +28,14 @@ export const buildSubResolver = (props: SchemaEntry, key: string, dependencies: 
       subResolver = yup.object().shape(getShapeAndDependencies(props.flow || Object.keys(props.schema), props.schema, deps, rawValues).shape, deps);
       arrayResolver = arrayResolver.of(yup.object().shape({ value: subResolver }))
     }
+    // todo: https://github.com/MAIF/react-forms/issues/96
+    // if (props.item?.constraints) {
+    //   subResolver = item?.constraints.reduce((resolver, constraint) => {
+    //     return jsonOrFunctionConstraint(constraint, resolver, key, dependencies)
+    //   }, resolvers[props.type]())
+
+    //   arrayResolver = arrayResolver.of(subResolver)   
+    // }
     return constraints.reduce((resolver, constraint) => {
       return jsonOrFunctionConstraint(constraint, resolver, key, dependencies)
     }, arrayResolver)

@@ -86,6 +86,7 @@ export interface SchemaEntry {
     render?: SchemaRenderType;
     array?: boolean;
     deps?: string | Array<string> | ((informations: Informations) => string | Array<string>);
+    // constraints?: Array<Constraint | { type: TConstraintType, message?: string }>;
   });
 }
 

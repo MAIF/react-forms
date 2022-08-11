@@ -71,7 +71,7 @@ export const cleanInputArray = (value: { [x: string]: any } = {}, defaultValues:
               cleanInputArray(value, defaultValues, subSchema?.[key]?.flow, subSchema?.[key]?.schema || {}) : value
           }))
         }
-      } else if (typeof v === 'object' && !(v instanceof Date) && !Array.isArray(v)) {
+      } else if (v !== null && typeof v === 'object' && !(v instanceof Date) && !Array.isArray(v)) {
         return { ...acc, [key]: cleanInputArray(value?.[key], defaultValues?.[key], subSchema?.[key]?.flow, subSchema?.[key]?.schema || {}) }
       } else {
         return { ...acc, [key]: v === undefined ? (Array.isArray(v) ? [] : null) : v }
