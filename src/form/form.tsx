@@ -1,4 +1,4 @@
-import React, { useEffect, useImperativeHandle, useState } from 'react';
+import React, { MutableRefObject, useEffect, useImperativeHandle, useState } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormProvider, useForm, UseFormReturn } from 'react-hook-form';
 import * as yup from "yup";
@@ -13,34 +13,6 @@ import { CollapsedStep, Step } from './step';
 import { Footer } from './footer';
 
 import '../style/style.scss';
-import { type } from '../type';
-
-type baseType = {[x: string]: any}
-
-
-
-type Props<T extends unknown> = {
-  data: T;
-  children: React.ReactNode;
-  onSubmit: (data: T) => void;
-};
-
-const MyForm = React.forwardRef(
-  <T extends unknown>(props: Props<T>, ref: React.Ref<HTMLFormElement>) => {
-      const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-          // onSubmit(...);
-      };
-      // some code here ...
-      return (
-          <form ref={ref} onSubmit={handleSubmit}>
-              {props.children}
-          </form>
-      );
-  }
-);
-
-// export default MyForm as <T extends unknown>(props: Props<T> & { ref: React.Ref<HTMLFormElement> })
-
 
 
 type FormProps<DataType> = {
@@ -52,7 +24,8 @@ type FormProps<DataType> = {
   onError?: (errors: Object, e?: React.BaseSyntheticEvent) => void,
   footer?: (props: { reset: () => void, valid: () => void }) => JSX.Element,
   className?: string,
-  options?: Option
+  options?: Option,
+  ref?: MutableRefObject<FormRef | undefined>
 }
 
 export interface FormRef {
@@ -61,44 +34,7 @@ export interface FormRef {
   methods: UseFormReturn & { data: () => any}
 }
 
-
-
-
-
-
-
-
-
-type TUser = {
-  name: string,
-  age: number,
-} 
-
-const user: TUser = {
-  name: 'quentin',
-  age: 35
-}
-
-const userSchema: Schema = {
-  name: { type: type.string },
-  age: { type: type.number}
-}
-
-function App() {
-  const [count, setCount] = useState(0)
-
-
-  return (
-    <div className="App">
-      <Form<TUser> 
-        schema={userSchema}
-        onSubmit={(d) => console.debug(d)}
-        value={user}/>
-    </div>
-  )
-}
-
-const FormComponent = <T extends TBaseObject>(props: FormProps<T>, ref?: React.Ref<FormRef>) => {
+const FormComponent = <T extends TBaseObject>(props: FormProps<T>, ref: React.Ref<FormRef>) => {
   const { schema, flow, value, inputWrapper, onSubmit, onError = () => { }, footer, className, options = {} } = props
 
   const formFlow = flow || Object.keys(schema)
@@ -226,5 +162,4 @@ const FormComponent = <T extends TBaseObject>(props: FormProps<T>, ref?: React.R
   )
 }
 
-export const Form = React.forwardRef(FormComponent) as
-<T extends TBaseObject>(props: FormProps<T>, ref?: React.Ref<FormRef>) => React.ReactElement
+export const Form = React.forwardRef(FormComponent) as <T extends TBaseObject>(props: FormProps<T>, ref?: React.Ref<FormRef>) => React.ReactElement
