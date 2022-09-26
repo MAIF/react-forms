@@ -98,7 +98,7 @@ function App() {
   )
 }
 
-const FormComponent = <T extends TBaseObject>(props: FormProps<T>, ref: React.Ref<FormRef>) => {
+const FormComponent = <T extends TBaseObject>(props: FormProps<T>, ref?: React.Ref<FormRef>) => {
   const { schema, flow, value, inputWrapper, onSubmit, onError = () => { }, footer, className, options = {} } = props
 
   const formFlow = flow || Object.keys(schema)
@@ -227,4 +227,4 @@ const FormComponent = <T extends TBaseObject>(props: FormProps<T>, ref: React.Re
 }
 
 export const Form = React.forwardRef(FormComponent) as
-<T extends TBaseObject>(props: FormProps<T>, ref: React.Ref<FormRef>) => React.ReactElement
+<T extends TBaseObject>(props: FormProps<T>, ref?: React.Ref<FormRef>) => React.ReactElement
