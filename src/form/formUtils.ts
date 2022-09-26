@@ -5,7 +5,7 @@ import { option } from "../Option";
 import { getShapeAndDependencies } from "../resolvers";
 import { type } from "../type";
 import { arrayFlatten, isDefined } from "../utils";
-import { Flow, FlowObject, Informations, Schema, SchemaRenderType } from "./types";
+import { Flow, FlowObject, Informations, Schema, SchemaRenderType, TBaseObject } from "./types";
 
 export const usePrevious = (value: any) => {
   // The ref object is a generic container whose current property is mutable ...
@@ -44,7 +44,7 @@ export function getDefaultValues(flow?: Flow, schema?: Schema, value?: any): obj
   }, {})
 }
 
-export const cleanInputArray = (value: { [x: string]: any } = {}, defaultValues: { [x: string]: any } = {}, flow?: Flow, subSchema?: Schema): object => {
+export const cleanInputArray = <T extends TBaseObject>(value?: T, defaultValues: { [x: string]: any } = {}, flow?: Flow, subSchema?: Schema): object => {
   const realFlow = option(flow)
     .map(f => f.map(v => typeof v === 'object' ? v.flow : v))
     .map(arrayFlatten)
@@ -76,7 +76,7 @@ export const cleanInputArray = (value: { [x: string]: any } = {}, defaultValues:
       } else {
         return { ...acc, [key]: v === undefined ? (Array.isArray(v) ? [] : null) : v }
       }
-    }, value)
+    }, value || {})
 }
 
 export const cleanOutputArray = (obj: any, subSchema: Schema): any => {

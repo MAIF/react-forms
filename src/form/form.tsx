@@ -6,20 +6,49 @@ import * as yup from "yup";
 
 import { getShapeAndDependencies } from '../resolvers/index';
 import { useHashEffect } from '../utils';
-import { FlowObject, Schema, Option, Informations } from './types';
+import { FlowObject, Schema, Option, Informations, TBaseObject } from './types';
 import { cleanInputArray, cleanOutputArray, getDefaultValues } from './formUtils';
 import { Watcher } from './watcher';
 import { CollapsedStep, Step } from './step';
 import { Footer } from './footer';
 
 import '../style/style.scss';
+import { type } from '../type';
 
-type FormProps = {
+type baseType = {[x: string]: any}
+
+
+
+type Props<T extends unknown> = {
+  data: T;
+  children: React.ReactNode;
+  onSubmit: (data: T) => void;
+};
+
+const MyForm = React.forwardRef(
+  <T extends unknown>(props: Props<T>, ref: React.Ref<HTMLFormElement>) => {
+      const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+          // onSubmit(...);
+      };
+      // some code here ...
+      return (
+          <form ref={ref} onSubmit={handleSubmit}>
+              {props.children}
+          </form>
+      );
+  }
+);
+
+// export default MyForm as <T extends unknown>(props: Props<T> & { ref: React.Ref<HTMLFormElement> })
+
+
+
+type FormProps<DataType> = {
   schema: Schema,
   flow?: Array<string | FlowObject>,
-  value?: object,
+  value?: DataType,
   inputWrapper?: (props: object) => JSX.Element,
-  onSubmit: (obj: { [x: string]: any }) => void,
+  onSubmit: (obj: DataType) => void,
   onError?: (errors: Object, e?: React.BaseSyntheticEvent) => void,
   footer?: (props: { reset: () => void, valid: () => void }) => JSX.Element,
   className?: string,
@@ -33,7 +62,43 @@ export interface FormRef {
 }
 
 
-export const Form = React.forwardRef<FormRef, FormProps>((props, ref) => {
+
+
+
+
+
+
+
+type TUser = {
+  name: string,
+  age: number,
+} 
+
+const user: TUser = {
+  name: 'quentin',
+  age: 35
+}
+
+const userSchema: Schema = {
+  name: { type: type.string },
+  age: { type: type.number}
+}
+
+function App() {
+  const [count, setCount] = useState(0)
+
+
+  return (
+    <div className="App">
+      <Form<TUser> 
+        schema={userSchema}
+        onSubmit={(d) => console.debug(d)}
+        value={user}/>
+    </div>
+  )
+}
+
+const FormComponent = <T extends TBaseObject>(props: FormProps<T>, ref: React.Ref<FormRef>) => {
   const { schema, flow, value, inputWrapper, onSubmit, onError = () => { }, footer, className, options = {} } = props
 
   const formFlow = flow || Object.keys(schema)
@@ -65,7 +130,7 @@ export const Form = React.forwardRef<FormRef, FormProps>((props, ref) => {
     resolver: (data, context, options) => yupResolver(resolver(data))(data, context, options),
     shouldFocusError: false,
     mode: 'onChange',
-    defaultValues: cleanInputArray(value, defaultValues, flow, schema)
+    defaultValues: cleanInputArray<T>(value, defaultValues, flow, schema)
   });
 
   const [initialReseted, setReset] = useState(false)
@@ -159,5 +224,7 @@ export const Form = React.forwardRef<FormRef, FormProps>((props, ref) => {
       </form>
     </FormProvider>
   )
-})
+}
 
+export const Form = React.forwardRef(FormComponent) as
+<T extends TBaseObject>(props: FormProps<T>, ref: React.Ref<FormRef>) => React.ReactElement

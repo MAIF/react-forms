@@ -107,3 +107,5 @@ export interface Informations {
   parent?: Informations,
   index?: number
 }
+
+export type TBaseObject = {[key: string]: any}
