@@ -12,6 +12,7 @@ export interface OptionActions {
   reset?: OptionActionItem;
   cancel?: OptionActionItem & { action: () => void };
   submit?: OptionActionItem;
+  add?: OptionActionItem
 }
 
 export type HttpClient = (url: string, method: string) => Promise<Response>;
@@ -106,6 +107,10 @@ export interface Informations {
   key?: string,
   parent?: Informations,
   index?: number
+}
+
+export interface StepsOptions {
+  addLabel?: string
 }
 
 export type TBaseObject = {[key: string]: any}

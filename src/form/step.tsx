@@ -19,7 +19,7 @@ import ChevronUp from 'react-feather/dist/icons/chevron-up.js';
 import { BooleanInput, CodeInput, Collapse, MarkdownInput, ObjectInput, SelectInput, SingleLineCode } from "../inputs"
 import { cleanHash, isDefined } from "../utils"
 import { cleanOutputArray, extractFlowString, getDefaultValues, usePrevious } from "./formUtils"
-import { Flow, FlowObject, HttpClient, Informations, Schema, SchemaEntry, SchemaRenderType, TFunctionalProperty } from "./types"
+import { Flow, FlowObject, HttpClient, Informations, Schema, SchemaEntry, SchemaRenderType, StepsOptions, TFunctionalProperty } from "./types"
 import { ControlledInput } from "./controlledInput";
 import { ArrayStep } from "./arrayStep";
 import { type } from "../type";
@@ -41,7 +41,8 @@ export const CollapsedStep = (props: {
   schema: Schema,
   inputWrapper?: (props: object) => JSX.Element,
   httpClient?: HttpClient,
-  functionalProperty: TFunctionalProperty
+  functionalProperty: TFunctionalProperty,
+  stepsOptions?: StepsOptions
 }) => {
   let {
     entry, schema,
@@ -75,7 +76,7 @@ export const CollapsedStep = (props: {
         return (
           <Step entry={en} step={stp} schema={schema}
             inputWrapper={inputWrapper} httpClient={httpClient}
-            defaultValue={stp?.defaultValue} functionalProperty={functionalProperty} informations={informations} />
+            defaultValue={stp?.defaultValue} functionalProperty={functionalProperty} informations={informations} options={props.stepsOptions} />
         )
       })}
     </Collapse>
@@ -92,7 +93,8 @@ export const Step = (props: {
   defaultValue?: any,
   index?: number,
   functionalProperty: TFunctionalProperty,
-  informations: Informations
+  informations: Informations,
+  options?: StepsOptions
 }) => {
   let { entry, realEntry, step, schema, inputWrapper, httpClient, functionalProperty, informations } = props;
   const methods = useFormContext();
@@ -158,7 +160,7 @@ export const Step = (props: {
           entry={entry}
           step={step}
           disabled={functionalProperty(entry, step.disabled || false, informations, error)}
-          component={((props, idx) => {
+          component={((cprops, idx) => {
             return (
               <Step
                 entry={`${entry}.${idx}.value`}
@@ -176,12 +178,14 @@ export const Step = (props: {
                 schema={schema}
                 inputWrapper={inputWrapper}
                 httpClient={httpClient}
-                defaultValue={props.defaultValue?.value}
+                defaultValue={cprops.defaultValue?.value}
                 index={idx}
                 functionalProperty={functionalProperty}
-                informations={{ path: `${informations?.path}.${idx}.value`, parent: informations, index: idx }} />
+                informations={{ path: `${informations?.path}.${idx}.value`, parent: informations, index: idx }}
+                options={props.options} />
             )
-          })} />
+          })}
+          addLabel={props.options?.addLabel} />
       </ControlledInput>
     )
   }
@@ -320,7 +324,7 @@ export const Step = (props: {
                 <NestedForm
                   schema={step.schema!} flow={flow} step={step} parent={entry}
                   inputWrapper={inputWrapper} maybeCustomHttpClient={httpClient} value={getValues(entry) || defaultValue}
-                  functionalProperty={functionalProperty} errorDisplayed={errorDisplayed} informations={informations} />
+                  functionalProperty={functionalProperty} errorDisplayed={errorDisplayed} informations={informations} stepsOptions={props.options} />
               </CustomizableInput>
             </ControlledInput>
           )
@@ -495,7 +499,7 @@ export const Step = (props: {
 
 }
 
-const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, errorDisplayed, value, step, functionalProperty, informations }:
+const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient, errorDisplayed, value, step, functionalProperty, informations, stepsOptions }:
   {
     schema: Schema,
     flow: Flow,
@@ -507,6 +511,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
     step: SchemaEntry,
     functionalProperty: TFunctionalProperty,
     informations?: Informations
+    stepsOptions?: StepsOptions
   }) => {
 
   const { getValues, control } = useFormContext();
@@ -572,6 +577,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
               inputWrapper={inputWrapper}
               httpClient={maybeCustomHttpClient}
               functionalProperty={functionalProperty}
+              stepsOptions={stepsOptions}
             />
           )
         }
@@ -592,7 +598,8 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
             httpClient={maybeCustomHttpClient}
             defaultValue={value && value[entry]}
             functionalProperty={functionalProperty}
-            informations={{ path: `${informations?.path}.${entry}`, key: entry, parent: informations }} />
+            informations={{ path: `${informations?.path}.${entry}`, key: entry, parent: informations }}
+            options={stepsOptions} />
         )
       })}
     </div>

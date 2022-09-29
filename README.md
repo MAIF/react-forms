@@ -281,7 +281,11 @@ httpClient = {(url, method) => fetch(url, {
 - **watch**: a boolean to activate the automatic log of form value. A function can be set up to override the default logger.
 - **autosubmit**: a boolean to activate the automatic run of the `onSubmit` form properties on every change of values.
 - **showErrorsOnStart**: a boolean to display constraints messages, not in error color,  when starting the form.
-- **actions**: an object to parameter footer buttons key. By default just `submit` button is displayed.
+- **actions**: an object to parameter footer buttons key. By default just `submit` button is displayed. Allow to change button label for the following actions:
+  - reset
+  - cancel
+  - submit
+  - add
 ```javascript
 <Form 
   options={

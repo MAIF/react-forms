@@ -9,7 +9,13 @@ import { option } from '../Option';
 import { type } from '../type';
 import { defaultVal, getDefaultValues } from './formUtils';
 
-export const ArrayStep = ({ entry, step, component, disabled }: { entry: string, step: SchemaEntry, component: ({ key, defaultValue, value }: { key: string, defaultValue: any, value?: any }, ids: number) => JSX.Element, disabled: boolean }) => {
+export const ArrayStep = ({ entry, step, component, disabled, addLabel }: 
+  { 
+    entry: string, 
+    step: SchemaEntry, 
+    component: ({ key, defaultValue, value }: { key: string, defaultValue: any, value?: any }, ids: number) => JSX.Element, 
+    disabled: boolean,
+    addLabel?: string }) => {
   const { getValues, setValue, control, trigger, formState } = useFormContext();
 
   const values = getValues(entry);
@@ -50,7 +56,7 @@ export const ArrayStep = ({ entry, step, component, disabled }: { entry: string,
           // trigger(entry);
           option(step.onChange)
             .map(onChange => onChange({ rawValues: getValues(), value: getValues(entry), setValue }))
-        }} disabled={disabled}>Add</button>
+        }} disabled={disabled}>{addLabel ? addLabel : 'Add'}</button>
         {error && <div className="mrf-invalid-feedback">{error.message}</div>}
       </div>
     </>

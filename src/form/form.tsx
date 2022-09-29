@@ -137,6 +137,7 @@ const FormComponent = <T extends TBaseObject>(props: FormProps<T>, ref: React.Re
                 inputWrapper={inputWrapper}
                 httpClient={maybeCustomHttpClient}
                 functionalProperty={functionalProperty}
+                stepsOptions={{addLabel: props.options?.actions?.add?.label}}
               />
             )
           }
@@ -153,7 +154,7 @@ const FormComponent = <T extends TBaseObject>(props: FormProps<T>, ref: React.Re
             <Step key={idx} entry={entry} step={step}
               schema={schema} inputWrapper={inputWrapper}
               httpClient={maybeCustomHttpClient} functionalProperty={functionalProperty}
-              informations={informations} />
+              informations={informations} options={{addLabel: props.options?.actions?.add?.label}}/>
           )
         })}
         <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(data => onSubmit(cleanOutputArray(data, schema)), onError)} actions={options.actions} />
