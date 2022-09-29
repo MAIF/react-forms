@@ -62,7 +62,7 @@ export interface SchemaEntry {
   help?: string;
   className?: string;
   style?: object;
-  onChange?: (param: object) => void;
+  onChange?: (params: { rawValues: object, setValue: (entry: string, value: any) => void, value: any}) => void;
   render?: SchemaRenderType;
   itemRender?: SchemaRenderType;
   props?: object;
