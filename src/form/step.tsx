@@ -27,7 +27,19 @@ import { format } from "../format";
 import classNames from "classnames";
 import { option } from "../Option";
 
-const CustomizableInput = (props: { rawValues?: any, value?: any, onChange?: (param: object) => void, error?: boolean, getValue: (entry: string) => any, informations?: Informations, setValue?: (key: string, data: any) => void, render?: SchemaRenderType, children: JSX.Element }) => {
+type TCustomizableInputProps = {
+  rawValues?: any,
+  value?: any,
+  onChange?: (param: object) => void,
+  error?: boolean,
+  getValue: (entry: string) => any,
+  informations?: Informations,
+  setValue?: (key: string, data: any) => void,
+  render?: SchemaRenderType,
+  children: JSX.Element,
+  defaultValue?: any
+}
+const CustomizableInput = (props: TCustomizableInputProps) => {
   if (props.render) {
     return (
       props.render({ ...props, error: props.error })
@@ -164,17 +176,17 @@ export const Step = (props: {
             return (
               <Step
                 entry={`${entry}.${idx}.value`}
-                step={{ 
-                  ...(schema[realEntry || (entry as string)]), 
-                  label: step.item?.label || null, 
-                  render: step.item?.render, 
-                  onChange: step.item?.onChange, 
-                  array: step.item?.array || false, 
-                  onAfterChange: step.item?.onAfterChange, 
-                  visible: step.item?.visible, 
+                step={{
+                  ...(schema[realEntry || (entry as string)]),
+                  label: step.item?.label || null,
+                  render: step.item?.render,
+                  onChange: step.item?.onChange,
+                  array: step.item?.array || false,
+                  onAfterChange: step.item?.onAfterChange,
+                  visible: step.item?.visible,
                   disabled: step.item?.disabled,
                   deps: step.item?.deps
-                 }}
+                }}
                 schema={schema}
                 inputWrapper={inputWrapper}
                 httpClient={httpClient}
@@ -278,7 +290,7 @@ export const Step = (props: {
       return (
         <ControlledInput
           step={step}
-          entry={entry} realEntry={realEntry} 
+          entry={entry} realEntry={realEntry}
           errorDisplayed={errorDisplayed}
           informations={informations}
           deactivateReactMemo={deactivateReactMemo}
@@ -313,13 +325,15 @@ export const Step = (props: {
           const flow = option(step.flow).getOrElse(option(step.schema).map(s => Object.keys(s)).getOrElse([]));
           return (
             <ControlledInput step={{ ...step, defaultValue: value || defaultValue }} entry={entry} realEntry={realEntry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
-              <CustomizableInput render={step.render}
+              <CustomizableInput  
+                render={step.render}
                 rawValues={getValues()}
                 value={getValues(entry)}
                 onChange={(v: any) => setValue((entry as string), v, { shouldValidate: true })}
                 setValue={(key: string, value: any) => setValue(key, value)}
                 getValue={(key: string) => getValues(key)}
                 informations={informations}
+                defaultValue={value || defaultValue}
               >
                 <NestedForm
                   schema={step.schema!} flow={flow} step={step} parent={entry}

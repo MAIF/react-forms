@@ -4,7 +4,7 @@ import { useController, useFormContext } from 'react-hook-form';
 import { BasicWrapper } from "./basicWrapper";
 import { option } from '../Option';
 import { type } from '../type';
-import { cleanHash } from '../utils';
+import { cleanHash, isDefined } from '../utils';
 import { ConditionnalSchema, Informations, SchemaEntry, SchemaRenderType } from "./types";
 
 const CustomizableInput = React.memo(
@@ -20,7 +20,7 @@ const CustomizableInput = React.memo(
     }) => {
         if (props.render) {
             return (
-                props.render({ ...props.field, error: props.error, informations: props.informations })
+                props.render({ ...props.field, error: props.error, informations: props.informations, defaultValue: props.step.defaultValue })
             )
         }
         return props.children
@@ -57,7 +57,7 @@ type Props = ComponentProps | ChildrenProps
 export const ControlledInput = (inputProps: Props) => {
     const { step, entry, realEntry, children, component, errorDisplayed = false, informations, deactivateReactMemo, inputWrapper } = inputProps;
     const { field } = useController({
-        // defaultValue: isDefined(step.defaultValue) ? step.defaultValue : null,
+        defaultValue: isDefined(step.defaultValue) ? step.defaultValue : null,
         name: entry
     })
     const { getValues, setValue, formState: { errors } } = useFormContext();
@@ -104,9 +104,12 @@ export const ControlledInput = (inputProps: Props) => {
 
     return <BasicWrapper key={`collapse-${entry}`} entry={entry} realEntry={realEntry} functionalProperty={functionalProperty} step={step} render={inputWrapper} informations={informations}>
         <CustomizableInput
-            render={step.render} step={step}
+            render={step.render} 
+            step={step}
             field={{ setValue: (key: string, value: any) => setValue(key, value), rawValues: getValues(), getValue: (key: string) => getValues(key), ...field }}
-            error={error} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo}>
+            error={error} errorDisplayed={errorDisplayed} 
+            informations={informations} 
+            deactivateReactMemo={deactivateReactMemo}>
             {component ? component(field, props) : React.cloneElement(children!, { ...props })}
         </CustomizableInput>
     </BasicWrapper>

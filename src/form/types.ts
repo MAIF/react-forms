@@ -30,8 +30,17 @@ export interface Schema {
   [key: string]: SchemaEntry;
 }
 
-export type SchemaRenderType = ({ rawValues, value, onChange, error, setValue, getValue, informations }: 
-  { rawValues?: any, value?: any, onChange?: (param: any) => void, error?: boolean, getValue: (entry: string) => any, informations?: Informations, setValue?: (key: string, data: any) => void }) => JSX.Element
+export type SchemaRenderType = ({ rawValues, value, onChange, error, setValue, getValue, informations, defaultValue }: 
+  { 
+    rawValues?: any, 
+    value?: any, 
+    onChange?: (param: any) => void, 
+    error?: boolean, 
+    getValue: (entry: string) => any, 
+    informations?: Informations, 
+    setValue?: (key: string, data: any) => void,
+    defaultValue?: any }) => JSX.Element
+    
 
 export interface ConditionnalSchemaElement {
   default?: boolean;
