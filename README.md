@@ -69,7 +69,7 @@ export const Example = () => {
 - **type** (required): the type of value. It provided by the imported object `type`. It could be just string like `string`, `number`, `bool`, `object`, `date` or `file`
 - **format**: Over the type you can display a special format for the field. It is provided by the imported object `format` or just a string
   - `select`: display a [react-select](https://react-select.com/home) field with provided options
-  - `buttonsSelect`: display a buttons group, drawn with the same options than the format `select`
+  - `buttonsSelect`: display a buttons group, drawn with the same options than the format `select`. You can add the property `isClearable` as boolean to `props` to add the ability to unselect value 
   - `code`: if the type is `string`, display a code input (draw with [react-ace](https://github.com/securingsincity/react-ace)) (add a props.setRef to get ace editor ref)
   - `singleLineCode`: renders text input with syntax highlighting (draw with [react-ace](https://github.com/securingsincity/react-ace)) (add a props.setRef to get ace editor ref)
   - `markdown`: if the type is `string`, display a markdown input. You can add buttons into toolbar by inject a JSX.element thanks to the `actions` property from `props` taking on params the insert function.

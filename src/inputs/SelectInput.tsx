@@ -53,6 +53,7 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
   label?: string,
   placeholder?: React.ReactNode,
   className: string
+  isClearable?: boolean
 }) => {
   const { getValues } = useFormContext()
 
@@ -142,6 +143,7 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
     if (props.isMulti) {
       props?.onChange?.((changes as SelectOption[]).map(x => x.value))
     } else {
+      console.debug({ changes })
       props?.onChange?.((changes as SelectOption)?.value);
     }
   };
@@ -170,6 +172,11 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
         return onChange([...vs, v])
       }
     }
+
+    if (!props.isMulti && props.isClearable && !!value && v.value === (value as SelectOption).value) {
+      return onChange(null)
+    }
+
     return onChange(v)
   }
 
