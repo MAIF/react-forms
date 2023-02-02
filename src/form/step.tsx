@@ -110,7 +110,7 @@ export const Step = (props: {
 }) => {
   let { entry, realEntry, step, schema, inputWrapper, httpClient, functionalProperty, informations } = props;
   const methods = useFormContext();
-  const { formState: { errors, dirtyFields, touchedFields, isSubmitted }, control, getValues, setValue } = methods;
+  const { formState: { errors, dirtyFields, touchedFields, isSubmitted }, control, getValues, setValue, reset } = methods;
   const { watch }: { watch: (param?: string | string[]) => any } = methods;
 
   const [render, setRender] = useState(cleanHash(getValues()));
@@ -142,6 +142,7 @@ export const Step = (props: {
         getValue: (e: string) => getValues(e),
         setValue,
         onChange: (v: any) => setValue(entry as string, v),
+        reset,
         informations
       })
   }

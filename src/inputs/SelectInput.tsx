@@ -143,7 +143,6 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
     if (props.isMulti) {
       props?.onChange?.((changes as SelectOption[]).map(x => x.value))
     } else {
-      console.debug({ changes })
       props?.onChange?.((changes as SelectOption)?.value);
     }
   };

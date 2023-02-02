@@ -82,7 +82,7 @@ export interface SchemaEntry {
   conditionalSchema?: ConditionnalSchema;
   constraints?: Array<Constraint | { type: TConstraintType, message?: string }>;
   flow?: Array<string | FlowObject>;
-  onAfterChange?: (obj: { entry: string, value: object, rawValues: object, previousValue?: object, getValue: (entry: string) => any, setValue: (entry: string, value: any) => void, onChange: (v: any) => void, informations?: Informations }) => void;
+  onAfterChange?: (obj: { entry: string, value: object, rawValues: object, previousValue?: object, getValue: (entry: string) => any, setValue: (entry: string, value: any) => void, onChange: (v: any) => void, reset: (v: any) => void, informations?: Informations }) => void;
   visibleOnCollapse?: boolean;
   addableDefaultValue?: any; /* TODO doc : possible only with array, used to give default value to dynamically added elements */
   collapsed?: boolean; // TODO doc : indicate wether form is closed or not, only for objects with form
