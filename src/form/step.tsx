@@ -296,7 +296,10 @@ export const Step = (props: {
           informations={informations}
           deactivateReactMemo={deactivateReactMemo}
           inputWrapper={inputWrapper}>
-          <BooleanInput className={step.className} errorDisplayed={errorDisplayed} />
+          <BooleanInput
+            className={step.className}
+            errorDisplayed={errorDisplayed}
+            buttons={step.format === format.buttonsSelect} />
         </ControlledInput>
       )
 
@@ -326,7 +329,7 @@ export const Step = (props: {
           const flow = option(step.flow).getOrElse(option(step.schema).map(s => Object.keys(s)).getOrElse([]));
           return (
             <ControlledInput step={{ ...step, defaultValue: value || defaultValue }} entry={entry} realEntry={realEntry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper}>
-              <CustomizableInput  
+              <CustomizableInput
                 render={step.render}
                 rawValues={getValues()}
                 value={getValues(entry)}
