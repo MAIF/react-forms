@@ -57,7 +57,6 @@ export const ArrayStep = ({ entry, step, component, disabled, addLabel }:
           option(step.onChange)
             .map(onChange => onChange({ rawValues: getValues(), value: getValues(entry), setValue }))
         }} disabled={disabled}>{addLabel ? addLabel : 'Add'}</button>
-        {error && <div className="mrf-invalid-feedback">{error.message}</div>}
       </div>
     </>
   )

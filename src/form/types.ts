@@ -81,6 +81,7 @@ export interface SchemaEntry {
   transformer?: ((v: any) => SelectOption) | { label: string, value: string };
   conditionalSchema?: ConditionnalSchema;
   constraints?: Array<Constraint | { type: TConstraintType, message?: string }>;
+  arrayConstraints?: Array<Constraint | { type: TConstraintType, message?: string }>;
   flow?: Array<string | FlowObject>;
   onAfterChange?: (obj: { entry: string, value: object, rawValues: object, previousValue?: object, getValue: (entry: string) => any, setValue: (entry: string, value: any) => void, onChange: (v: any) => void, reset: (v: any) => void, informations?: Informations }) => void;
   visibleOnCollapse?: boolean;

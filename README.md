@@ -207,6 +207,7 @@ export const Example = () => {
   }
   ```
 - **constraints**: a JSON array of constraints. see [constraints section](#constraints)
+- **arrayConstraints**: a JSON array of constraints apply to the entire array (use constraints to apply constraints to inner fileds of array). see [constraints section](#constraints)
 - **deps**: In case of the entry need some form values, thestepwill be re-render after all change. To avoid some perf issues, it would be nice to declare a deps array to listen. The array must contains the root path
   ```javascript
   const schema = {
