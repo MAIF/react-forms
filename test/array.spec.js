@@ -3,12 +3,12 @@ import * as constraints from '../src/constraints';
 import * as yup from 'yup';
 import { getShapeAndDependencies } from '../src/resolvers';
 
-const testArrayConstraints = (constraints = [], message, right, wrong, type) => {
+const testArrayConstraints = (arrayConstraints = [], message, right, wrong, type) => {
   const schema = {
     test: {
       type,
       array: true,
-      constraints
+      arrayConstraints
     }
   }
 
