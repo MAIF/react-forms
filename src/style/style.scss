@@ -40,6 +40,8 @@
   cursor: pointer;
   border-width: 1px;
   background-color: $form-bg-color;
+  color: $form-text-color;
+
 
   &:disabled {
     opacity: .6;
