@@ -347,3 +347,14 @@
   height: 20px;
   box-shadow: 1px 0px 5px 0px rgba(0, 0, 0, 0.3);
 }
+
+.react-form-select__menu{
+  background-color: $form-bg-color !important;
+  border-color: $form-border-color !important;
+  color:$form-text-color !important;
+}
+
+.react-form-select__option--is-focused{
+  background-color: $form-select-hover-color !important;
+  color:$form-select-hover-text-color !important;
+}

@@ -2,7 +2,9 @@ $form-text-color: #{"var(--form-text-color, #495057)"};
 $form-border-color: #{"var(--form-border-color, #ced4da)"};
 $form-bg-color: #{"var(--form-bg-color, #fff)"};
 
-$readonly-bg-color: #{"var(--form-readonly-bg-color, #e9ecef)"};
+$form-select-hover-color:#{"var(--form-select-hover-color, #ccc)"};
+$form-select-hover-text-color:#{"var(--form-select-hover-text-color, #000)"};
+
 
 // status
 $error-color: #{"var(--error-color, #dc3545)"}; //status
