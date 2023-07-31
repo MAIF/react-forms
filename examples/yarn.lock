@@ -2115,10 +2115,10 @@
   dependencies:
     "@lezer/lr" "^0.15.0"
 
-"@maif/react-forms@^1.4.0":
-  version "1.4.0"
-  resolved "https://registry.npmjs.org/@maif/react-forms/-/react-forms-1.4.0.tgz"
-  integrity sha512-uoG0CTxMncpGulHSMscoKX3Q/j6RiR1C4QB69BPXgcS0JsBFs2NBUO+Xrxqoo46TK66c9c4oGQkmrcCFj0+Qxg==
+"@maif/react-forms@^1.6.0":
+  version "1.6.0"
+  resolved "https://registry.npmjs.org/@maif/react-forms/-/react-forms-1.6.0.tgz"
+  integrity sha512-WwEbH7DvCl65j4AwhFxWHRJ7odhwuss5fP1/3ZM7KI89RkyBFHMoLKp8BP3iJEpLRbcV5arTATf67gjIKw5FHQ==
   dependencies:
     "@codemirror/basic-setup" "^0.19.1"
     "@codemirror/lang-html" "^0.19.4"
