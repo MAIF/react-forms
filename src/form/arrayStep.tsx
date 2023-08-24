@@ -9,13 +9,14 @@ import { option } from '../Option';
 import { type } from '../type';
 import { defaultVal, getDefaultValues } from './formUtils';
 
-export const ArrayStep = ({ entry, step, component, disabled, addLabel }: 
-  { 
-    entry: string, 
-    step: SchemaEntry, 
-    component: ({ key, defaultValue, value }: { key: string, defaultValue: any, value?: any }, ids: number) => JSX.Element, 
+export const ArrayStep = ({ entry, step, component, disabled, addLabel }:
+  {
+    entry: string,
+    step: SchemaEntry,
+    component: ({ key, defaultValue, value }: { key: string, defaultValue: any, value?: any }, ids: number) => JSX.Element,
     disabled: boolean,
-    addLabel?: string }) => {
+    addLabel?: string
+  }) => {
   const { getValues, setValue, control, trigger, formState } = useFormContext();
 
   const values = getValues(entry);
@@ -39,8 +40,12 @@ export const ArrayStep = ({ entry, step, component, disabled, addLabel }:
                 </div>
                 <button type="button"
                   style={{ position: 'absolute', top: '2px', right: 0 }}
-                  className='mrf-btn mrf-btn_red mrf-btn_sm mrf-ml_5' disabled={disabled} onClick={() => {
+                  className='mrf-btn mrf-btn_red mrf-btn_sm mrf-ml_5'
+                  disabled={disabled}
+                  onClick={() => {
                     remove(idx)
+                    option(step.onChange)
+                      .map(onChange => onChange({ rawValues: getValues(), value: getValues(entry), setValue }))
                     trigger(entry);
                   }}>
                   <Trash2 size={16} />
@@ -50,13 +55,15 @@ export const ArrayStep = ({ entry, step, component, disabled, addLabel }:
           )
         })}
       <div className='mrf-flex mrf-jc_flex_end'>
-        <button type="button" className={classNames('mrf-btn', 'mrf-btn_blue', 'mrf-btn_sm', 'mrf-mt_5', { ['mrf-input__invalid']: !!errorDisplayed })} onClick={() => {
-          const defaultValues = step.type === type.object ? getDefaultValues(step.flow, step.schema) : defaultVal()
-          append({ value: step.addableDefaultValue || defaultValues })
-          // trigger(entry);
-          option(step.onChange)
-            .map(onChange => onChange({ rawValues: getValues(), value: getValues(entry), setValue }))
-        }} disabled={disabled}>{addLabel ? addLabel : 'Add'}</button>
+        <button type="button"
+          className={classNames('mrf-btn', 'mrf-btn_blue', 'mrf-btn_sm', 'mrf-mt_5', { ['mrf-input__invalid']: !!errorDisplayed })}
+          onClick={() => {
+            const defaultValues = step.type === type.object ? getDefaultValues(step.flow, step.schema) : defaultVal()
+            append({ value: step.addableDefaultValue || defaultValues })
+            // trigger(entry);
+            option(step.onChange)
+              .map(onChange => onChange({ rawValues: getValues(), value: getValues(entry), setValue }))
+          }} disabled={disabled}>{addLabel ? addLabel : 'Add'}</button>
       </div>
     </>
   )
