@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/react-forms/static/css/main.152dba32.css",
-    "main.js": "/react-forms/static/js/main.db420f90.js",
+    "main.js": "/react-forms/static/js/main.f684acda.js",
     "static/media/fa-solid-900.svg": "/react-forms/static/media/fa-solid-900.7a8b4f130182d19a2d7c.svg",
     "static/media/fa-brands-400.svg": "/react-forms/static/media/fa-brands-400.2f517e09eb2ca6650ff5.svg",
     "static/media/fa-solid-900.eot": "/react-forms/static/media/fa-solid-900.9bbb245e67a133f6e486.eot",
@@ -19,10 +19,10 @@
     "static/media/fa-regular-400.woff2": "/react-forms/static/media/fa-regular-400.7a3337626410ca2f4071.woff2",
     "index.html": "/react-forms/index.html",
     "main.152dba32.css.map": "/react-forms/static/css/main.152dba32.css.map",
-    "main.db420f90.js.map": "/react-forms/static/js/main.db420f90.js.map"
+    "main.f684acda.js.map": "/react-forms/static/js/main.f684acda.js.map"
   },
   "entrypoints": [
     "static/css/main.152dba32.css",
-    "static/js/main.db420f90.js"
+    "static/js/main.f684acda.js"
   ]
 }
