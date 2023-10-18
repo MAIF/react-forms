@@ -3,13 +3,26 @@ import classNames from 'classnames';
 import CreatableSelect from 'react-select/creatable';
 import Select from 'react-select';
 import { None, option, OptionType, Some } from '../Option';
-import { isPromise } from '../utils'
+import { isGroup, isOption, isPromise } from '../utils'
 import deepEqual from 'fast-deep-equal';
 import { useFormContext } from 'react-hook-form';
 
 export type SelectOption = { label: string, value: any };
+export type GroupOptions = { label?: string, options: SelectOption[] }
 
-const valueToSelectOption = (value: any, possibleValues: SelectOption[] = [], isMulti = false): SelectOption | SelectOption[] | null => {
+const getValueFromOption = (possibleValues: SelectOption[] | GroupOptions[], value: any): OptionType<any> => {
+  return option(possibleValues.find(v => {
+    if (isOption(v)) {
+      return deepEqual(v.value, value)
+    } else if (isGroup(v)) {
+      return getValueFromOption(v.options, value)
+    } else {
+      return undefined
+    }
+  }))
+}
+
+const valueToSelectOption = (value: any, possibleValues: SelectOption[] | GroupOptions[] = [], isMulti = false): SelectOption | SelectOption[] | null => {
   if (value === null || !value) {
     return null;
   }
@@ -27,7 +40,12 @@ const valueToSelectOption = (value: any, possibleValues: SelectOption[] = [], is
       })
       .getOrElse([]);
   }
-  const maybeValue = option(possibleValues.find(v => deepEqual(v.value, value)))
+
+  
+
+  const maybeValue = getValueFromOption(possibleValues, value)
+
+
   return maybeValue
     .getOrElse({
       label: maybeValue.map(v => v.label).getOrElse(value?.label || (typeof value === 'object' ? JSON.stringify(value) : value)),
@@ -86,7 +104,7 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
     .map(v => transformOption(v))
 
   const [loading, setLoading] = useState(true);
-  const [values, setValues] = useState<SelectOption[]>(possibleValues);
+  const [values, setValues] = useState<SelectOption[] | GroupOptions[]>(possibleValues);
   const [value, setValue] = useState<readonly SelectOption[] | SelectOption | null>()
 
   useEffect(() => {
@@ -153,7 +171,8 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
       .flatMap(createdOpt => transform(createdOpt))
       .getOrElse(valueToSelectOption(label, values) as SelectOption)
 
-    setValues([...values, createdValue])
+    const newLocal = [...values as SelectOption[], createdValue];
+    setValues(newLocal)
 
     if (props.isMulti) {
       onChange([...(value as SelectOption[]), createdValue])

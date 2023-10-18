@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import hash from 'object-hash';
+import { GroupOptions, SelectOption } from "./inputs/SelectInput";
 
 export const isPromise = (value: any) => {
   return Boolean(value && typeof value.then === 'function');
@@ -57,4 +58,12 @@ export const useHashEffect = (func: () => void, deps: any) => {
 
   }, deps) /* FIXME deps or [deps] ? */
 
+}
+
+export function isGroup(obj: any): obj is GroupOptions {
+  return 'options' in (<GroupOptions>obj)
+}
+
+export function isOption(obj: any): obj is SelectOption {
+  return 'value' in (<SelectOption>obj)
 }
