@@ -96,7 +96,8 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
   }, [props.value, values, props.defaultValue, loading])
 
   useEffect(() => {
-    if (props.optionsFrom && (typeof props.optionsFrom === 'function' || !values.length)) {
+    console.debug('get possoible values')
+    if (props.optionsFrom) {
       const cond = option(props.fetchCondition)
         .map(cond => cond())
         .getOrElse(true);
