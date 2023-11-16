@@ -96,7 +96,6 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
   }, [props.value, values, props.defaultValue, loading])
 
   useEffect(() => {
-    console.debug('get possoible values')
     if (props.optionsFrom) {
       const cond = option(props.fetchCondition)
         .map(cond => cond())
@@ -154,10 +153,10 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
       .flatMap(createdOpt => transform(createdOpt))
       .getOrElse(valueToSelectOption(label, values) as SelectOption)
 
-    setValues([...values, createdValue])
+    setValues([...values || [], createdValue])
 
     if (props.isMulti) {
-      onChange([...(value as SelectOption[]), createdValue])
+      onChange([...(value as SelectOption[]) || [], createdValue])
     } else {
       onChange(createdValue)
     }
