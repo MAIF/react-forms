@@ -121,7 +121,7 @@ export const ObjectInput = (props: {value?: object, onChange?: (value: InternalS
           <button
             disabled={props.disabled}
             type="button"
-            className='mrf-flex mrf-btn mrf-btn_red mrf-btn_sm mrf-ml_10'
+            className='mrf-flex mrf-ai_center mrf-btn mrf-btn_red mrf-btn_sm mrf-ml_10'
             onClick={() => remove(id)}>
             <MinusCircle />
           </button>
@@ -129,7 +129,7 @@ export const ObjectInput = (props: {value?: object, onChange?: (value: InternalS
             <button
               disabled={props.disabled}
               type="button"
-              className='mrf-flex mrf-btn mrf-btn_blue mrf-btn_sm mrf-ml_5'
+              className='mrf-flex mrf-ai_center mrf-btn mrf-btn_blue mrf-btn_sm mrf-ml_5'
               onClick={addNext}>
               <PlusCircle />
             </button>
