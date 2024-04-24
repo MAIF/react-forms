@@ -31,7 +31,7 @@ type FormProps<DataType> = {
 export interface FormRef {
   handleSubmit: () => void,
   trigger: () => void,
-  methods: UseFormReturn & { data: () => any}
+  methods: UseFormReturn & { data: () => any }
 }
 
 const FormComponent = <T extends TBaseObject>(props: FormProps<T>, ref: React.Ref<FormRef>) => {
@@ -95,7 +95,7 @@ const FormComponent = <T extends TBaseObject>(props: FormProps<T>, ref: React.Re
   const functionalProperty = <T,>(entry: string, prop: T | ((param: { rawValues: { [x: string]: any }, value: any, informations?: Informations, getValue: (key: string) => any }) => T), informations?: Informations, error?: { [x: string]: any }): T => {
     if (typeof prop === 'function') {
 
-      return (prop as Function)({ rawValues: getValues(), value: getValues(entry), informations, getValue: (key: string) => getValues(key), error });
+      return (prop as Function)({ rawValues: getValues(), value: getValues(entry), defaultFormValue: value, informations, getValue: (key: string) => getValues(key), error });
     } else {
       return prop;
     }
@@ -137,7 +137,8 @@ const FormComponent = <T extends TBaseObject>(props: FormProps<T>, ref: React.Re
                 inputWrapper={inputWrapper}
                 httpClient={maybeCustomHttpClient}
                 functionalProperty={functionalProperty}
-                stepsOptions={{addLabel: props.options?.actions?.add?.label}}
+                stepsOptions={{ addLabel: props.options?.actions?.add?.label }}
+                defaultFormValue={value} 
               />
             )
           }
@@ -151,10 +152,10 @@ const FormComponent = <T extends TBaseObject>(props: FormProps<T>, ref: React.Re
 
           const informations = { path: entry, key: entry }
           return (
-            <Step key={idx} entry={entry} step={step}
+            <Step defaultFormValue={value} key={idx} entry={entry} step={step}
               schema={schema} inputWrapper={inputWrapper}
               httpClient={maybeCustomHttpClient} functionalProperty={functionalProperty}
-              informations={informations} options={{addLabel: props.options?.actions?.add?.label}}/>
+              informations={informations} options={{ addLabel: props.options?.actions?.add?.label }} />
           )
         })}
         <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(data => onSubmit(cleanOutputArray(data, schema)), onError)} actions={options.actions} />

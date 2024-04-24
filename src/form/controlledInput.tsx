@@ -42,6 +42,7 @@ interface BaseProps {
     informations: Informations,
     deactivateReactMemo: boolean,
     inputWrapper?: (props: object) => JSX.Element,
+    defaultFormValue: any
 }
 
 interface ComponentProps extends BaseProps {
@@ -55,7 +56,7 @@ interface ChildrenProps extends BaseProps {
 type Props = ComponentProps | ChildrenProps
 
 export const ControlledInput = (inputProps: Props) => {
-    const { step, entry, realEntry, children, component, errorDisplayed = false, informations, deactivateReactMemo, inputWrapper } = inputProps;
+    const { step, entry, realEntry, children, component, errorDisplayed = false, informations, deactivateReactMemo, inputWrapper, defaultFormValue } = inputProps;
     const { field } = useController({
         defaultValue: isDefined(step.defaultValue) ? step.defaultValue : null,
         name: entry
@@ -68,7 +69,7 @@ export const ControlledInput = (inputProps: Props) => {
 
     const functionalProperty = (entry: string, prop: any) => {
         if (typeof prop === 'function') {
-            return prop({ rawValues: getValues(), value: getValues(entry), informations, error, getValue: (key: string) => getValues(key) });
+            return prop({ rawValues: getValues(), value: getValues(entry), defaultFormValue, informations, error, getValue: (key: string) => getValues(key) });
         } else {
             return prop;
         }
