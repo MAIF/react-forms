@@ -15,7 +15,7 @@ import { Footer } from './footer';
 import '../style/style.scss';
 
 
-type FormProps<DataType> = {
+export type FormProps<DataType> = {
   schema: Schema,
   flow?: Array<string | FlowObject>,
   value?: DataType,
