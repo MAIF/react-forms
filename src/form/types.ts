@@ -60,6 +60,7 @@ export interface SchemaEntry {
   type: Type;
   format?: Format;
   array?: boolean;
+  optional?: boolean
   createOption?: boolean;
   onCreateOption?: (option: string) => any; // TODO specify option style
   isMulti?: boolean;

@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useMemo, useState } from "react"
-import { Controller, useFormContext, useWatch } from "react-hook-form"
+import { Controller, useController, useFormContext, useWatch } from "react-hook-form"
 import deepEqual from 'fast-deep-equal';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -13,8 +13,10 @@ import Loader from 'react-feather/dist/icons/loader.js';
 import Upload from 'react-feather/dist/icons/upload.js';
 // @ts-ignore
 import ChevronDown from 'react-feather/dist/icons/chevron-down.js';
-// @ts-ignore
+// @ts-ignore 
 import ChevronUp from 'react-feather/dist/icons/chevron-up.js';
+// @ts-ignore 
+import Trash2 from 'react-feather/dist/icons/trash-2.js';
 
 import { BooleanInput, CodeInput, Collapse, MarkdownInput, ObjectInput, SelectInput, SingleLineCode } from "../inputs"
 import { cleanHash, isDefined } from "../utils"
@@ -168,6 +170,10 @@ export const Step = (props: {
     }
   }
 
+  if (step.optional) {
+    return <OptionalStep {...props} />
+  }
+
   if (step.array) {
     return (
       <ControlledInput step={step} entry={entry} realEntry={realEntry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper} defaultFormValue={defaultFormValue} >
@@ -294,7 +300,7 @@ export const Step = (props: {
       return (
         <ControlledInput
           step={step}
-          defaultFormValue={defaultFormValue} 
+          defaultFormValue={defaultFormValue}
           entry={entry} realEntry={realEntry}
           errorDisplayed={errorDisplayed}
           informations={informations}
@@ -353,7 +359,7 @@ export const Step = (props: {
 
         case format.code:
           return (
-            <ControlledInput step={{ ...step, defaultValue: value || defaultValue }} entry={entry} realEntry={realEntry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper} defaultFormValue={defaultFormValue} 
+            <ControlledInput step={{ ...step, defaultValue: value || defaultValue }} entry={entry} realEntry={realEntry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper} defaultFormValue={defaultFormValue}
               component={(field, props) => (
                 <CodeInput
                   {...props}
@@ -386,7 +392,7 @@ export const Step = (props: {
       switch (step.format) {
         case format.datetime:
           return (
-            <ControlledInput step={step} entry={entry} realEntry={realEntry} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper} defaultFormValue={defaultFormValue} 
+            <ControlledInput step={step} entry={entry} realEntry={realEntry} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper} defaultFormValue={defaultFormValue}
               component={(field: { value: any, onChange: (v: any) => void }) => {
                 return (
                   <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -405,7 +411,7 @@ export const Step = (props: {
           )
         case format.time:
           return (
-            <ControlledInput step={step} entry={entry} realEntry={realEntry} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper} defaultFormValue={defaultFormValue} 
+            <ControlledInput step={step} entry={entry} realEntry={realEntry} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper} defaultFormValue={defaultFormValue}
               component={(field: { value: any, onChange: (v: any) => void }) => {
                 return (
                   <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -424,7 +430,7 @@ export const Step = (props: {
           )
         default:
           return (
-            <ControlledInput step={step} entry={entry} realEntry={realEntry} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper} defaultFormValue={defaultFormValue} 
+            <ControlledInput step={step} entry={entry} realEntry={realEntry} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper} defaultFormValue={defaultFormValue}
               component={(field: { value: any, onChange: (v: any) => void }) => {
                 return (
                   <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -500,7 +506,7 @@ export const Step = (props: {
 
     case type.json:
       return (
-        <ControlledInput step={step} entry={entry} realEntry={realEntry} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper} defaultFormValue={defaultFormValue} 
+        <ControlledInput step={step} entry={entry} realEntry={realEntry} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper} defaultFormValue={defaultFormValue}
           component={(field: { value: any, onChange: (v: any) => void }, props: object) => (
             <CodeInput
               {...props}
@@ -601,7 +607,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
               httpClient={maybeCustomHttpClient}
               functionalProperty={functionalProperty}
               stepsOptions={stepsOptions}
-              defaultFormValue={defaultFormValue} 
+              defaultFormValue={defaultFormValue}
             />
           )
         }
@@ -624,9 +630,64 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
             functionalProperty={functionalProperty}
             informations={{ path: `${informations?.path}.${entry}`, key: entry, parent: informations }}
             options={stepsOptions}
-            defaultFormValue={defaultFormValue}  />
+            defaultFormValue={defaultFormValue} />
         )
       })}
+    </div>
+  )
+}
+
+const OptionalStep = (props: {
+  entry: string,
+  realEntry?: string,
+  step: SchemaEntry,
+  schema: Schema,
+  inputWrapper?: (props: object) => JSX.Element,
+  httpClient?: HttpClient,
+  defaultValue?: any,
+  index?: number,
+  functionalProperty: TFunctionalProperty,
+  informations: Informations,
+  options?: StepsOptions
+  defaultFormValue: any
+}) => {
+  const { field } = useController({
+    defaultValue: isDefined(props.step.defaultValue) ? props.step.defaultValue : null,
+    name: props.entry
+  })
+  const [isAdded, setIsAdded] = useState<boolean>(!!field.value)
+  const { setValue } = useFormContext()
+
+
+  console.debug({props, isDefined: isAdded})
+
+  if (isAdded) {
+    return (
+      <div className='mrf-ai_center mrf-mt_5' style={{ position: 'relative' }}>
+        <div style={{ width: '95%' }}>
+          <Step {...{ ...props, step: { ...props.step, optional: false } }} />
+        </div>
+        <button type="button"
+          style={{ position: 'absolute', top: '2px', right: 0 }}
+          className='mrf-btn mrf-btn_red mrf-btn_sm mrf-ml_5'
+          onClick={() => {
+            setIsAdded(false)
+            setValue(props.entry, null)
+          }}>
+          <Trash2 size={16} />
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className='mrf-flex mrf-jc_flex_end'>
+      <button type="button"
+        className={classNames('mrf-btn', 'mrf-btn_blue', 'mrf-btn_sm', 'mrf-mt_5')}
+        onClick={() => {
+          setIsAdded(true)
+          //todo: setup la valeur par defaut ??
+        }}>Add</button>
     </div>
   )
 }
