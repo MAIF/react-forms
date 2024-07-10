@@ -1,5 +1,8 @@
 import * as  React from "react";
 import { ChangeEvent } from 'react';
+import classNames from "classnames";
+// @ts-ignore 
+import Trash2 from 'react-feather/dist/icons/trash-2.js';
 import { useController, useFormContext } from 'react-hook-form';
 import { BasicWrapper } from "./basicWrapper";
 import { option } from '../Option';
@@ -62,6 +65,7 @@ export const ControlledInput = (inputProps: Props) => {
         name: entry
     })
     const { getValues, setValue, formState: { errors } } = useFormContext();
+    const [isAdded, setIsAdded] = React.useState<boolean>(!!field.value)
 
     //@ts-ignore
     const error: { [x: string]: any } = entry.split('.').reduce((acc, curr) => acc && acc[curr], errors)
@@ -103,13 +107,55 @@ export const ControlledInput = (inputProps: Props) => {
         value: field.value,
     }
 
+    if (step.optional && isAdded) {
+        return (
+            <div className='mrf-ai_center mrf-mt_5' style={{ position: 'relative' }}>
+                <div style={{ width: '95%' }}>
+                    <BasicWrapper key={`collapse-${entry}`} entry={entry} realEntry={realEntry} functionalProperty={functionalProperty} step={step} render={inputWrapper} informations={informations}>
+                        <CustomizableInput
+                            render={step.render}
+                            step={step}
+                            field={{ setValue: (key: string, value: any) => setValue(key, value), rawValues: getValues(), getValue: (key: string) => getValues(key), ...field }}
+                            error={error} errorDisplayed={errorDisplayed}
+                            informations={informations}
+                            deactivateReactMemo={deactivateReactMemo}>
+                            {component ? component(field, props) : React.cloneElement(children!, { ...props })}
+                        </CustomizableInput>
+                    </BasicWrapper>
+                </div>
+                <button type="button"
+                    style={{ position: 'absolute', top: '2px', right: 0 }}
+                    className='mrf-btn mrf-btn_red mrf-btn_sm mrf-ml_5'
+                    onClick={() => {
+                        setIsAdded(false)
+                        setValue(entry, null)
+                    }}>
+                    <Trash2 size={16} />
+                </button>
+            </div>
+        )
+    } else if (step.optional) {
+        return (
+            <BasicWrapper key={`collapse-${entry}`} entry={entry} realEntry={realEntry} functionalProperty={functionalProperty} step={step} render={inputWrapper} informations={informations}>
+                <div className='mrf-flex mrf-jc_flex_end'>
+                    <button type="button"
+                        className={classNames('mrf-btn', 'mrf-btn_blue', 'mrf-btn_sm', 'mrf-mt_5')}
+                        onClick={() => {
+                            setIsAdded(true)
+                            //todo: setup la valeur par defaut ??
+                        }}>Add</button>
+                </div>
+            </BasicWrapper>
+        )
+    }
+
     return <BasicWrapper key={`collapse-${entry}`} entry={entry} realEntry={realEntry} functionalProperty={functionalProperty} step={step} render={inputWrapper} informations={informations}>
         <CustomizableInput
-            render={step.render} 
+            render={step.render}
             step={step}
             field={{ setValue: (key: string, value: any) => setValue(key, value), rawValues: getValues(), getValue: (key: string) => getValues(key), ...field }}
-            error={error} errorDisplayed={errorDisplayed} 
-            informations={informations} 
+            error={error} errorDisplayed={errorDisplayed}
+            informations={informations}
             deactivateReactMemo={deactivateReactMemo}>
             {component ? component(field, props) : React.cloneElement(children!, { ...props })}
         </CustomizableInput>

@@ -170,10 +170,6 @@ export const Step = (props: {
     }
   }
 
-  if (step.optional) {
-    return <OptionalStep {...props} />
-  }
-
   if (step.array) {
     return (
       <ControlledInput step={step} entry={entry} realEntry={realEntry} errorDisplayed={errorDisplayed} informations={informations} deactivateReactMemo={deactivateReactMemo} inputWrapper={inputWrapper} defaultFormValue={defaultFormValue} >
@@ -658,8 +654,6 @@ const OptionalStep = (props: {
   const [isAdded, setIsAdded] = useState<boolean>(!!field.value)
   const { setValue } = useFormContext()
 
-
-  console.debug({props, isDefined: isAdded})
 
   if (isAdded) {
     return (
