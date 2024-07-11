@@ -21,7 +21,7 @@ export const buildSubResolver = (props: SchemaEntry, key: string, dependencies: 
   const { constraints = [] } = props;
   if (props.array || props.isMulti) {
     let subResolver;
-    let arrayResolver = yup.array()
+    let arrayResolver = yup.array().nullable().optional()
 
     if (props.schema) {
       const deps: Array<[string, string]> = [];
@@ -44,12 +44,12 @@ export const buildSubResolver = (props: SchemaEntry, key: string, dependencies: 
     return arrayResolver
   } else if (props.type === type.object && props.schema) {
     if (!Object.keys(props.schema).length) {
-      return yup.object()
+      return yup.object().nullable().optional()
     }
     const subResolver = getShapeAndDependencies(props.flow || Object.keys(props.schema), props.schema, dependencies, rawValues);
     return constraints.reduce((resolver, constraint) => {
       return jsonOrFunctionConstraint(constraint, resolver, key, dependencies)
-    }, yup.object().shape(subResolver.shape, dependencies))
+    }, yup.object().nullable().optional().shape(subResolver.shape, dependencies))
   } else if (props.type === type.object && props.conditionalSchema) {
     const { schema, flow } = option(props.conditionalSchema)
       .map(condiSchema => {
@@ -74,7 +74,7 @@ export const buildSubResolver = (props: SchemaEntry, key: string, dependencies: 
     const subResolver = getShapeAndDependencies(flow || Object.keys(schema), schema, dependencies, rawValues);
     return constraints.reduce((resolver, constraint) => {
       return jsonOrFunctionConstraint(constraint, resolver, key, dependencies)
-    }, yup.object().shape(subResolver.shape, dependencies))
+    }, yup.object().nullable().optional().shape(subResolver.shape, dependencies))
   } else {
     return constraints.reduce((resolver, constraint) => {
       return jsonOrFunctionConstraint(constraint, resolver, key, dependencies)
