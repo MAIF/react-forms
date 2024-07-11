@@ -1,7 +1,7 @@
 {
   "name": "@maif/react-forms",
   "description": "Build react safe forms as fast as possible",
-  "version": "1.6.5",
+  "version": "1.6.9",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "source": "src/index.ts",
