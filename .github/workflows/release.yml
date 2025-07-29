@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: coursier/cache-action@v5
+    - uses: coursier/cache-action@v6
     #get version
     - name: Get the version
       id: get_version
