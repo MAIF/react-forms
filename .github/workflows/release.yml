@@ -8,7 +8,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2.2.0
+    - uses: actions/checkout@v4
     - uses: coursier/cache-action@v5
     #get version
     - name: Get the version
@@ -21,7 +21,7 @@ jobs:
         node-version: '16'
         registry-url: 'https://registry.npmjs.org'
     # release
-    - uses: actions/cache@v2
+    - uses: actions/cache@v4
       with:
         path: ~/.npm
         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
