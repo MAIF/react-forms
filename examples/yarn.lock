@@ -2115,10 +2115,10 @@
   dependencies:
     "@lezer/lr" "^0.15.0"
 
-"@maif/react-forms@^1.6.9":
-  version "1.6.9"
-  resolved "https://registry.npmjs.org/@maif/react-forms/-/react-forms-1.6.9.tgz"
-  integrity sha512-Nsoiu8T3JHajVuFsSyEWg4gUxUcXCATGt+HAAfk7OstOK/v5yvh05J3effHxG9luU/iOAsm3H9uiiAM8qy1K4g==
+"@maif/react-forms@^1.6.10":
+  version "1.6.10"
+  resolved "https://registry.npmjs.org/@maif/react-forms/-/react-forms-1.6.10.tgz"
+  integrity sha512-p/lnJqfg52yfRKLiZ75BDWsJWS+s3GbvQDzmVwU9Q59lk7t8f5T1NV5UeSrwjItwa4a6YHRVApju7BrUO/1/8g==
   dependencies:
     "@codemirror/basic-setup" "^0.19.1"
     "@codemirror/lang-html" "^0.19.4"
@@ -8335,7 +8335,7 @@ react-transition-group@^4.3.0, react-transition-group@^4.4.2:
     loose-envify "^1.4.0"
     prop-types "^15.6.2"
 
-"react@^16.8.0 || ^17 || ^18", "react@^16.8.0 || ^17.0.0", "react@^16.8.6 || ^17", "react@^17.0.0 || ^18.0.0", "react@^17.0.2 || ^18.0.0", "react@^17.0.2 || 18", "react@>= 16", react@>=16.0.0, react@>=16.6.0, react@>=16.8, react@>=16.8.0, react@17.0.2:
+"react@^16.8.0 || ^17 || ^18", "react@^16.8.0 || ^17.0.0", "react@^16.8.6 || ^17", "react@^17.0.0 || ^18.0.0", "react@^17.0.2 || ^18.0.0", "react@>= 16", react@>=16.0.0, react@>=16.6.0, react@>=16.8, react@>=16.8.0, react@>=17.0.2, react@17.0.2:
   version "17.0.2"
   resolved "https://registry.npmjs.org/react/-/react-17.0.2.tgz"
   integrity sha512-gnhPt75i/dq/z3/6q/0asP78D0u592D5L1pd7M8P+dck6Fu/jJeL6iVVK23fptSUZj8Vjf++7wXA8UNclGQcbA==
