@@ -80,9 +80,9 @@ export const ControlledInput = (inputProps: Props) => {
     }
 
     const props = {
-        name: field.name,
+        name: step.name ?? field.name,
         ...step.props,
-        id: entry,
+        id: step.name ?? entry,
         readOnly: functionalProperty(entry, step.disabled) ? 'readOnly' : null,
         placeholder: step.placeholder,
         onChange: (e: ChangeEvent<HTMLInputElement>) => {

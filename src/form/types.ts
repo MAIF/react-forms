@@ -68,6 +68,7 @@ export interface SchemaEntry {
   visible?: boolean | ((prop: { rawValues: { [x: string]: any }, value: any, informations?: Informations }) => boolean);
   disabled?: boolean | ((prop: { rawValues: { [x: string]: any }, value: any, informations?: Informations }) => boolean);
   label?: React.ReactNode | ((prop: { rawValues: { [x: string]: any }, value: any, informations?: Informations }) => React.ReactNode);
+  name?: string;
   placeholder?: string;
   defaultValue?: any;
   help?: string;

@@ -47,7 +47,7 @@ export const BasicWrapper = ({ entry, realEntry, children, render, functionalPro
 
   return (
     <div className={`mrf-mt_10  ${className || ""}`} style={{ position: 'relative' }}>
-      {computedLabel && <label className='mrf-flex mrf-ai_center mrf-mb_5' htmlFor={entry}>
+      {computedLabel && <label className='mrf-flex mrf-ai_center mrf-mb_5' htmlFor={step?.name ?? entry}>
         <span>{computedLabel}</span>
         {step?.help && <>
           <ReactToolTip html={true} place={'bottom'} id={id} />
