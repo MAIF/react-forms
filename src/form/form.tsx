@@ -95,7 +95,7 @@ const FormComponent = <T extends TBaseObject>(props: FormProps<T>, ref: React.Re
   const functionalProperty = <T,>(entry: string, prop: T | ((param: { rawValues: { [x: string]: any }, value: any, informations?: Informations, getValue: (key: string) => any }) => T), informations?: Informations, error?: { [x: string]: any }): T => {
     if (typeof prop === 'function') {
 
-      return (prop as Function)({ rawValues: getValues(), value: getValues(entry), defaultFormValue: value, informations, getValue: (key: string) => getValues(key), error });
+      return (prop as Function)({ rawValues: cleanOutputArray(getValues(), schema), value: getValues(entry), defaultFormValue: value, informations, getValue: (key: string) => getValues(key), error });
     } else {
       return prop;
     }

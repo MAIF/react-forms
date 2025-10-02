@@ -8,7 +8,8 @@ import { BasicWrapper } from "./basicWrapper";
 import { option } from '../Option';
 import { type } from '../type';
 import { cleanHash, isDefined } from '../utils';
-import { ConditionnalSchema, Informations, SchemaEntry, SchemaRenderType } from "./types";
+import { ConditionnalSchema, Informations, Schema, SchemaEntry, SchemaRenderType } from "./types";
+import { cleanOutputArray } from "./formUtils";
 
 const CustomizableInput = React.memo(
     (props: {
@@ -46,6 +47,7 @@ interface BaseProps {
     deactivateReactMemo: boolean,
     inputWrapper?: (props: object) => JSX.Element,
     defaultFormValue: any
+    schema: Schema
 }
 
 interface ComponentProps extends BaseProps {
@@ -73,7 +75,7 @@ export const ControlledInput = (inputProps: Props) => {
 
     const functionalProperty = (entry: string, prop: any) => {
         if (typeof prop === 'function') {
-            return prop({ rawValues: getValues(), value: getValues(entry), defaultFormValue, informations, error, getValue: (key: string) => getValues(key) });
+            return prop({ rawValues: cleanOutputArray(getValues(), inputProps.schema), value: getValues(entry), defaultFormValue, informations, error, getValue: (key: string) => getValues(key) });
         } else {
             return prop;
         }
@@ -102,7 +104,7 @@ export const ControlledInput = (inputProps: Props) => {
             })()
             field.onChange(value)
             option(step.onChange)
-                .map(onChange => onChange({ rawValues: getValues(), value, setValue }))
+                .map(onChange => onChange({ rawValues: cleanOutputArray(getValues(), inputProps.schema), value, setValue }))
         },
         value: field.value,
     }
@@ -153,7 +155,7 @@ export const ControlledInput = (inputProps: Props) => {
         <CustomizableInput
             render={step.render}
             step={step}
-            field={{ setValue: (key: string, value: any) => setValue(key, value), rawValues: getValues(), getValue: (key: string) => getValues(key), ...field }}
+            field={{ setValue: (key: string, value: any) => setValue(key, value), rawValues: cleanOutputArray(getValues(), inputProps.schema), getValue: (key: string) => getValues(key), ...field }}
             error={error} errorDisplayed={errorDisplayed}
             informations={informations}
             deactivateReactMemo={deactivateReactMemo}>

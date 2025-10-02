@@ -6,6 +6,8 @@ import { None, option, OptionType, Some } from '../Option';
 import { isPromise } from '../utils'
 import deepEqual from 'fast-deep-equal';
 import { useFormContext } from 'react-hook-form';
+import { cleanOutputArray } from '../form/formUtils';
+import { Schema } from '../form/types';
 
 export type SelectOption = { label: string, value: any };
 
@@ -54,6 +56,7 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
   placeholder?: React.ReactNode,
   className: string
   isClearable?: boolean
+  schema: Schema
 }) => {
   const { getValues } = useFormContext()
 
@@ -108,7 +111,7 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
         if (isPromise(props.optionsFrom)) {
           promise = props.optionsFrom as Promise<T[]>
         } else if (typeof props.optionsFrom === 'function') {
-          const result = props.optionsFrom({ rawValues: getValues(), value: getValues(props.id!), getValue: (k: string) => getValues(k) })
+          const result = props.optionsFrom({ rawValues: cleanOutputArray(getValues(), props.schema), value: getValues(props.id!), getValue: (k: string) => getValues(k) })
           promise = isPromise(result) ? result as Promise<T[]> : props.httpClient!(result as string, 'GET').then(r => r.json())
         } else {
           promise = props.httpClient!(props.optionsFrom as string, 'GET').then(r => r.json())

@@ -4,18 +4,19 @@ import classNames from 'classnames';
 import Trash2 from 'react-feather/dist/icons/trash-2.js';
 import { useFormContext, useFieldArray } from "react-hook-form";
 
-import { SchemaEntry } from "./types";
+import { Schema, SchemaEntry } from "./types";
 import { option } from '../Option';
 import { type } from '../type';
-import { defaultVal, getDefaultValues } from './formUtils';
+import { cleanOutputArray, defaultVal, getDefaultValues } from './formUtils';
 
-export const ArrayStep = ({ entry, step, component, disabled, addLabel }:
+export const ArrayStep = ({ entry, step, component, disabled, addLabel, schema }:
   {
     entry: string,
     step: SchemaEntry,
     component: ({ key, defaultValue, value }: { key: string, defaultValue: any, value?: any }, ids: number) => JSX.Element,
     disabled: boolean,
-    addLabel?: string
+    schema: Schema,
+    addLabel?: string,
   }) => {
   const { getValues, setValue, control, trigger, formState } = useFormContext();
 
@@ -45,7 +46,7 @@ export const ArrayStep = ({ entry, step, component, disabled, addLabel }:
                   onClick={() => {
                     remove(idx)
                     option(step.onChange)
-                      .map(onChange => onChange({ rawValues: getValues(), value: getValues(entry), setValue }))
+                      .map(onChange => onChange({ rawValues: cleanOutputArray(getValues(), schema), value: getValues(entry), setValue }))
                     trigger(entry);
                   }}>
                   <Trash2 size={16} />
@@ -62,7 +63,7 @@ export const ArrayStep = ({ entry, step, component, disabled, addLabel }:
             append({ value: step.addableDefaultValue || defaultValues })
             // trigger(entry);
             option(step.onChange)
-              .map(onChange => onChange({ rawValues: getValues(), value: getValues(entry), setValue }))
+              .map(onChange => onChange({ rawValues: cleanOutputArray(getValues(), schema), value: getValues(entry), setValue }))
           }} disabled={disabled}>{addLabel ? addLabel : 'Add'}</button>
       </div>
     </>
