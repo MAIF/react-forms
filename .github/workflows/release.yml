@@ -4,21 +4,23 @@ on:
     tags:
       - '*.*.*'
 
+permissions:
+  contents: write
+  id-token: write
+
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     - uses: coursier/cache-action@v6
-    #get version
     - name: Get the version
       id: get_version
-      run: echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d / -f 3)
-    # install node 14
+      run: echo "VERSION=$(echo $GITHUB_REF | cut -d / -f 3)" >> $GITHUB_OUTPUT
     - name: setup node
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v4
       with:
-        node-version: '16'
+        node-version: '20'
         registry-url: 'https://registry.npmjs.org'
     # release
     - uses: actions/cache@v4
@@ -28,15 +30,12 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-node-
     - name: install
-      run: npm install
+      run: npm ci
     - name: build & publish
       run: |
         npm version ${{ steps.get_version.outputs.VERSION }} --no-git-tag-version
         npm run build
-        npm publish --access public
-      env:
-          CI: true
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        npm publish --access public --provenance
     - name: Commit files
       run: |
         git config --local user.email "github-actions@users.noreply.github.com"
