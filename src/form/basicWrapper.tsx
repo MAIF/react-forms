@@ -1,6 +1,6 @@
 import React from "react";
 import { useFormContext, useFormState } from "react-hook-form";
-import ReactToolTip from 'react-tooltip';
+import { Tooltip } from 'react-tooltip';
 import classNames from 'classnames';
 import { v4 as uuid } from 'uuid';
 // @ts-ignore
@@ -12,8 +12,8 @@ export const BasicWrapper = ({ entry, realEntry, children, render, functionalPro
     entry: object | string,
     realEntry?: string,
     className?: string,
-    children: JSX.Element,
-    render?: ({ entry, label, error, help, children }: { entry: string, label: React.ReactNode, error: object, help: React.ReactNode, children: React.ReactNode }) => JSX.Element,
+    children: React.JSX.Element,
+    render?: ({ entry, label, error, help, children }: { entry: string, label: React.ReactNode, error: object, help: React.ReactNode, children: React.ReactNode }) => React.JSX.Element,
     functionalProperty: TFunctionalProperty,
     step?: SchemaEntry,
     informations: Informations
@@ -50,8 +50,8 @@ export const BasicWrapper = ({ entry, realEntry, children, render, functionalPro
       {computedLabel && <label className='mrf-flex mrf-ai_center mrf-mb_5' htmlFor={step?.name ?? entry}>
         <span>{computedLabel}</span>
         {step?.help && <>
-          <ReactToolTip html={true} place={'bottom'} id={id} />
-          <span className='mrf-flex mrf-ai_center' data-html={true} data-tip={step?.help} data-for={id}>
+          <Tooltip id={id} place="bottom" />
+          <span className='mrf-flex mrf-ai_center' data-tooltip-id={id} data-tooltip-html={step?.help}>
             <HelpCircle style={{ color: 'gray', width: 17, marginLeft: '.5rem', cursor: 'help' }} />
           </span>
         </>}

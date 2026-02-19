@@ -17,7 +17,7 @@ const CustomizableInput = React.memo(
         step: SchemaEntry,
         error: any, errorDisplayed: boolean,
         render?: SchemaRenderType,
-        children: JSX.Element,
+        children: React.JSX.Element,
         conditionalSchema?: ConditionnalSchema,
         informations?: Informations,
         deactivateReactMemo: boolean
@@ -41,21 +41,21 @@ interface BaseProps {
     entry: string,
     realEntry?: string,
     errorDisplayed?: boolean,
-    component?: (field: { value: any, onChange: (e: ChangeEvent<HTMLInputElement>) => void }, props: object) => JSX.Element,
-    children?: JSX.Element,
+    component?: (field: { value: any, onChange: (e: ChangeEvent<HTMLInputElement>) => void }, props: object) => React.JSX.Element,
+    children?: React.JSX.Element,
     informations: Informations,
     deactivateReactMemo: boolean,
-    inputWrapper?: (props: object) => JSX.Element,
+    inputWrapper?: (props: object) => React.JSX.Element,
     defaultFormValue: any
     schema: Schema
 }
 
 interface ComponentProps extends BaseProps {
-    component: (field: { value: any, onChange: (e: ChangeEvent<HTMLInputElement>) => void }, props: object) => JSX.Element,
+    component: (field: { value: any, onChange: (e: ChangeEvent<HTMLInputElement>) => void }, props: object) => React.JSX.Element,
 }
 
 interface ChildrenProps extends BaseProps {
-    children: JSX.Element,
+    children: React.JSX.Element,
 }
 
 type Props = ComponentProps | ChildrenProps

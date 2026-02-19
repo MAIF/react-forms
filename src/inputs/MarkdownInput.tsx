@@ -33,9 +33,9 @@ interface Range {
   to: any;
 }
 
-export const MarkdownInput = (props: { value?: string, preview?: boolean, className: string, readOnly?: boolean, onChange?: (value: string) => void, actions?: (inject: (text: string) => void) => JSX.Element }) => {
+export const MarkdownInput = (props: { value?: string, preview?: boolean, className: string, readOnly?: boolean, onChange?: (value: string) => void, actions?: (inject: (text: string) => void) => React.JSX.Element }) => {
   const [preview, setPreview] = useState<boolean>(props.preview || false);
-  const ref = useRef<any>()
+  const ref = useRef<any>(null)
 
   useEffect(() => {
     if (preview) {

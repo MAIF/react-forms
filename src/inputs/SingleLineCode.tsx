@@ -37,7 +37,7 @@ export function SingleLineCode({
         maxWidth: string,
     }
 }) {
-    const ref = useRef<any>()
+    const ref = useRef<any>(null)
 
     useEffect(() => {
         Editor(ref.current, mode, tabSize, readOnly, showLinesNumber, highlightLine, themeStyle, (v: string) => {

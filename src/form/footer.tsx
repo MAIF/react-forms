@@ -1,6 +1,6 @@
 import React from "react";
 
-export const Footer = (props: { actions?: { submit?: { display?: boolean, label?: React.ReactNode }, cancel?: { display?: boolean, action: () => void, label?: React.ReactNode }, reset?: { display?: boolean, label?: React.ReactNode } }, render?: ({ reset, valid }: { reset: () => void, valid: () => void }) => JSX.Element, reset: () => void, valid: () => void }) => {
+export const Footer = (props: { actions?: { submit?: { display?: boolean, label?: React.ReactNode }, cancel?: { display?: boolean, action: () => void, label?: React.ReactNode }, reset?: { display?: boolean, label?: React.ReactNode } }, render?: ({ reset, valid }: { reset: () => void, valid: () => void }) => React.JSX.Element, reset: () => void, valid: () => void }) => {
   if (props.render) {
     return props.render({ reset: props.reset, valid: props.valid })
   }

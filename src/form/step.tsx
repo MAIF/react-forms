@@ -6,7 +6,6 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import TextField from '@mui/material/TextField';
 // @ts-ignore
 import Loader from 'react-feather/dist/icons/loader.js';
 // @ts-ignore
@@ -38,7 +37,7 @@ type TCustomizableInputProps = {
   informations?: Informations,
   setValue?: (key: string, data: any) => void,
   render?: SchemaRenderType,
-  children: JSX.Element,
+  children: React.JSX.Element,
   defaultValue?: any
 }
 const CustomizableInput = (props: TCustomizableInputProps) => {
@@ -53,7 +52,7 @@ const CustomizableInput = (props: TCustomizableInputProps) => {
 export const CollapsedStep = (props: {
   entry: FlowObject,
   schema: Schema,
-  inputWrapper?: (props: object) => JSX.Element,
+  inputWrapper?: (props: object) => React.JSX.Element,
   httpClient?: HttpClient,
   functionalProperty: TFunctionalProperty,
   stepsOptions?: StepsOptions
@@ -103,7 +102,7 @@ export const Step = (props: {
   realEntry?: string,
   step: SchemaEntry,
   schema: Schema,
-  inputWrapper?: (props: object) => JSX.Element,
+  inputWrapper?: (props: object) => React.JSX.Element,
   httpClient?: HttpClient,
   defaultValue?: any,
   index?: number,
@@ -142,7 +141,7 @@ export const Step = (props: {
         entry,
         value: getValues(entry),
         rawValues: cleanOutputArray(getValues(), schema),
-        previousValue: currentData,
+        previousValue: currentData as object | undefined,
         getValue: (e: string) => getValues(e),
         setValue,
         onChange: (v: any) => setValue(entry as string, v),
@@ -404,9 +403,8 @@ export const Step = (props: {
                         option(step.onChange)
                           .map(onChange => onChange({ rawValues: cleanOutputArray(getValues(), schema), value, setValue }))
                       }}
-                      renderInput={(params) => <TextField {...params} />}
-                      PopperProps={{
-                        disablePortal: true,
+                      slotProps={{
+                        popper: { disablePortal: true }
                       }}
                     />
                   </LocalizationProvider>
@@ -426,7 +424,6 @@ export const Step = (props: {
                         option(step.onChange)
                           .map(onChange => onChange({ rawValues: cleanOutputArray(getValues(), schema), value, setValue }))
                       }}
-                      renderInput={(params) => <TextField {...params} />}
                     />
                   </LocalizationProvider>
                 )
@@ -445,7 +442,6 @@ export const Step = (props: {
                         option(step.onChange)
                           .map(onChange => onChange({ rawValues: cleanOutputArray(getValues(), schema), value, setValue }))
                       }}
-                      renderInput={(params) => <TextField {...params} />}
                     />
                   </LocalizationProvider>
                 )
@@ -536,7 +532,7 @@ const NestedForm = ({ schema, flow, parent, inputWrapper, maybeCustomHttpClient,
     schema: Schema,
     flow: Flow,
     parent: string,
-    inputWrapper?: (props: object) => JSX.Element,
+    inputWrapper?: (props: object) => React.JSX.Element,
     maybeCustomHttpClient?: HttpClient,
     errorDisplayed: boolean,
     value: any,
@@ -646,7 +642,7 @@ const OptionalStep = (props: {
   realEntry?: string,
   step: SchemaEntry,
   schema: Schema,
-  inputWrapper?: (props: object) => JSX.Element,
+  inputWrapper?: (props: object) => React.JSX.Element,
   httpClient?: HttpClient,
   defaultValue?: any,
   index?: number,

@@ -10,7 +10,7 @@ import { Flow, FlowObject, Informations, Schema, SchemaRenderType, TBaseObject }
 export const usePrevious = (value: any) => {
   // The ref object is a generic container whose current property is mutable ...
   // ... and can hold any value, similar to an instance property on a class
-  const ref = useRef();
+  const ref = useRef(undefined);
 
   // Store current value in ref
   useEffect(() => {

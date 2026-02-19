@@ -13,7 +13,7 @@ export const ArrayStep = ({ entry, step, component, disabled, addLabel, schema }
   {
     entry: string,
     step: SchemaEntry,
-    component: ({ key, defaultValue, value }: { key: string, defaultValue: any, value?: any }, ids: number) => JSX.Element,
+    component: ({ key, defaultValue, value }: { key: string, defaultValue: any, value?: any }, ids: number) => React.JSX.Element,
     disabled: boolean,
     schema: Schema,
     addLabel?: string,

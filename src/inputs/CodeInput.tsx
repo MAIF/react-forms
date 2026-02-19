@@ -40,7 +40,7 @@ export function CodeInput({
   className?: string,
   setRef?: (editor: any) => void
 }) {
-  const ref = useRef<any>()
+  const ref = useRef<any>(null)
   const [editor, setEditor] = useState<any>()
 
   useEffect(() => {

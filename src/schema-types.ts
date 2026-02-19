@@ -40,7 +40,7 @@ interface BaseSchema<OutputType> {
     error?: any;
     setValue?: (data: any) => /*TODO 2 params ?*/ void;
     parent: any;
-  }) => JSX.Element;
+  }) => React.JSX.Element;
 }
 
 interface DateTypeSchema extends BaseSchema<Date> {

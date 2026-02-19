@@ -1,3 +1,4 @@
+import React from "react";
 import { Constraint, TConstraintType } from "../constraints";
 import { SelectOption } from "../inputs";
 import { Type } from '../type';
@@ -39,7 +40,7 @@ export type SchemaRenderType = ({ rawValues, value, onChange, error, setValue, g
     getValue: (entry: string) => any, 
     informations?: Informations, 
     setValue?: (key: string, data: any) => void,
-    defaultValue?: any }) => JSX.Element
+    defaultValue?: any }) => React.JSX.Element
     
 
 export interface ConditionnalSchemaElement {
@@ -89,7 +90,7 @@ export interface SchemaEntry {
   visibleOnCollapse?: boolean;
   addableDefaultValue?: any; /* TODO doc : possible only with array, used to give default value to dynamically added elements */
   collapsed?: boolean; // TODO doc : indicate wether form is closed or not, only for objects with form
-  collapsable?: boolean | ((param: { rawValues: { [x: string]: any }, value: any, getValue: (key: string) => any }) => JSX.Element); // TODO doc : indicate wether schema can be collapsed, only for objects with form
+  collapsable?: boolean | ((param: { rawValues: { [x: string]: any }, value: any, getValue: (key: string) => any }) => React.JSX.Element); // TODO doc : indicate wether schema can be collapsed, only for objects with form
   deps?: string | Array<string> | ((informations: Informations) => string | Array<string>);
   item?: ({
     disabled?: boolean | ((prop: { rawValues: { [x: string]: any }, value: any, informations?: Informations }) => boolean);

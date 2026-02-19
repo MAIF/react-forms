@@ -1,4 +1,4 @@
-import React, { MutableRefObject, useEffect, useImperativeHandle, useMemo, useState } from 'react';
+import React, { useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormProvider, useForm, UseFormReturn, useWatch } from 'react-hook-form';
 import * as yup from "yup";
@@ -19,13 +19,13 @@ export type FormProps<DataType> = {
   schema: Schema,
   flow?: Array<string | FlowObject>,
   value?: DataType,
-  inputWrapper?: (props: object) => JSX.Element,
+  inputWrapper?: (props: object) => React.JSX.Element,
   onSubmit: (obj: DataType) => void,
   onError?: (errors: Object, e?: React.BaseSyntheticEvent) => void,
-  footer?: (props: { reset: () => void, valid: () => void }) => JSX.Element,
+  footer?: (props: { reset: () => void, valid: () => void }) => React.JSX.Element,
   className?: string,
   options?: Option,
-  ref?: MutableRefObject<FormRef | undefined>
+  ref?: React.RefObject<FormRef | undefined>
 }
 
 export interface FormRef {
@@ -72,26 +72,26 @@ const FormComponent = <T extends TBaseObject>(props: FormProps<T>, ref: React.Re
   const methods = useForm({
     resolver: conditionalRefs.length > 0
       ? (data: any, context, options) => {
-          const currentRefValues = conditionalRefs.reduce((acc, ref) => {
-            acc[ref] = data[ref];
-            return acc;
-          }, {} as Record<string, any>);
+        const currentRefValues = conditionalRefs.reduce((acc, ref) => {
+          acc[ref] = data[ref];
+          return acc;
+        }, {} as Record<string, any>);
 
-          const refsChanged = !schemaCache ||
-            conditionalRefs.some(ref => schemaCache.refValues[ref] !== currentRefValues[ref]);
+        const refsChanged = !schemaCache ||
+          conditionalRefs.some(ref => schemaCache.refValues[ref] !== currentRefValues[ref]);
 
-          let dynamicSchema: yup.AnyObjectSchema;
-          if (refsChanged) {
-            const { shape, dependencies } = getShapeAndDependencies(formFlow, schema, [], data);
-            dynamicSchema = yup.object().shape(shape, dependencies);
-            setSchemaCache({ refValues: currentRefValues, schema: dynamicSchema });
-          } else {
-            dynamicSchema = schemaCache.schema;
-          }
-
-          return yupResolver(dynamicSchema)(data, context, options);
+        let dynamicSchema: yup.AnyObjectSchema;
+        if (refsChanged) {
+          const { shape, dependencies } = getShapeAndDependencies(formFlow, schema, [], data);
+          dynamicSchema = yup.object().shape(shape, dependencies);
+          setSchemaCache({ refValues: currentRefValues, schema: dynamicSchema });
+        } else {
+          dynamicSchema = schemaCache.schema;
         }
-      : yupResolver(baseYupSchema), 
+
+        return yupResolver(dynamicSchema)(data, context, options);
+      }
+      : yupResolver(baseYupSchema),
     shouldFocusError: false,
     mode: 'onChange',
     defaultValues: cleanInputArray<T>(value, defaultValues, flow, schema)
@@ -161,7 +161,7 @@ const FormComponent = <T extends TBaseObject>(props: FormProps<T>, ref: React.Re
                 httpClient={maybeCustomHttpClient}
                 functionalProperty={functionalProperty}
                 stepsOptions={{ addLabel: props.options?.actions?.add?.label }}
-                defaultFormValue={value} 
+                defaultFormValue={value}
               />
             )
           }
