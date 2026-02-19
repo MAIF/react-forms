@@ -1,12 +1,13 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import './index.css';
 import Playground from './Playground';
 import Storybook from './Storybook';
 import Tabs from './Tabs';
 import ReleaseCandidate from './ReleaseCandidate'
 
-ReactDOM.render(
+const root = createRoot(document.getElementById('root'));
+root.render(
   <React.StrictMode>
     <Tabs tabs={[
       {
@@ -25,6 +26,5 @@ ReactDOM.render(
         content: <Storybook />
       }]}
       defaultTab="playground" />
-  </React.StrictMode>,
-  document.getElementById('root')
+  </React.StrictMode>
 );

@@ -33,11 +33,9 @@
   "scripts": {
     "build": "tsc --emitDeclarationOnly && NODE_ENV=production rollup -c",
     "dev": "tsc --emitDeclarationOnly && rollup -c -w",
-    "test": "jest && npm run cypress:headless",
+    "test": "jest && npm run playwright-test",
     "sandbox": "cd examples && npm run start:test",
-    "cypress:run-headless": "cypress run",
-    "cypress:open": "cypress open",
-    "cypress:headless": "start-server-and-test sandbox http-get://127.0.0.1:3000/react-forms cypress:run-headless",
+    "playwright-test": "playwright test --workers 1 --trace on",
     "tdd": "jest --watch"
   },
   "jest": {
@@ -68,6 +66,7 @@
     "@babel/preset-env": "^7.18.9",
     "@babel/preset-react": "^7.16.7",
     "@babel/preset-typescript": "^7.18.6",
+    "@playwright/test": "^1.58.2",
     "@rollup/plugin-babel": "^5.3.1",
     "@rollup/plugin-commonjs": "^21.0.2",
     "@rollup/plugin-json": "^4.1.0",
