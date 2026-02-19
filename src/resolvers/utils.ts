@@ -5,6 +5,33 @@ import { Constraint, jsonConstraints, TConstraintType } from '../constraints';
 import { Flow, Schema, SchemaEntry } from '../form/types';
 import { ObjectShape } from 'yup/lib/object';
 
+export const extractConditionalRefs = (flow: Flow, schema: Schema): string[] => {
+  const refs = new Set<string>();
+
+  const scanSchema = (currentFlow: Flow, currentSchema: Schema) => {
+    (currentFlow || Object.keys(currentSchema)).forEach(key => {
+      if (typeof key === 'object') {
+        scanSchema(key.flow, currentSchema);
+        return;
+      }
+
+      const schemaEntry = currentSchema[key];
+      if (!schemaEntry) return;
+
+      if (schemaEntry.conditionalSchema?.ref) {
+        refs.add(schemaEntry.conditionalSchema.ref);
+      }
+
+      if (schemaEntry.schema) {
+        scanSchema(schemaEntry.flow || Object.keys(schemaEntry.schema), schemaEntry.schema);
+      }
+    });
+  };
+
+  scanSchema(flow, schema);
+  return Array.from(refs);
+};
+
 const resolvers = {
   [type.string]: (typeErrorMessage?: string) => yup.string().nullable().optional().typeError(typeErrorMessage || 'Value must be a string'),
   [type.number]: (typeErrorMessage?: string) => yup.number().nullable().optional()

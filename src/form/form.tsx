@@ -1,10 +1,10 @@
-import React, { MutableRefObject, useEffect, useImperativeHandle, useState } from 'react';
+import React, { MutableRefObject, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { FormProvider, useForm, UseFormReturn } from 'react-hook-form';
+import { FormProvider, useForm, UseFormReturn, useWatch } from 'react-hook-form';
 import * as yup from "yup";
 
 
-import { getShapeAndDependencies } from '../resolvers/index';
+import { getShapeAndDependencies, extractConditionalRefs } from '../resolvers/index';
 import { useHashEffect } from '../utils';
 import { FlowObject, Schema, Option, Informations, TBaseObject } from './types';
 import { cleanInputArray, cleanOutputArray, getDefaultValues } from './formUtils';
@@ -54,27 +54,50 @@ const FormComponent = <T extends TBaseObject>(props: FormProps<T>, ref: React.Re
 
   const defaultValues = getDefaultValues(formFlow, schema, value);
 
-  //FIXME: get real schema through the switch
+  const conditionalRefs = useMemo(() =>
+    extractConditionalRefs(formFlow, schema),
+    [formFlow, schema]
+  );
 
-  const resolver = (rawData: object) => {
-    const { shape, dependencies } = getShapeAndDependencies(formFlow, schema, [], rawData);
-    const resolver = yup.object().shape(shape, dependencies);
-    return resolver;
-  }
+  const baseYupSchema = useMemo(() => {
+    const { shape, dependencies } = getShapeAndDependencies(formFlow, schema, [], {});
+    return yup.object().shape(shape, dependencies);
+  }, [formFlow, schema]);
+
+  const [schemaCache, setSchemaCache] = useState<{
+    refValues: Record<string, any>;
+    schema: yup.AnyObjectSchema;
+  } | null>(null);
 
   const methods = useForm({
-    resolver: (data, context, options) => yupResolver(resolver(data))(data, context, options),
+    resolver: conditionalRefs.length > 0
+      ? (data: any, context, options) => {
+          const currentRefValues = conditionalRefs.reduce((acc, ref) => {
+            acc[ref] = data[ref];
+            return acc;
+          }, {} as Record<string, any>);
+
+          const refsChanged = !schemaCache ||
+            conditionalRefs.some(ref => schemaCache.refValues[ref] !== currentRefValues[ref]);
+
+          let dynamicSchema: yup.AnyObjectSchema;
+          if (refsChanged) {
+            const { shape, dependencies } = getShapeAndDependencies(formFlow, schema, [], data);
+            dynamicSchema = yup.object().shape(shape, dependencies);
+            setSchemaCache({ refValues: currentRefValues, schema: dynamicSchema });
+          } else {
+            dynamicSchema = schemaCache.schema;
+          }
+
+          return yupResolver(dynamicSchema)(data, context, options);
+        }
+      : yupResolver(baseYupSchema), 
     shouldFocusError: false,
     mode: 'onChange',
     defaultValues: cleanInputArray<T>(value, defaultValues, flow, schema)
   });
 
   const [initialReseted, setReset] = useState(false)
-
-  // useEffect(() => {
-  //   reset(cleanInputArray(value, defaultValues, flow, schema))
-  //   setReset(true)
-  // }, [reset])
 
   const { handleSubmit, reset, trigger } = methods
   const { getValues }: { getValues: (param?: string | string[]) => any } = methods //todo:check after react-hook-form update if type is good

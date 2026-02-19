@@ -405,6 +405,9 @@ export const Step = (props: {
                           .map(onChange => onChange({ rawValues: cleanOutputArray(getValues(), schema), value, setValue }))
                       }}
                       renderInput={(params) => <TextField {...params} />}
+                      PopperProps={{
+                        disablePortal: true,
+                      }}
                     />
                   </LocalizationProvider>
                 )

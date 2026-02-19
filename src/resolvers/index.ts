@@ -1,2 +1,2 @@
-import {buildSubResolver, getShapeAndDependencies} from './utils';
-export {buildSubResolver, getShapeAndDependencies }
+import {buildSubResolver, getShapeAndDependencies, extractConditionalRefs} from './utils';
+export {buildSubResolver, getShapeAndDependencies, extractConditionalRefs }
