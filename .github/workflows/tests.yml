@@ -11,10 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      - name: Run tests
+      - name: Install deps & Playwright
         run: |
           npm ci
+          npx playwright install --with-deps chromium
+      - name: install examples deps
+        run: |
           cd examples
           npm ci
           cd ..
-          npm test
+      - name: Run tests
+        run: npm test
