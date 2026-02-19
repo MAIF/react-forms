@@ -32,7 +32,7 @@
 
 /*! https://mths.be/regenerate v1.3.2 by @mathias | MIT license */
 
-/*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/facebook/regenerator/blob/main/LICENSE */
+/*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
 
 /*! showdown v 1.9.1 - 02-11-2019 */
 
@@ -58,9 +58,9 @@
 
 /**
  * @license React
- * react-is.production.min.js
+ * react-is.production.js
  *
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
@@ -91,12 +91,6 @@
  * scheduler.production.js
  *
  * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
-/** @license MUI v5.8.7
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
