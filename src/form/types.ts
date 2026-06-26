@@ -18,6 +18,10 @@ export interface OptionActions {
   remove?: OptionActionItem;
   addEntry?: OptionActionItem;
   removeEntry?: OptionActionItem;
+  markdownTab?: OptionActionItem;
+  fileUpload?: OptionActionItem;
+  collapse?: OptionActionItem;
+  selectButton?: OptionActionItem;
 }
 
 export type HttpClient = (url: string, method: string) => Promise<Response>;

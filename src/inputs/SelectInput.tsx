@@ -8,6 +8,7 @@ import deepEqual from 'fast-deep-equal';
 import { useFormContext } from 'react-hook-form';
 import { cleanOutputArray } from '../form/formUtils';
 import { Schema } from '../form/types';
+import { useFormActions } from '../form/context';
 
 export type SelectOption = { label: string, value: any };
 
@@ -59,6 +60,7 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
   schema: Schema
 }) => {
   const { getValues } = useFormContext()
+  const actions = useFormActions();
 
   function transform(v: T): OptionType<SelectOption> {
     if (!props.transformer) {
@@ -192,7 +194,7 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
               key={idx}
               type="button"
               disabled={props.disabled}
-              className={classNames(props.className, 'mrf-btn mrf-btn_grey mrf-ml_5', { active })}
+              className={classNames(props.className, actions.selectButton?.className, { active })}
               onClick={() => handleSelectButtonClick(v)}>
               {v.label}
             </button>

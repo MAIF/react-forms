@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
+import { useFormActions } from '../form/context';
 import showdown from 'showdown';
 import classNames from 'classnames';
 
@@ -143,6 +144,8 @@ export const MarkdownInput = (props: { value?: string, preview?: boolean, classN
     )
   };
 
+  const actions = useFormActions();
+
   return <div className={classNames(props.className)}>
     {!props.readOnly && <div
       style={{
@@ -153,14 +156,14 @@ export const MarkdownInput = (props: { value?: string, preview?: boolean, classN
         <div>
           <button
             type="button"
-            className='mrf-btn mrf-btn_sm'
+            className={actions.markdownTab?.className}
             style={{ color: !preview ? '#7f96af' : 'white', backgroundColor: preview ? '#7f96af' : 'white' }}
             onClick={() => setPreview(false)}>
             Write
           </button>
           <button
             type="button"
-            className='mrf-btn mrf-btn_sm mrf-ml_5'
+            className={`${actions.markdownTab?.className} mrf-ml_5`}
             style={{ color: preview ? '#7f96af' : 'white', backgroundColor: preview ? 'white' : '#7f96af' }}
             onClick={() => setPreview(true)}>
             Preview

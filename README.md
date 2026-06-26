@@ -290,6 +290,10 @@ httpClient = {(url, method) => fetch(url, {
   - `remove` — the button to remove an item on array fields
   - `addEntry` — the icon button to add a key/value entry on object fields
   - `removeEntry` — the icon button to remove a key/value entry on object fields
+  - `markdownTab` — the Write/Preview toggle buttons on markdown fields
+  - `fileUpload` — the file picker trigger button on file fields
+  - `collapse` — the expand/collapse toggle button on collapsable sections
+  - `selectButton` — the option buttons on `buttonsSelect` fields (string and boolean)
 
 ```javascript
 <Form
@@ -340,6 +344,10 @@ const App = () => (
       remove:      { className: 'btn btn-danger btn-sm' },
       addEntry:    { className: 'btn btn-outline-primary btn-sm' },
       removeEntry: { className: 'btn btn-danger btn-sm ms-2' },
+      markdownTab:  { className: 'btn btn-outline-secondary btn-sm' },
+      fileUpload:   { className: 'btn btn-secondary btn-sm' },
+      collapse:     { className: 'btn btn-outline-secondary btn-sm' },
+      selectButton: { className: 'btn btn-outline-secondary' },
     }
   }}>
     {/* All <Form> components inside will use these classes */}
