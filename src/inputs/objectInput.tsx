@@ -5,10 +5,12 @@ import PlusCircle from 'react-feather/dist/icons/plus-circle.js';
 // @ts-ignore
 import MinusCircle from 'react-feather/dist/icons/minus-circle.js';
 import deepEqual from 'fast-deep-equal';
+import { useFormActions } from '../form/context';
 
 type InternalState = {[x: string] : {key: string, value: any}};
 
 export const ObjectInput = (props: {value?: object, onChange?: (value: InternalState) => void, defaultKeyValue?: {key: string, value: string}, className: string, disabled?:boolean, placeholderKey?: string, placeholderValue?: string}) => {
+  const actions = useFormActions();
   const [internalState, setInternalState] = useState<InternalState>({})
 
   useEffect(() => {
@@ -95,7 +97,7 @@ export const ObjectInput = (props: {value?: object, onChange?: (value: InternalS
         <button
           disabled={props.disabled}
           type="button"
-          className='mrf-flex mrf-btn mrf-btn_blue mrf-btn_sm'
+          className={actions.addEntry?.className}
           onClick={addFirst}>
           <PlusCircle />
         </button>
@@ -121,7 +123,7 @@ export const ObjectInput = (props: {value?: object, onChange?: (value: InternalS
           <button
             disabled={props.disabled}
             type="button"
-            className='mrf-flex mrf-ai_center mrf-btn mrf-btn_red mrf-btn_sm mrf-ml_10'
+            className={actions.removeEntry?.className}
             onClick={() => remove(id)}>
             <MinusCircle />
           </button>
@@ -129,7 +131,7 @@ export const ObjectInput = (props: {value?: object, onChange?: (value: InternalS
             <button
               disabled={props.disabled}
               type="button"
-              className='mrf-flex mrf-ai_center mrf-btn mrf-btn_blue mrf-btn_sm mrf-ml_5'
+              className={actions.addEntry?.className}
               onClick={addNext}>
               <PlusCircle />
             </button>

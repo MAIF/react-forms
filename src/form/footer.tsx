@@ -10,7 +10,7 @@ export const Footer = (props: { actions?: OptionActions, render?: ({ reset, vali
 
   return (
     <div className='mrf-flex mrf-jc_end mrf-mt_5'>
-      {props.actions?.cancel?.display && <button className={props.actions.cancel.className} type="button" onClick={() => props.actions?.cancel?.action()}>{props.actions?.cancel?.label || 'Cancel'}</button>}
+      {props.actions?.cancel?.display && <button className={props.actions.cancel.className} type="button" onClick={() => props.actions?.cancel?.action?.()}>{props.actions?.cancel?.label || 'Cancel'}</button>}
       {props.actions?.reset?.display && <button className={props.actions.reset.className} type="button" onClick={props.reset}>{props.actions?.reset?.label || 'Reset'}</button>}
       {isSubmitDisplayed && <button className={props.actions?.submit?.className} type="submit">{props.actions?.submit?.label || 'Save'}</button>}
     </div>

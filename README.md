@@ -288,6 +288,8 @@ httpClient = {(url, method) => fetch(url, {
   - `cancel` — the cancel button (hidden by default, requires an `action` callback)
   - `add` — the button to add an item on array fields
   - `remove` — the button to remove an item on array fields
+  - `addEntry` — the icon button to add a key/value entry on object fields
+  - `removeEntry` — the icon button to remove a key/value entry on object fields
 
 ```javascript
 <Form
@@ -334,8 +336,10 @@ const App = () => (
       submit: { className: 'btn btn-success' },
       cancel: { className: 'btn btn-secondary' },
       reset:  { className: 'btn btn-warning' },
-      add:    { className: 'btn btn-outline-primary btn-sm' },
-      remove: { className: 'btn btn-danger btn-sm' },
+      add:         { className: 'btn btn-outline-primary btn-sm' },
+      remove:      { className: 'btn btn-danger btn-sm' },
+      addEntry:    { className: 'btn btn-outline-primary btn-sm' },
+      removeEntry: { className: 'btn btn-danger btn-sm ms-2' },
     }
   }}>
     {/* All <Form> components inside will use these classes */}

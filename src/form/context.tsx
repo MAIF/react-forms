@@ -5,8 +5,10 @@ export const defaultActions: OptionActions = {
   submit: { className: 'mrf-btn mrf-btn_green mrf-ml_10' },
   cancel: { className: 'mrf-btn mrf-btn_red', action: () => {} },
   reset:  { className: 'mrf-btn mrf-btn_red' },
-  add:    { className: 'mrf-btn mrf-btn_blue mrf-btn_sm mrf-mt_5' },
-  remove: { className: 'mrf-btn mrf-btn_red mrf-btn_sm mrf-ml_5' },
+  add:         { className: 'mrf-btn mrf-btn_blue mrf-btn_sm mrf-mt_5' },
+  remove:      { className: 'mrf-btn mrf-btn_red mrf-btn_sm mrf-ml_5' },
+  addEntry:    { className: 'mrf-flex mrf-btn mrf-btn_blue mrf-btn_sm' },
+  removeEntry: { className: 'mrf-flex mrf-ai_center mrf-btn mrf-btn_red mrf-btn_sm mrf-ml_10' },
 };
 
 const defaultOptions: Option = { actions: defaultActions };

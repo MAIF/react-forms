@@ -12,10 +12,12 @@ export interface OptionActionItem {
 
 export interface OptionActions {
   reset?: OptionActionItem;
-  cancel?: OptionActionItem & { action: () => void };
+  cancel?: OptionActionItem & { action?: () => void };
   submit?: OptionActionItem;
   add?: OptionActionItem;
   remove?: OptionActionItem;
+  addEntry?: OptionActionItem;
+  removeEntry?: OptionActionItem;
 }
 
 export type HttpClient = (url: string, method: string) => Promise<Response>;
