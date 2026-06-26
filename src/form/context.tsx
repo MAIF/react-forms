@@ -9,6 +9,10 @@ export const defaultActions: OptionActions = {
   remove:      { className: 'mrf-btn mrf-btn_red mrf-btn_sm mrf-ml_5' },
   addEntry:    { className: 'mrf-flex mrf-btn mrf-btn_blue mrf-btn_sm' },
   removeEntry: { className: 'mrf-flex mrf-ai_center mrf-btn mrf-btn_red mrf-btn_sm mrf-ml_10' },
+  markdownTab:  { className: 'mrf-btn mrf-btn_sm' },
+  fileUpload:   { className: 'mrf-btn mrf-btn_sm mrf-flex mrf-ai_center' },
+  collapse:     { className: 'mrf-btn mrf-btn_sm mrf-ml_5' },
+  selectButton: { className: 'mrf-flex_grow_1 mrf-btn mrf-btn_grey mrf-ml_5' },
 };
 
 const defaultOptions: Option = { actions: defaultActions };

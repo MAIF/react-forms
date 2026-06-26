@@ -1,5 +1,6 @@
 import classNames from 'classnames';
 import React, { SyntheticEvent, useState } from 'react';
+import { useFormActions } from '../form/context';
 // @ts-ignore
 import EyeOff from 'react-feather/dist/icons/eye-off.js';
 // @ts-ignore
@@ -7,6 +8,7 @@ import Eye from 'react-feather/dist/icons/eye.js';
 
 export const Collapse = (props: {initCollapsed?: boolean, collapsed?: boolean, errored: boolean, label?: React.ReactNode, inline?: any, children: React.ReactNode, lineEnd?: boolean}) => {
   const [collapsed, setCollapsed] = useState(props.initCollapsed || props.collapsed)
+  const actions = useFormActions();
 
   const toggle = (e: SyntheticEvent) => {
     if (e) e.stopPropagation()
@@ -20,7 +22,7 @@ export const Collapse = (props: {initCollapsed?: boolean, collapsed?: boolean, e
         <span className={classNames('mrf-collapse_label', { ['mrf-collapse_error']: props.errored })}>{props.label}</span>
         <button
           type="button"
-          className={classNames('mrf-btn', 'mrf-btn_sm', 'mrf-ml_5', { ['mrf-collapse_error']: props.errored })}
+          className={classNames(actions.collapse?.className, { ['mrf-collapse_error']: props.errored })}
           onClick={toggle}>
           {!!collapsed && <Eye size={16} />}
           {!collapsed && <EyeOff size={16} />}

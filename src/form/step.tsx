@@ -458,6 +458,7 @@ export const Step = (props: {
             const FileInput = ({ onChange }: { onChange?: (files: any[]) => void }) => {
               const [uploading, setUploading] = useState(false);
               const [input, setInput] = useState<HTMLInputElement | undefined | null>(undefined);
+              const fileActions = useFormActions();
 
               const setFiles = (e: ChangeEvent<HTMLInputElement>) => {
                 const files = (e.target as HTMLInputElement).files;
@@ -483,7 +484,7 @@ export const Step = (props: {
                   />
                   <button
                     type="button"
-                    className='mrf-btn mrf-btn_sm mrf-flex mrf-ai_center'
+                    className={fileActions.fileUpload?.className}
                     disabled={uploading || functionalProperty((entry as string), step?.disabled || false, informations, error)}
                     onClick={trigger}>
                     {uploading && <Loader />}
