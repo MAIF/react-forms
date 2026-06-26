@@ -27,6 +27,7 @@ import { type } from "../type";
 import { format } from "../format";
 import classNames from "classnames";
 import { option } from "../Option";
+import { useFormActions } from "./context";
 
 type TCustomizableInputProps = {
   rawValues?: any,
@@ -657,7 +658,7 @@ const OptionalStep = (props: {
   })
   const [isAdded, setIsAdded] = useState<boolean>(!!field.value)
   const { setValue } = useFormContext()
-
+  const actions = useFormActions()
 
   if (isAdded) {
     return (
@@ -667,7 +668,7 @@ const OptionalStep = (props: {
         </div>
         <button type="button"
           style={{ position: 'absolute', top: '2px', right: 0 }}
-          className='mrf-btn mrf-btn_red mrf-btn_sm mrf-ml_5'
+          className={actions.remove?.className}
           onClick={() => {
             setIsAdded(false)
             setValue(props.entry, null)
@@ -681,11 +682,11 @@ const OptionalStep = (props: {
   return (
     <div className='mrf-flex mrf-jc_flex_end'>
       <button type="button"
-        className={classNames('mrf-btn', 'mrf-btn_blue', 'mrf-btn_sm', 'mrf-mt_5')}
+        className={actions.add?.className}
         onClick={() => {
           setIsAdded(true)
           //todo: setup la valeur par defaut ??
-        }}>Add</button>
+        }}>{props.options?.addLabel || actions.add?.label || 'Add'}</button>
     </div>
   )
 }

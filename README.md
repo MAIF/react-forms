@@ -282,29 +282,81 @@ httpClient = {(url, method) => fetch(url, {
 - **watch**: a boolean to activate the automatic log of form value. A function can be set up to override the default logger.
 - **autosubmit**: a boolean to activate the automatic run of the `onSubmit` form properties on every change of values.
 - **showErrorsOnStart**: a boolean to display constraints messages, not in error color,  when starting the form.
-- **actions**: an object to parameter footer buttons key. By default just `submit` button is displayed. Allow to change button label for the following actions:
-  - reset
-  - cancel
-  - submit
-  - add
+- **actions**: an object to configure form buttons. By default only the `submit` button is displayed. Each action accepts `display`, `label` and `className`. Available actions:
+  - `submit` — the save/submit button (displayed by default)
+  - `reset` — the reset button (hidden by default)
+  - `cancel` — the cancel button (hidden by default, requires an `action` callback)
+  - `add` — the button to add an item on array fields
+  - `remove` — the button to remove an item on array fields
+
 ```javascript
-<Form 
-  options={
-    autosubmit: true,
-    showErrorsOnStart: true,
-    actions={
-        reset: {
-          display: false (value by default)
-          label: 'reset' (value by default)
-        },
-        submit: {
-          display: true (value by default)
-          label: "save" (value by default)
-        }
-      }
-  }
+<Form
+  options={{
+    actions: {
+      submit: {
+        display: true,       // default
+        label: 'Save',       // default
+        className: 'btn btn-success',
+      },
+      reset: {
+        display: false,      // default
+        label: 'Reset',
+        className: 'btn btn-warning',
+      },
+      cancel: {
+        display: false,      // default
+        label: 'Cancel',
+        className: 'btn btn-secondary',
+        action: () => router.back(),
+      },
+      add: {
+        label: 'Add item',
+        className: 'btn btn-outline-primary btn-sm',
+      },
+      remove: {
+        className: 'btn btn-danger btn-sm',
+      },
+    }
+  }}
 />
 ```
+
+## Global button styling with ReactFormsProvider
+
+If your app uses a custom design system (Bootstrap, Tailwind, etc.) you can configure button classes **once** for all forms using `ReactFormsProvider`. Every `<Form>` inside the provider inherits those classes automatically, without any per-form configuration.
+
+```javascript
+import { ReactFormsProvider } from '@maif/react-forms'
+
+const App = () => (
+  <ReactFormsProvider options={{
+    actions: {
+      submit: { className: 'btn btn-success' },
+      cancel: { className: 'btn btn-secondary' },
+      reset:  { className: 'btn btn-warning' },
+      add:    { className: 'btn btn-outline-primary btn-sm' },
+      remove: { className: 'btn btn-danger btn-sm' },
+    }
+  }}>
+    {/* All <Form> components inside will use these classes */}
+    <MyApp />
+  </ReactFormsProvider>
+)
+```
+
+A form can still override any value locally — the form-level `options` prop takes precedence over the provider, key by key:
+
+```javascript
+// Provider sets className: 'btn btn-success' and label: 'Save' for submit.
+// This form only overrides the label — the className from the provider is kept.
+<Form
+  schema={schema}
+  onSubmit={onSubmit}
+  options={{ actions: { submit: { label: 'Create' } } }}
+/>
+```
+
+If no `ReactFormsProvider` is present, forms fall back to the default `mrf-*` classes.
 ## constraints
 Possible constraints are provided by import `constraints` from **@maif/react-form** or can be wrotes on json
 By default all fields of the form are nullable (they can accept `null` or `undefined` value). 

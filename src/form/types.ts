@@ -7,13 +7,15 @@ import { Format } from '../format';
 export interface OptionActionItem {
   display?: boolean;
   label?: string;
+  className?: string;
 }
 
 export interface OptionActions {
   reset?: OptionActionItem;
   cancel?: OptionActionItem & { action: () => void };
   submit?: OptionActionItem;
-  add?: OptionActionItem
+  add?: OptionActionItem;
+  remove?: OptionActionItem;
 }
 
 export type HttpClient = (url: string, method: string) => Promise<Response>;
@@ -123,7 +125,7 @@ export interface Informations {
 }
 
 export interface StepsOptions {
-  addLabel?: string
+  addLabel?: string;
 }
 
 export type TBaseObject = {[key: string]: any}

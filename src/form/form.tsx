@@ -2,6 +2,7 @@ import React, { useEffect, useImperativeHandle, useMemo, useState } from 'react'
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormProvider, useForm, UseFormReturn, useWatch } from 'react-hook-form';
 import * as yup from "yup";
+import { useReactFormsContext, defaultActions, FormActionsProvider } from './context';
 
 
 import { getShapeAndDependencies, extractConditionalRefs } from '../resolvers/index';
@@ -35,7 +36,17 @@ export interface FormRef {
 }
 
 const FormComponent = <T extends TBaseObject>(props: FormProps<T>, ref: React.Ref<FormRef>) => {
-  const { schema, flow, value, inputWrapper, onSubmit, onError = () => { }, footer, className, options = {} } = props
+  const { schema, flow, value, inputWrapper, onSubmit, onError = () => { }, footer, className, options: propsOptions = {} } = props
+
+  const contextOptions = useReactFormsContext();
+
+  const mergedActions = Object.keys(defaultActions).reduce((acc, key) => {
+    const k = key as keyof typeof defaultActions;
+    acc[k] = { ...defaultActions[k], ...contextOptions.actions?.[k], ...propsOptions.actions?.[k] } as any;
+    return acc;
+  }, {} as typeof defaultActions);
+
+  const options = { ...contextOptions, ...propsOptions, actions: mergedActions };
 
   const formFlow = flow || Object.keys(schema)
   const maybeCustomHttpClient = (url: string, method: string) => {
@@ -137,6 +148,7 @@ const FormComponent = <T extends TBaseObject>(props: FormProps<T>, ref: React.Re
   }));
 
   return (
+    <FormActionsProvider actions={mergedActions}>
     <FormProvider {...methods}>
       {(!!options.watch || !!options.autosubmit) && <Watcher
         options={options}
@@ -160,7 +172,7 @@ const FormComponent = <T extends TBaseObject>(props: FormProps<T>, ref: React.Re
                 inputWrapper={inputWrapper}
                 httpClient={maybeCustomHttpClient}
                 functionalProperty={functionalProperty}
-                stepsOptions={{ addLabel: props.options?.actions?.add?.label }}
+                stepsOptions={{ addLabel: options.actions?.add?.label }}
                 defaultFormValue={value}
               />
             )
@@ -178,12 +190,13 @@ const FormComponent = <T extends TBaseObject>(props: FormProps<T>, ref: React.Re
             <Step defaultFormValue={value} key={idx} entry={entry} step={step}
               schema={schema} inputWrapper={inputWrapper}
               httpClient={maybeCustomHttpClient} functionalProperty={functionalProperty}
-              informations={informations} options={{ addLabel: props.options?.actions?.add?.label }} />
+              informations={informations} options={{ addLabel: options.actions?.add?.label }} />
           )
         })}
         <Footer render={footer} reset={() => reset(defaultValues)} valid={handleSubmit(data => onSubmit(cleanOutputArray(data, schema)), onError)} actions={options.actions} />
       </form>
     </FormProvider>
+    </FormActionsProvider>
   )
 }
 

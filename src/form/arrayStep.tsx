@@ -8,6 +8,7 @@ import { Schema, SchemaEntry } from "./types";
 import { option } from '../Option';
 import { type } from '../type';
 import { cleanOutputArray, defaultVal, getDefaultValues } from './formUtils';
+import { useFormActions } from './context';
 
 export const ArrayStep = ({ entry, step, component, disabled, addLabel, schema }:
   {
@@ -19,6 +20,7 @@ export const ArrayStep = ({ entry, step, component, disabled, addLabel, schema }
     addLabel?: string,
   }) => {
   const { getValues, setValue, control, trigger, formState } = useFormContext();
+  const actions = useFormActions();
 
   const values = getValues(entry);
   //@ts-ignore
@@ -41,7 +43,7 @@ export const ArrayStep = ({ entry, step, component, disabled, addLabel, schema }
                 </div>
                 <button type="button"
                   style={{ position: 'absolute', top: '2px', right: 0 }}
-                  className='mrf-btn mrf-btn_red mrf-btn_sm mrf-ml_5'
+                  className={actions.remove?.className}
                   disabled={disabled}
                   onClick={() => {
                     remove(idx)
@@ -57,7 +59,7 @@ export const ArrayStep = ({ entry, step, component, disabled, addLabel, schema }
         })}
       <div className='mrf-flex mrf-jc_flex_end'>
         <button type="button"
-          className={classNames('mrf-btn', 'mrf-btn_blue', 'mrf-btn_sm', 'mrf-mt_5', { ['mrf-input__invalid']: !!errorDisplayed })}
+          className={classNames(actions.add?.className, { ['mrf-input__invalid']: !!errorDisplayed })}
           onClick={() => {
             const defaultValues = step.type === type.object ? getDefaultValues(step.flow, step.schema) : defaultVal()
             append({ value: step.addableDefaultValue || defaultValues })

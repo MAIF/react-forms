@@ -1,6 +1,5 @@
 import * as  React from "react";
 import { ChangeEvent } from 'react';
-import classNames from "classnames";
 // @ts-ignore 
 import Trash2 from 'react-feather/dist/icons/trash-2.js';
 import { useController, useFormContext } from 'react-hook-form';
@@ -9,6 +8,7 @@ import { option } from '../Option';
 import { type } from '../type';
 import { cleanHash, isDefined } from '../utils';
 import { ConditionnalSchema, Informations, Schema, SchemaEntry, SchemaRenderType } from "./types";
+import { useFormActions } from './context';
 import { cleanOutputArray } from "./formUtils";
 
 const CustomizableInput = React.memo(
@@ -46,8 +46,8 @@ interface BaseProps {
     informations: Informations,
     deactivateReactMemo: boolean,
     inputWrapper?: (props: object) => React.JSX.Element,
-    defaultFormValue: any
-    schema: Schema
+    defaultFormValue: any,
+    schema: Schema,
 }
 
 interface ComponentProps extends BaseProps {
@@ -67,6 +67,7 @@ export const ControlledInput = (inputProps: Props) => {
         name: entry
     })
     const { getValues, setValue, formState: { errors } } = useFormContext();
+    const actions = useFormActions();
     const [isAdded, setIsAdded] = React.useState<boolean>(!!field.value)
 
     //@ts-ignore
@@ -127,7 +128,7 @@ export const ControlledInput = (inputProps: Props) => {
                 </div>
                 <button type="button"
                     style={{ position: 'absolute', top: '2px', right: 0 }}
-                    className='mrf-btn mrf-btn_red mrf-btn_sm mrf-ml_5'
+                    className={actions.remove?.className}
                     onClick={() => {
                         setIsAdded(false)
                         setValue(entry, null)
@@ -141,7 +142,7 @@ export const ControlledInput = (inputProps: Props) => {
             <BasicWrapper key={`collapse-${entry}`} entry={entry} realEntry={realEntry} functionalProperty={functionalProperty} step={step} render={inputWrapper} informations={informations}>
                 <div className='mrf-flex mrf-jc_flex_end'>
                     <button type="button"
-                        className={classNames('mrf-btn', 'mrf-btn_blue', 'mrf-btn_sm', 'mrf-mt_5')}
+                        className={actions.add?.className}
                         onClick={() => {
                             setIsAdded(true)
                             //todo: setup la valeur par defaut ??
