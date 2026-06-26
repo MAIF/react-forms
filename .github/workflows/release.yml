@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+      with:
+        ref: main
     - uses: coursier/cache-action@v6
     - name: Get the version
       id: get_version
@@ -46,6 +48,7 @@ jobs:
       with:
         branch: main
         github_token: ${{ secrets.GITHUB_TOKEN}}
+        force: true
     # create github release
     - name: Create a Release
       id: create_release
