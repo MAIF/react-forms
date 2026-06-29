@@ -50,8 +50,8 @@ export const BasicWrapper = ({ entry, realEntry, children, render, functionalPro
       {computedLabel && <label className='mrf-flex mrf-ai_center mrf-mb_5' htmlFor={step?.name ?? entry}>
         <span>{computedLabel}</span>
         {step?.help && <>
-          <Tooltip id={id} place="bottom" />
-          <span className='mrf-flex mrf-ai_center' data-tooltip-id={id} data-tooltip-html={step?.help}>
+          <Tooltip  id={id} place="bottom" />
+          <span className='mrf-flex mrf-ai_center' data-tooltip-id={id} data-tooltip-class-name="mrf-content_tooltip" data-tooltip-html={step?.help}>
             <HelpCircle style={{ color: 'gray', width: 17, marginLeft: '.5rem', cursor: 'help' }} />
           </span>
         </>}

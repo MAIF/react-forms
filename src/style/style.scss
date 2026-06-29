@@ -358,3 +358,7 @@
   background-color: $form-select-hover-color !important;
   color:$form-select-hover-text-color !important;
 }
+
+.mrf-content_tooltip {
+  z-index: 1;
+}
