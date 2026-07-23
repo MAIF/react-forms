@@ -10,7 +10,7 @@ import { cleanOutputArray } from '../form/formUtils';
 import { Schema } from '../form/types';
 import { useFormActions } from '../form/context';
 
-export type SelectOption = { label: string, value: any };
+export type SelectOption = { label: string, value: any, disabled?: boolean };
 
 const valueToSelectOption = (value: any, possibleValues: SelectOption[] = [], isMulti = false): SelectOption | SelectOption[] | null => {
   if (value === null || !value) {
@@ -83,7 +83,8 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
 
     return {
       label: maybeSelectOption?.label || (typeof maybeSelectOption === 'object' ? JSON.stringify(maybeSelectOption) : maybeSelectOption),
-      value: maybeSelectOption?.value || v
+      value: maybeSelectOption?.value || v,
+      disabled: (maybeSelectOption as { disabled?: boolean })?.disabled
     }
   }
 
@@ -168,6 +169,8 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
   }
 
   const handleSelectButtonClick = (v: SelectOption) => {
+    if (v.disabled) return;
+
     if (props.isMulti) {
       const vs = value as SelectOption[]
       if (vs.includes(v)) { /* FIXME could be a different object ref but the same SelectOption, perhaps it would be better to compare label/values ? */
@@ -186,15 +189,17 @@ export const SelectInput = <T extends { [x: string]: any },>(props: {
 
   if (props.buttons) {
     return (
-      <div style={{ display: 'flex' }}>
+      <div style={{ display: 'flex', gap: '0.25rem' }}>
         {values.map((v, idx) => {
           const active = !!value && (props.isMulti ? (value as SelectOption[]).includes(v) : v.value === (value as SelectOption).value)
+          const disabled = props.disabled || !!v.disabled
           return (
             <button
               key={idx}
               type="button"
-              disabled={props.disabled}
-              className={classNames(props.className, actions.selectButton?.className, { active })}
+              disabled={disabled}
+              aria-disabled={disabled}
+              className={classNames(props.className, actions.selectButton?.className, { active, disabled })}
               onClick={() => handleSelectButtonClick(v)}>
               {v.label}
             </button>
